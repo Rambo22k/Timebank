@@ -1,0 +1,72 @@
+@if (isOpen && skill) {
+  <div class="modal-backdrop" (click)="onClose()" role="dialog" aria-modal="true">
+    <div class="exchange-card" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="modal-head">
+        <div class="head-icon">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+        </div>
+        <div>
+          <span class="sub-label">Intercambio de Tiempo</span>
+          <h2 class="title">Proponer Sesión</h2>
+        </div>
+      </div>
+
+      <!-- Skill Summary Card -->
+      <div class="target-skill-box">
+        <div class="skill-main">
+          <span class="cat-pill">{{ skill.categoryName }}</span>
+          <h4 class="skill-name">{{ skill.title }}</h4>
+          <span class="author-note">Impartido por <strong>{{ skill.authorName }}</strong></span>
+        </div>
+        <div class="time-cost-badge">
+          <ion-icon name="time-outline"></ion-icon>
+          <div class="cost-texts">
+            <span class="cost-num">1 Crédito</span>
+            <span class="cost-label">1 Hora de sesión</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Balance Check -->
+      <div class="balance-status-row">
+        <span>Tu saldo actual:</span>
+        <strong class="balance-val">{{ authService.currentUser()?.timeCredits || 0 }} créditos disponibles</strong>
+      </div>
+
+      <!-- Proposal Message -->
+      <div class="tb-form-group">
+        <label class="tb-label" for="exchange-msg">Mensaje inicial para {{ skill.authorName }}</label>
+        <textarea
+          id="exchange-msg"
+          class="tb-textarea"
+          [(ngModel)]="proposedMessage"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Division of Labor / Scope Note -->
+      <div class="integration-note">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        <div class="note-content">
+          <strong>Arquitectura TimeBank:</strong>
+          <span>El agendamiento de calendarios, confirmación mutua de sesiones, billetera de créditos y calificaciones son gestionados por el módulo de Intercambios a cargo de Ernesto.</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="modal-footer">
+        <button class="tb-btn tb-btn-outline" (click)="onClose()">
+          Cancelar
+        </button>
+        <button class="tb-btn tb-btn-accent" (click)="onSendProposal()" [disabled]="isSubmitting">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          {{ isSubmitting ? 'Enviando...' : 'Confirmar Propuesta (Demo)' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

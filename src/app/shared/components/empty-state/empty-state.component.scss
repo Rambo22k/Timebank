@@ -1,0 +1,45 @@
+.empty-state-box {
+  background: var(--tb-white);
+  border: 1px dashed var(--tb-border);
+  border-radius: var(--tb-radius-md);
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.empty-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--tb-bg-alt);
+  color: var(--tb-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+
+.empty-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--tb-text-primary);
+  margin-bottom: 6px;
+}
+
+.empty-message {
+  font-size: 0.875rem;
+  color: var(--tb-text-secondary);
+  max-width: 380px;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.empty-btn {
+  margin-top: 4px;
+}

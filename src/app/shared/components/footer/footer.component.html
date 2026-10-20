@@ -1,0 +1,75 @@
+<footer class="tb-footer">
+  <div class="tb-container">
+    <div class="tb-footer-grid">
+      <!-- Brand & Mission Column -->
+      <div class="footer-col footer-col-brand">
+        <div class="footer-brand">
+          <img src="assets/images/logo.png" alt="TimeBank Logo" class="footer-logo" />
+          <span class="footer-brand-title">Time<span class="accent-orange">Bank</span></span>
+        </div>
+        <p class="footer-desc">
+          Plataforma colaborativa donde las habilidades y conocimientos se intercambian usando el tiempo como única moneda de valor.
+        </p>
+        <div class="footer-rule-pill">
+          <ion-icon name="time-outline"></ion-icon>
+          <span><strong>1 hora de ayuda</strong> = <strong>1 crédito de tiempo</strong></span>
+        </div>
+      </div>
+
+      <!-- Quick Exploration Links -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">Plataforma</h4>
+        <ul class="footer-links">
+          <li><a routerLink="/">Inicio & Landing</a></li>
+          <li><a routerLink="/explore">Explorar Habilidades</a></li>
+          <li><a routerLink="/skills">Gestión de Habilidades</a></li>
+          <li><a routerLink="/profile">Perfiles de Usuario</a></li>
+        </ul>
+      </div>
+
+      <!-- Identity & Philosophy -->
+      <div class="footer-col">
+        <h4 class="footer-col-title">Comunidad</h4>
+        <ul class="footer-links">
+          <li><a routerLink="/" fragment="como-funciona">¿Cómo funciona?</a></li>
+          <li><a routerLink="/" fragment="valor-tiempo">El valor del tiempo</a></li>
+          <li><a routerLink="/" fragment="categorias">Categorías destacadas</a></li>
+          <li><a routerLink="/" fragment="faq">Preguntas frecuentes</a></li>
+        </ul>
+      </div>
+
+      <!-- Access & Tech Credits -->
+      <div class="footer-col footer-col-auth">
+        <h4 class="footer-col-title">Acceso Frontend</h4>
+        <p class="footer-subtext">Demostración interactiva client-side diseñada para Ionic y Angular.</p>
+        <div class="footer-cta-stack">
+          <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-sm">
+            <ion-icon name="sparkles-outline"></ion-icon>
+            Crear cuenta demo
+          </a>
+          <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">
+            Iniciar sesión
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Attribution Row -->
+    <div class="footer-bottom">
+      <div class="footer-credits">
+        <span>&copy; {{ currentYear }} TimeBank. Diseñado & Desarrollado por <strong>Enyel Reyes</strong>.</span>
+        <span class="footer-scope-badge">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          Frontend Development Only
+        </span>
+      </div>
+      <div class="footer-legal">
+        <span>Angular 22 & Ionic 9</span>
+        <span class="sep">&bull;</span>
+        <span>TypeScript</span>
+        <span class="sep">&bull;</span>
+        <span>SCSS Modular</span>
+      </div>
+    </div>
+  </div>
+</footer>

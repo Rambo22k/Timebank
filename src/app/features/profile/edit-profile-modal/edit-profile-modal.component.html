@@ -1,0 +1,99 @@
+@if (isOpen && user) {
+  <div class="modal-backdrop" (click)="onClose()" role="dialog" aria-modal="true">
+    <div class="edit-card" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="modal-header">
+        <span class="sub-label">Configuración Personal</span>
+        <h2 class="title">Editar Perfil de Usuario</h2>
+        <p class="subtitle">Personaliza tu presentación ante la comunidad de TimeBank.</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Avatar Selector Section -->
+        <div class="avatar-selection-section">
+          <label class="tb-label">Selecciona tu avatar</label>
+          <div class="avatars-row">
+            @for (av of avatarOptions; track av) {
+              <button
+                type="button"
+                class="avatar-choice-btn"
+                [class.is-selected]="selectedAvatar === av"
+                (click)="selectAvatar(av)"
+              >
+                <img [src]="av" alt="Avatar option" />
+                @if (selectedAvatar === av) {
+                  <span class="selected-check">
+                    <ion-icon name="checkmark-outline"></ion-icon>
+                  </span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Name -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="user-name">Nombre completo *</label>
+          <input
+            id="user-name"
+            type="text"
+            class="tb-input"
+            [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+            formControlName="name"
+          />
+        </div>
+
+        <!-- Headline -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="user-headline">Titular profesional o interés principal *</label>
+          <input
+            id="user-headline"
+            type="text"
+            class="tb-input"
+            [class.is-invalid]="form.get('headline')?.invalid && form.get('headline')?.touched"
+            placeholder="Ej: Senior Frontend Developer & UI Designer"
+            formControlName="headline"
+          />
+        </div>
+
+        <!-- Location -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="user-loc">Ubicación *</label>
+          <input
+            id="user-loc"
+            type="text"
+            class="tb-input"
+            placeholder="Ej: Santo Domingo, Rep. Dom."
+            formControlName="location"
+          />
+        </div>
+
+        <!-- Bio -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="user-bio">Biografía / Acerca de mí *</label>
+          <textarea
+            id="user-bio"
+            class="tb-textarea"
+            rows="3"
+            placeholder="Cuéntale a la comunidad tus intereses, qué te motiva a intercambiar tiempo..."
+            formControlName="bio"
+          ></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-footer">
+          <button type="button" class="tb-btn tb-btn-outline" (click)="onClose()">
+            Cancelar
+          </button>
+          <button type="submit" class="tb-btn tb-btn-primary">
+            <ion-icon name="checkmark-outline"></ion-icon>
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

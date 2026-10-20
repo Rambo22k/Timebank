@@ -1,0 +1,367 @@
+@use "./theme/variables.scss" as *;
+
+/* Core CSS required for Ionic components */
+@import "@ionic/angular/css/core.css";
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* Reset & Editorial Typography Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: var(--tb-text-primary);
+  background-color: var(--tb-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif;
+  color: var(--tb-text-primary);
+  margin-top: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--tb-text-secondary);
+  line-height: 1.6;
+}
+
+a {
+  color: var(--tb-teal);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: var(--tb-teal-dark);
+  }
+}
+
+/* Global Container */
+.tb-container {
+  width: 100%;
+  max-width: 1240px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+
+  @media (min-width: 768px) {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+.tb-section {
+  padding-top: 80px;
+  padding-bottom: 80px;
+
+  @media (max-width: 768px) {
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+}
+
+/* Custom Editorial Button System */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 22px;
+  border-radius: var(--tb-radius-sm);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  line-height: 1.25;
+  outline: none;
+  user-select: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(8, 123, 118, 0.25);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  ion-icon {
+    font-size: 1.15rem;
+  }
+}
+
+.tb-btn-primary {
+  background-color: var(--tb-teal);
+  color: var(--tb-white);
+  border-color: var(--tb-teal);
+  box-shadow: 0 2px 8px rgba(8, 123, 118, 0.2);
+
+  &:hover {
+    background-color: var(--tb-teal-dark);
+    border-color: var(--tb-teal-dark);
+    color: var(--tb-white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(8, 123, 118, 0.3);
+  }
+}
+
+.tb-btn-accent {
+  background-color: var(--tb-orange);
+  color: var(--tb-white);
+  border-color: var(--tb-orange);
+  box-shadow: 0 2px 10px rgba(245, 154, 0, 0.25);
+
+  &:hover {
+    background-color: var(--tb-orange-dark);
+    border-color: var(--tb-orange-dark);
+    color: var(--tb-white);
+    transform: translateY(-1px);
+    box-shadow: var(--tb-shadow-accent);
+  }
+}
+
+.tb-btn-secondary {
+  background-color: var(--tb-teal-light);
+  color: var(--tb-teal-dark);
+  border-color: var(--tb-teal-subtle);
+
+  &:hover {
+    background-color: #d8ece9;
+    color: var(--tb-teal-dark);
+  }
+}
+
+.tb-btn-outline {
+  background-color: transparent;
+  color: var(--tb-text-primary);
+  border-color: var(--tb-border);
+
+  &:hover {
+    background-color: var(--tb-white);
+    border-color: var(--tb-text-primary);
+  }
+}
+
+.tb-btn-ghost {
+  background-color: transparent;
+  color: var(--tb-text-secondary);
+  border-color: transparent;
+
+  &:hover {
+    background-color: rgba(20, 41, 39, 0.05);
+    color: var(--tb-text-primary);
+  }
+}
+
+.tb-btn-danger {
+  background-color: var(--tb-danger-light);
+  color: var(--tb-danger);
+  border-color: rgba(214, 69, 69, 0.2);
+
+  &:hover {
+    background-color: var(--tb-danger);
+    color: var(--tb-white);
+  }
+}
+
+.tb-btn-sm {
+  padding: 7px 14px;
+  font-size: 0.8125rem;
+  border-radius: var(--tb-radius-xs);
+}
+
+.tb-btn-lg {
+  padding: 14px 28px;
+  font-size: 1.0625rem;
+  border-radius: var(--tb-radius-md);
+}
+
+/* Editorial Badges & Pills */
+.tb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--tb-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.tb-badge-teal {
+  background-color: var(--tb-teal-light);
+  color: var(--tb-teal-dark);
+  border: 1px solid var(--tb-teal-subtle);
+}
+
+.tb-badge-orange {
+  background-color: var(--tb-orange-light);
+  color: var(--tb-orange-dark);
+  border: 1px solid var(--tb-orange-subtle);
+}
+
+.tb-badge-neutral {
+  background-color: var(--tb-bg-alt);
+  color: var(--tb-text-secondary);
+  border: 1px solid var(--tb-border);
+}
+
+.tb-badge-pill {
+  padding: 6px 14px;
+  border-radius: var(--tb-radius-full);
+  font-size: 0.8125rem;
+  text-transform: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid var(--tb-border);
+  background: var(--tb-white);
+  color: var(--tb-text-secondary);
+
+  &:hover {
+    border-color: var(--tb-teal);
+    color: var(--tb-teal);
+  }
+
+  &.active {
+    background: var(--tb-teal);
+    color: var(--tb-white);
+    border-color: var(--tb-teal);
+  }
+}
+
+/* Card System */
+.tb-card {
+  background: var(--tb-white);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-md);
+  padding: 24px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+
+  &:hover {
+    border-color: #ced6d1;
+    box-shadow: var(--tb-shadow-md);
+  }
+}
+
+/* Form Controls */
+.tb-form-group {
+  margin-bottom: 20px;
+}
+
+.tb-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tb-text-primary);
+  margin-bottom: 6px;
+}
+
+.tb-input, .tb-select, .tb-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 0.9375rem;
+  color: var(--tb-text-primary);
+  background-color: var(--tb-white);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-sm);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:focus {
+    border-color: var(--tb-teal);
+    box-shadow: 0 0 0 3px rgba(8, 123, 118, 0.15);
+  }
+
+  &::placeholder {
+    color: var(--tb-text-muted);
+  }
+
+  &.is-invalid {
+    border-color: var(--tb-danger);
+    background-color: #fff9f9;
+  }
+}
+
+.tb-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.tb-error-text {
+  font-size: 0.8125rem;
+  color: var(--tb-danger);
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tb-help-text {
+  font-size: 0.8125rem;
+  color: var(--tb-text-muted);
+  margin-top: 4px;
+}
+
+/* Geometric Orbit Graphic Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+/* Accessibility: Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Ionic Page Overrides for Clean Modern Web Layout */
+ion-content {
+  --background: var(--tb-bg);
+  --color: var(--tb-text-primary);
+}

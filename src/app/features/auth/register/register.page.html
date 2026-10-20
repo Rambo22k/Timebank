@@ -1,0 +1,171 @@
+<div class="auth-page-root">
+  <app-navbar></app-navbar>
+
+  <main class="auth-main-wrapper">
+    <div class="tb-container">
+      <div class="auth-card-shell">
+        <!-- Left Side: Editorial Community Perks -->
+        <div class="auth-brand-side">
+          <div class="brand-side-content">
+            <div class="brand-pill">
+              <ion-icon name="gift-outline"></ion-icon>
+              <span>Bienvenida a TimeBank</span>
+            </div>
+
+            <h2 class="brand-heading">
+              Únete a una comunidad donde tu tiempo vale oro.
+            </h2>
+
+            <p class="brand-sub">
+              Al registrarte en esta demostración, tu cuenta se iniciará automáticamente con <strong>5 créditos de tiempo</strong> listos para probar solicitudes de intercambio.
+            </p>
+
+            <div class="perks-checklist">
+              <div class="perk-item">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Acceso inmediato a la red de talentos</span>
+              </div>
+              <div class="perk-item">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Publicación ilimitada de habilidades ofrecidas y deseadas</span>
+              </div>
+              <div class="perk-item">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>1 hora de ayuda = 1 crédito universal</span>
+              </div>
+            </div>
+
+            <div class="demo-environment-badge">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+              <span>Demostración de Frontend (Sin conexión a base de datos)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Registration Form -->
+        <div class="auth-form-side">
+          <div class="auth-form-header">
+            <h1 class="auth-title">Crear Cuenta</h1>
+            <p class="auth-subtitle">
+              ¿Ya eres miembro?
+              <a routerLink="/auth/login" class="link-bold">Inicia sesión aquí</a>
+            </p>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+            <!-- Full Name -->
+            <div class="tb-form-group">
+              <label class="tb-label" for="reg-name">Nombre y Apellido *</label>
+              <div class="input-with-icon">
+                <ion-icon name="person-outline"></ion-icon>
+                <input
+                  id="reg-name"
+                  type="text"
+                  class="tb-input"
+                  [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+                  placeholder="Tu nombre completo"
+                  formControlName="name"
+                />
+              </div>
+              @if (form.get('name')?.invalid && form.get('name')?.touched) {
+                <span class="tb-error-text">Introduce un nombre válido de al menos 3 caracteres.</span>
+              }
+            </div>
+
+            <!-- Email -->
+            <div class="tb-form-group">
+              <label class="tb-label" for="reg-email">Correo Electrónico *</label>
+              <div class="input-with-icon">
+                <ion-icon name="mail-outline"></ion-icon>
+                <input
+                  id="reg-email"
+                  type="email"
+                  class="tb-input"
+                  [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                  placeholder="tu.correo@ejemplo.com"
+                  formControlName="email"
+                />
+              </div>
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <span class="tb-error-text">Introduce un correo electrónico con formato válido.</span>
+              }
+            </div>
+
+            <!-- Password -->
+            <div class="tb-form-group">
+              <label class="tb-label" for="reg-pass">Contraseña *</label>
+              <div class="input-with-icon">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input
+                  id="reg-pass"
+                  [type]="showPassword ? 'text' : 'password'"
+                  class="tb-input"
+                  [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                  placeholder="Mínimo 6 caracteres"
+                  formControlName="password"
+                />
+                <button
+                  type="button"
+                  class="password-toggle-btn"
+                  (click)="togglePassword()"
+                  aria-label="Ver u ocultar contraseña"
+                >
+                  <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </button>
+              </div>
+              @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                <span class="tb-error-text">La contraseña debe tener al menos 6 caracteres.</span>
+              }
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="tb-form-group">
+              <label class="tb-label" for="reg-pass-confirm">Confirmar Contraseña *</label>
+              <div class="input-with-icon">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input
+                  id="reg-pass-confirm"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  class="tb-input"
+                  [class.is-invalid]="(form.get('confirmPassword')?.invalid || form.errors?.['passwordMismatch']) && form.get('confirmPassword')?.touched"
+                  placeholder="Repite tu contraseña"
+                  formControlName="confirmPassword"
+                />
+                <button
+                  type="button"
+                  class="password-toggle-btn"
+                  (click)="toggleConfirmPassword()"
+                  aria-label="Ver u ocultar confirmación de contraseña"
+                >
+                  <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </button>
+              </div>
+              @if (form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched) {
+                <span class="tb-error-text">Las contraseñas no coinciden.</span>
+              }
+            </div>
+
+            <!-- Agree terms -->
+            <div class="terms-row">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="agreeTerms" />
+                <span>Acepto las normas de colaboración y respeto de la comunidad TimeBank</span>
+              </label>
+              @if (form.get('agreeTerms')?.invalid && form.get('agreeTerms')?.touched) {
+                <span class="tb-error-text">Debes aceptar las normas para continuar.</span>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="tb-btn tb-btn-accent tb-btn-lg full-btn" [disabled]="isLoading">
+              <ion-icon [name]="isLoading ? 'time-outline' : 'sparkles-outline'"></ion-icon>
+              {{ isLoading ? 'Creando perfil demo...' : 'Crear mi cuenta con 5 créditos' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

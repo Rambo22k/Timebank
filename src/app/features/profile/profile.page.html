@@ -1,0 +1,265 @@
+<div class="profile-page-root">
+  <app-navbar></app-navbar>
+
+  <main class="profile-main-content">
+    <div class="tb-container">
+      @if (user) {
+        <!-- Perspective Switcher Tool Bar (Great for Evaluators!) -->
+        <div class="perspective-switch-bar">
+          <div class="perspective-label">
+            <ion-icon name="person-circle-outline"></ion-icon>
+            <span>Ver perfil como:</span>
+          </div>
+          <div class="perspective-pills">
+            @for (demo of authService.allUsers(); track demo.id) {
+              <button
+                type="button"
+                class="perspective-btn"
+                [class.is-active]="demo.id === user.id"
+                (click)="switchPerspective(demo.id)"
+              >
+                <img [src]="demo.avatar" [alt]="demo.name" />
+                <span>{{ demo.name.split(' ')[0] }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- PROFILE HERO HEADER -->
+        <div class="profile-hero-card">
+          <div class="hero-cover-pattern"></div>
+          
+          <div class="profile-hero-body">
+            <div class="profile-avatar-row">
+              <div class="avatar-wrapper">
+                <img [src]="user.avatar" [alt]="user.name" class="profile-avatar-img" />
+                <div class="avatar-online-dot" title="Activo en la red"></div>
+              </div>
+
+              <div class="hero-actions-group">
+                <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="openEditProfile()">
+                  <ion-icon name="create-outline"></ion-icon>
+                  Editar Perfil
+                </button>
+                <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="openNewSkillModal()">
+                  <ion-icon name="sparkles-outline"></ion-icon>
+                  Publicar Habilidad
+                </button>
+              </div>
+            </div>
+
+            <!-- Identity info -->
+            <div class="profile-name-section">
+              <div class="name-rating-row">
+                <h1 class="profile-full-name">{{ user.name }}</h1>
+                @if (user.rating) {
+                  <div class="rating-badge" title="Calificación comunitaria">
+                    <ion-icon name="star"></ion-icon>
+                    <span>{{ user.rating }}</span>
+                    <span class="reviews-count">({{ user.reviewsCount }} valoraciones)</span>
+                  </div>
+                }
+              </div>
+
+              <p class="profile-headline">{{ user.headline }}</p>
+
+              <div class="profile-meta-row">
+                <span class="meta-item">
+                  <ion-icon name="location-outline"></ion-icon>
+                  {{ user.location }}
+                </span>
+                <span class="meta-sep">&bull;</span>
+                <span class="meta-item">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  Miembro desde {{ user.memberSince }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="profile-bio-box">
+              <p class="bio-text">{{ user.bio }}</p>
+            </div>
+
+            <!-- Badges Row -->
+            @if (user.badges && user.badges.length > 0) {
+              <div class="profile-badges-row">
+                @for (b of user.badges; track b) {
+                  <span class="badge-item">
+                    <ion-icon name="ribbon-outline"></ion-icon>
+                    {{ b }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- TIME BANK BALANCE & STATS BANNER -->
+          <div class="timebank-metrics-bar">
+            <!-- Balance Highlight -->
+            <div class="metric-block highlight-credit">
+              <div class="metric-top">
+                <ion-icon name="time-outline"></ion-icon>
+                <span class="metric-lbl">Saldo Disponible</span>
+              </div>
+              <div class="metric-value-box">
+                <span class="value-huge">{{ user.timeCredits }}</span>
+                <span class="value-unit">Créditos de tiempo</span>
+              </div>
+              <span class="metric-subtext">Equivalente a {{ user.timeCredits }} horas de aprendizaje</span>
+            </div>
+
+            <!-- Hours Shared -->
+            <div class="metric-block">
+              <span class="metric-lbl">Horas Compartidas</span>
+              <span class="metric-num">{{ user.hoursGiven }}h</span>
+              <span class="metric-subtext">Enseñando a la comunidad</span>
+            </div>
+
+            <!-- Hours Received -->
+            <div class="metric-block">
+              <span class="metric-lbl">Horas Recibidas</span>
+              <span class="metric-num">{{ user.hoursReceived }}h</span>
+              <span class="metric-subtext">Aprendiendo de otros</span>
+            </div>
+
+            <!-- Completed Exchanges -->
+            <div class="metric-block">
+              <span class="metric-lbl">Intercambios Realizados</span>
+              <span class="metric-num">{{ user.completedExchanges }}</span>
+              <span class="metric-subtext">Sesiones bilaterales exitosas</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SKILLS TABS SECTION -->
+        <div class="profile-skills-section">
+          <div class="skills-section-header">
+            <!-- Tabs -->
+            <div class="skills-tab-switch">
+              <button
+                type="button"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'offered'"
+                (click)="setActiveTab('offered')"
+              >
+                <ion-icon name="sparkles-outline"></ion-icon>
+                <span>Habilidades que Ofrezco</span>
+                <span class="tab-count">{{ offeredSkills.length }}</span>
+              </button>
+
+              <button
+                type="button"
+                class="tab-btn"
+                [class.is-active]="activeTab() === 'wanted'"
+                (click)="setActiveTab('wanted')"
+              >
+                <ion-icon name="swap-horizontal-outline"></ion-icon>
+                <span>Habilidades que Busco</span>
+                <span class="tab-count orange">{{ wantedSkills.length }}</span>
+              </button>
+            </div>
+
+            <!-- Add Skill Action -->
+            <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="openNewSkillModal()">
+              <ion-icon name="sparkles-outline"></ion-icon>
+              Añadir otra habilidad
+            </button>
+          </div>
+
+          <!-- Skills Grid Display -->
+          @if (activeTab() === 'offered') {
+            @if (offeredSkills.length > 0) {
+              <div class="skills-cards-grid">
+                @for (skill of offeredSkills; track skill.id) {
+                  <app-skill-card
+                    [skill]="skill"
+                    [isOwner]="true"
+                    (viewDetail)="onViewSkillDetail($event)"
+                    (edit)="onEditSkill($event)"
+                    (delete)="onConfirmDeleteSkill($event)"
+                  ></app-skill-card>
+                }
+              </div>
+            } @else {
+              <app-empty-state
+                icon="layers-outline"
+                title="Aún no tienes habilidades ofrecidas publicadas"
+                message="Comparte tus conocimientos con la red para empezar a acumular créditos de tiempo."
+                actionText="Publicar primera habilidad"
+                actionIcon="sparkles-outline"
+                (action)="openNewSkillModal()"
+              ></app-empty-state>
+            }
+          } @else {
+            @if (wantedSkills.length > 0) {
+              <div class="skills-cards-grid">
+                @for (skill of wantedSkills; track skill.id) {
+                  <app-skill-card
+                    [skill]="skill"
+                    [isOwner]="true"
+                    (viewDetail)="onViewSkillDetail($event)"
+                    (edit)="onEditSkill($event)"
+                    (delete)="onConfirmDeleteSkill($event)"
+                  ></app-skill-card>
+                }
+              </div>
+            } @else {
+              <app-empty-state
+                icon="swap-horizontal-outline"
+                title="No has solicitado habilidades para aprender"
+                message="Indica qué temas te gustaría dominar para que otros miembros con experiencia te contacten."
+                actionText="Publicar lo que deseo aprender"
+                actionIcon="sparkles-outline"
+                (action)="openNewSkillModal()"
+              ></app-empty-state>
+            }
+          }
+        </div>
+      }
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+
+  <!-- Modals -->
+  <app-edit-profile-modal
+    [isOpen]="isEditProfileModalOpen"
+    [user]="user"
+    (close)="closeEditProfile()"
+    (save)="onSaveProfile($event)"
+  ></app-edit-profile-modal>
+
+  <app-skill-detail-modal
+    [isOpen]="detailModalOpen"
+    [skill]="selectedSkillForDetail"
+    [isOwner]="true"
+    (close)="onCloseSkillDetail()"
+    (edit)="onEditSkill($event)"
+  ></app-skill-detail-modal>
+
+  <app-skill-form-modal
+    [isOpen]="isSkillFormOpen"
+    [skillToEdit]="skillToEdit"
+    [defaultType]="activeTab()"
+    (close)="onCloseSkillForm()"
+    (save)="onSaveSkill($event)"
+  ></app-skill-form-modal>
+
+  <app-confirmation-modal
+    [isOpen]="isDeleteModalOpen"
+    title="¿Eliminar esta habilidad?"
+    [message]="'¿Estás seguro de que deseas eliminar &quot;' + (skillToDelete?.title || '') + '&quot; de tu lista pública?'"
+    confirmText="Sí, eliminar"
+    cancelText="Cancelar"
+    [isDanger]="true"
+    (confirm)="executeDeleteSkill()"
+    (cancel)="cancelDeleteSkill()"
+  ></app-confirmation-modal>
+
+  <app-exchange-modal
+    [isOpen]="exchangeModalOpen"
+    [skill]="selectedSkillForExchange"
+    (close)="onCloseExchange()"
+  ></app-exchange-modal>
+</div>

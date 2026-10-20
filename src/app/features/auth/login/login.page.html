@@ -1,0 +1,139 @@
+<div class="auth-page-root">
+  <app-navbar></app-navbar>
+
+  <main class="auth-main-wrapper">
+    <div class="tb-container">
+      <div class="auth-card-shell">
+        <!-- Left Side: Editorial Brand Panel -->
+        <div class="auth-brand-side">
+          <div class="brand-side-content">
+            <div class="brand-pill">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Acceso a la Red</span>
+            </div>
+            <h2 class="brand-heading">
+              Vuelve a conectar con tus horas de aprendizaje.
+            </h2>
+            <p class="brand-sub">
+              Ingresa para revisar tu saldo de créditos de tiempo, responder a propuestas de intercambio y gestionar tus conocimientos.
+            </p>
+
+            <!-- Equality badge -->
+            <div class="quote-tile">
+              <span class="quote-rule">1 hora de ayuda = 1 crédito de tiempo</span>
+              <span class="quote-text">«Lo que sabes puede cambiar la hora de alguien».</span>
+            </div>
+
+            <div class="demo-environment-badge">
+              <ion-icon name="shield-checkmark-outline"></ion-icon>
+              <span>Entorno de Demostración 100% Frontend</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Form & Quick Demo Logins -->
+        <div class="auth-form-side">
+          <div class="auth-form-header">
+            <h1 class="auth-title">Iniciar Sesión</h1>
+            <p class="auth-subtitle">
+              ¿No tienes cuenta aún?
+              <a routerLink="/auth/register" class="link-bold">Crear una cuenta gratis</a>
+            </p>
+          </div>
+
+          <!-- Quick Test Profile Selector -->
+          <div class="quick-demo-section">
+            <span class="quick-label">Acceso rápido con perfiles de demostración:</span>
+            <div class="quick-profiles-row">
+              @for (user of demoUsers.slice(0, 3); track user.id) {
+                <button
+                  type="button"
+                  class="profile-quick-btn"
+                  (click)="quickLoginAs(user.email)"
+                  [title]="'Ingresar como ' + user.name"
+                >
+                  <img [src]="user.avatar" [alt]="user.name" />
+                  <div class="quick-btn-info">
+                    <strong>{{ user.name.split(' ')[0] }}</strong>
+                    <span>{{ user.timeCredits }} créditos</span>
+                  </div>
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-divider">
+            <span>o ingresa con tu correo</span>
+          </div>
+
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+            <!-- Email -->
+            <div class="tb-form-group">
+              <label class="tb-label" for="login-email">Correo Electrónico</label>
+              <div class="input-with-icon">
+                <ion-icon name="mail-outline"></ion-icon>
+                <input
+                  id="login-email"
+                  type="email"
+                  class="tb-input"
+                  [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
+                  placeholder="ejemplo@timebank.app"
+                  formControlName="email"
+                />
+              </div>
+              @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                <span class="tb-error-text">Introduce un correo electrónico válido.</span>
+              }
+            </div>
+
+            <!-- Password -->
+            <div class="tb-form-group">
+              <div class="label-row-split">
+                <label class="tb-label" for="login-pass">Contraseña</label>
+                <a routerLink="/auth/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
+              </div>
+              <div class="input-with-icon">
+                <ion-icon name="lock-closed-outline"></ion-icon>
+                <input
+                  id="login-pass"
+                  [type]="showPassword ? 'text' : 'password'"
+                  class="tb-input"
+                  [class.is-invalid]="form.get('password')?.invalid && form.get('password')?.touched"
+                  placeholder="Tu contraseña"
+                  formControlName="password"
+                />
+                <button
+                  type="button"
+                  class="password-toggle-btn"
+                  (click)="togglePasswordVisibility()"
+                  aria-label="Ver u ocultar contraseña"
+                >
+                  <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+                </button>
+              </div>
+              @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                <span class="tb-error-text">La contraseña debe tener mínimo 6 caracteres.</span>
+              }
+            </div>
+
+            <!-- Remember checkbox -->
+            <div class="remember-row">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="rememberMe" />
+                <span>Recordar sesión en este dispositivo</span>
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="tb-btn tb-btn-primary tb-btn-lg full-btn" [disabled]="isLoading">
+              <ion-icon [name]="isLoading ? 'time-outline' : 'log-in-outline'"></ion-icon>
+              {{ isLoading ? 'Iniciando sesión demo...' : 'Entrar a TimeBank' }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+</div>

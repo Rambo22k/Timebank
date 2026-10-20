@@ -1,0 +1,182 @@
+<div class="discovery-root">
+  <app-navbar></app-navbar>
+
+  <main class="discovery-main">
+    <div class="tb-container">
+      <!-- Search & Discovery Header -->
+      <div class="discovery-header">
+        <span class="sub-label">Mercado de Talentos & Habilidades</span>
+        <h1 class="page-title">Descubre y Conecta</h1>
+        <p class="page-sub">
+          Explora lo que los miembros de la comunidad ofrecen o desean aprender. Recuerda: 1 hora de intercambio = 1 crédito universal.
+        </p>
+
+        <!-- Big Search Bar -->
+        <div class="big-search-box">
+          <ion-icon name="search-outline" class="search-lead-icon"></ion-icon>
+          <input
+            type="text"
+            class="big-search-input"
+            placeholder="Buscar por habilidad, tecnología, idioma, persona o etiqueta (ej. Python, Francés, Figma)..."
+            [ngModel]="searchQuery()"
+            (ngModelChange)="searchQuery.set($event)"
+          />
+          @if (searchQuery().length > 0) {
+            <button class="clear-search-btn" (click)="clearSearch()" aria-label="Limpiar búsqueda">
+              <ion-icon name="close-circle-outline"></ion-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Categories Filter Carousel/Pill-Bar -->
+      <div class="categories-bar-wrap">
+        <span class="filter-group-lbl">Filtrar por categoría:</span>
+        <div class="categories-scroll-row">
+          <button
+            type="button"
+            class="tb-badge-pill"
+            [class.active]="selectedCategoryId() === 'all'"
+            (click)="setCategory('all')"
+          >
+            Todas las categorías
+          </button>
+          @for (cat of categories; track cat.id) {
+            <button
+              type="button"
+              class="tb-badge-pill"
+              [class.active]="selectedCategoryId() === cat.id"
+              (click)="setCategory(cat.id)"
+            >
+              {{ cat.name }} ({{ cat.skillsCount }})
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Secondary Controls Toolbar: Type, Modality, Sort & Reset -->
+      <div class="filters-secondary-toolbar">
+        <!-- Type Pill Selector -->
+        <div class="filter-subgroup">
+          <span class="toolbar-label">Tipo:</span>
+          <div class="btn-group-segmented">
+            <button
+              type="button"
+              class="seg-btn"
+              [class.active]="selectedType() === 'all'"
+              (click)="setType('all')"
+            >
+              Todos
+            </button>
+            <button
+              type="button"
+              class="seg-btn"
+              [class.active]="selectedType() === 'offered'"
+              (click)="setType('offered')"
+            >
+              <ion-icon name="sparkles-outline"></ion-icon>
+              Ofrecidas
+            </button>
+            <button
+              type="button"
+              class="seg-btn"
+              [class.active]="selectedType() === 'wanted'"
+              (click)="setType('wanted')"
+            >
+              <ion-icon name="swap-horizontal-outline"></ion-icon>
+              Buscadas
+            </button>
+          </div>
+        </div>
+
+        <!-- Modality Selector -->
+        <div class="filter-subgroup">
+          <span class="toolbar-label">Modalidad:</span>
+          <select
+            class="tb-select filter-select"
+            [value]="selectedModality()"
+            (change)="setModality($any($event.target).value)"
+          >
+            <option value="all">Todas las modalidades</option>
+            <option value="online">Online / Remoto</option>
+            <option value="presencial">Presencial</option>
+            <option value="híbrido">Híbrido</option>
+          </select>
+        </div>
+
+        <!-- Sort By -->
+        <div class="filter-subgroup">
+          <span class="toolbar-label">Ordenar:</span>
+          <select
+            class="tb-select filter-select"
+            [value]="sortBy()"
+            (change)="setSort($any($event.target).value)"
+          >
+            <option value="recent">Más recientes</option>
+            <option value="rating">Mejor calificación</option>
+            <option value="alphabetical">Alfabético (A-Z)</option>
+          </select>
+        </div>
+
+        <!-- Clear All Filters Button -->
+        @if (hasActiveFilters) {
+          <button class="tb-btn tb-btn-ghost tb-btn-sm reset-filters-btn" (click)="resetFilters()">
+            <ion-icon name="refresh-outline"></ion-icon>
+            Limpiar filtros
+          </button>
+        }
+      </div>
+
+      <!-- Live Results Counter -->
+      <div class="results-meta-bar">
+        <span class="results-count">
+          Mostrando <strong>{{ filteredSkills.length }}</strong> habilidades disponibles
+        </span>
+
+        @if (hasActiveFilters) {
+          <span class="active-filters-hint">
+            Filtros activos aplicados sobre la lista.
+          </span>
+        }
+      </div>
+
+      <!-- Skills Cards Grid -->
+      @if (filteredSkills.length > 0) {
+        <div class="discovery-grid">
+          @for (skill of filteredSkills; track skill.id) {
+            <app-skill-card
+              [skill]="skill"
+              (viewDetail)="onViewDetail($event)"
+              (exchange)="onExchange($event)"
+            ></app-skill-card>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          icon="search-outline"
+          title="No encontramos habilidades con esos criterios"
+          message="No hay publicaciones que coincidan con tus filtros actuales. Prueba a limpiar los filtros o buscar con otro término."
+          actionText="Restablecer todos los filtros"
+          actionIcon="refresh-outline"
+          (action)="resetFilters()"
+        ></app-empty-state>
+      }
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+
+  <!-- Modals -->
+  <app-skill-detail-modal
+    [isOpen]="isDetailModalOpen"
+    [skill]="selectedSkillForDetail"
+    (close)="onCloseDetail()"
+    (exchange)="onExchange($event)"
+  ></app-skill-detail-modal>
+
+  <app-exchange-modal
+    [isOpen]="isExchangeModalOpen"
+    [skill]="selectedSkillForExchange"
+    (close)="onCloseExchange()"
+  ></app-exchange-modal>
+</div>

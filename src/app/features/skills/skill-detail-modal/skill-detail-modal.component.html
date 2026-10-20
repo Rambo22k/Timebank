@@ -1,0 +1,116 @@
+@if (isOpen && skill) {
+  <div class="modal-backdrop" (click)="onClose()" role="dialog" aria-modal="true">
+    <div class="detail-card" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <!-- Category & Type Badges -->
+      <div class="badges-row">
+        <span class="category-pill">{{ skill.categoryName }}</span>
+        @if (skill.type === 'offered') {
+          <span class="tb-badge tb-badge-teal">
+            <ion-icon name="sparkles-outline"></ion-icon>
+            Habilidad Ofrecida
+          </span>
+        } @else {
+          <span class="tb-badge tb-badge-orange">
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+            Habilidad Deseada
+          </span>
+        }
+      </div>
+
+      <!-- Skill Title -->
+      <h2 class="skill-title">{{ skill.title }}</h2>
+
+      <!-- Author Box -->
+      <div class="author-banner">
+        <img [src]="skill.authorAvatar" [alt]="skill.authorName" class="author-avatar" />
+        <div class="author-info">
+          <div class="author-name-row">
+            <span class="author-name">{{ skill.authorName }}</span>
+            @if (skill.authorRating) {
+              <span class="author-rating">
+                <ion-icon name="star"></ion-icon>
+                {{ skill.authorRating }}
+              </span>
+            }
+          </div>
+          <span class="author-headline">{{ skill.authorHeadline }}</span>
+          <span class="author-location">
+            <ion-icon name="location-outline"></ion-icon>
+            {{ skill.authorLocation || 'Comunidad TimeBank' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Description Body -->
+      <div class="description-section">
+        <h4 class="section-heading">Descripción detallada</h4>
+        <p class="description-text">{{ skill.description }}</p>
+      </div>
+
+      <!-- Technical Meta Grid -->
+      <div class="meta-grid">
+        <div class="meta-tile">
+          <ion-icon name="ribbon-outline"></ion-icon>
+          <div class="meta-tile-texts">
+            <span class="meta-label">Nivel de dominio</span>
+            <span class="meta-value">{{ skill.level }}</span>
+          </div>
+        </div>
+
+        <div class="meta-tile">
+          <ion-icon name="location-outline"></ion-icon>
+          <div class="meta-tile-texts">
+            <span class="meta-label">Modalidad</span>
+            <span class="meta-value">{{ skill.modality }}</span>
+          </div>
+        </div>
+
+        <div class="meta-tile">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <div class="meta-tile-texts">
+            <span class="meta-label">Disponibilidad</span>
+            <span class="meta-value">{{ skill.availability }}</span>
+          </div>
+        </div>
+
+        <div class="meta-tile time-tile">
+          <ion-icon name="time-outline"></ion-icon>
+          <div class="meta-tile-texts">
+            <span class="meta-label">Valor en tiempo</span>
+            <span class="meta-value orange">1h = 1 Crédito</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags Section -->
+      @if (skill.tags && skill.tags.length > 0) {
+        <div class="tags-section">
+          @for (tag of skill.tags; track tag) {
+            <span class="tag-badge">#{{ tag }}</span>
+          }
+        </div>
+      }
+
+      <!-- Bottom Action Row -->
+      <div class="modal-footer-actions">
+        @if (isOwner) {
+          <button class="tb-btn tb-btn-outline" (click)="onEdit()">
+            Editar publicación
+          </button>
+        } @else {
+          <button class="tb-btn tb-btn-outline" (click)="onClose()">
+            Volver a la lista
+          </button>
+          <button class="tb-btn tb-btn-accent" (click)="onExchange()">
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+            Proponer intercambio de tiempo
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

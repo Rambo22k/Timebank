@@ -1,0 +1,149 @@
+<div class="skills-mgmt-root">
+  <app-navbar></app-navbar>
+
+  <main class="skills-mgmt-main">
+    <div class="tb-container">
+      <!-- Breadcrumb & Page Header -->
+      <div class="page-title-row">
+        <div>
+          <span class="sub-label">Gestión de Talento Personal</span>
+          <h1 class="page-title">Mis Habilidades & Conocimientos</h1>
+          <p class="page-description">
+            Administra tus publicaciones activas. Puedes ofrecer habilidades para ganar tiempo o solicitar aprender lo que te apasiona.
+          </p>
+        </div>
+
+        <button class="tb-btn tb-btn-primary" (click)="openCreateModal()">
+          <ion-icon name="add-outline"></ion-icon>
+          Publicar Nueva Habilidad
+        </button>
+      </div>
+
+      <!-- Live Counter Cards -->
+      <div class="counters-row">
+        <div class="counter-card" [class.is-active]="selectedFilter() === 'all'" (click)="setFilter('all')">
+          <div class="counter-icon-wrap">
+            <ion-icon name="layers-outline"></ion-icon>
+          </div>
+          <div class="counter-info">
+            <span class="counter-num">{{ offeredCount + wantedCount }}</span>
+            <span class="counter-lbl">Total Publicadas</span>
+          </div>
+        </div>
+
+        <div class="counter-card teal-accent" [class.is-active]="selectedFilter() === 'offered'" (click)="setFilter('offered')">
+          <div class="counter-icon-wrap">
+            <ion-icon name="sparkles-outline"></ion-icon>
+          </div>
+          <div class="counter-info">
+            <span class="counter-num">{{ offeredCount }}</span>
+            <span class="counter-lbl">Habilidades que Ofrezco</span>
+          </div>
+        </div>
+
+        <div class="counter-card orange-accent" [class.is-active]="selectedFilter() === 'wanted'" (click)="setFilter('wanted')">
+          <div class="counter-icon-wrap">
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+          </div>
+          <div class="counter-info">
+            <span class="counter-num">{{ wantedCount }}</span>
+            <span class="counter-lbl">Habilidades que Busco</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter & Search Toolbar -->
+      <div class="toolbar-card">
+        <div class="search-input-wrap">
+          <ion-icon name="search-outline"></ion-icon>
+          <input
+            type="text"
+            class="tb-input search-box"
+            placeholder="Buscar entre mis habilidades..."
+            [value]="searchQuery()"
+            (input)="onSearchChange($event)"
+          />
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="filter-pills-row">
+          <button
+            class="tb-badge-pill"
+            [class.active]="selectedFilter() === 'all'"
+            (click)="setFilter('all')"
+          >
+            Todas ({{ offeredCount + wantedCount }})
+          </button>
+          <button
+            class="tb-badge-pill"
+            [class.active]="selectedFilter() === 'offered'"
+            (click)="setFilter('offered')"
+          >
+            Ofrezco ({{ offeredCount }})
+          </button>
+          <button
+            class="tb-badge-pill"
+            [class.active]="selectedFilter() === 'wanted'"
+            (click)="setFilter('wanted')"
+          >
+            Busco ({{ wantedCount }})
+          </button>
+        </div>
+      </div>
+
+      <!-- Skills Cards Grid -->
+      @if (userSkills.length > 0) {
+        <div class="skills-grid">
+          @for (skill of userSkills; track skill.id) {
+            <app-skill-card
+              [skill]="skill"
+              [isOwner]="true"
+              (viewDetail)="onViewDetail($event)"
+              (edit)="onEditSkill($event)"
+              (delete)="onConfirmDelete($event)"
+            ></app-skill-card>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          icon="layers-outline"
+          title="No hay habilidades que coincidan con el filtro"
+          message="Intenta cambiar el término de búsqueda o publica una nueva habilidad para enriquecer tu perfil."
+          actionText="Crear Habilidad"
+          actionIcon="add-outline"
+          (action)="openCreateModal()"
+        ></app-empty-state>
+      }
+    </div>
+  </main>
+
+  <app-footer></app-footer>
+
+  <!-- Modals -->
+  <app-skill-form-modal
+    [isOpen]="isFormModalOpen"
+    [skillToEdit]="skillToEdit"
+    [defaultType]="selectedFilter() === 'wanted' ? 'wanted' : 'offered'"
+    (close)="onCloseForm()"
+    (save)="onSaveSkill($event)"
+  ></app-skill-form-modal>
+
+  <app-skill-detail-modal
+    [isOpen]="isDetailModalOpen"
+    [skill]="selectedSkillForDetail"
+    [isOwner]="true"
+    (close)="onCloseDetail()"
+    (edit)="onEditSkill($event)"
+  ></app-skill-detail-modal>
+
+  <app-confirmation-modal
+    [isOpen]="isDeleteModalOpen"
+    title="¿Eliminar habilidad permanentemente?"
+    [message]="'Estás a punto de eliminar &quot;' + (skillToDelete?.title || '') + '&quot;. Los usuarios de la comunidad ya no podrán verla.'"
+    confirmText="Sí, eliminar"
+    cancelText="Conservar"
+    [isDanger]="true"
+    (confirm)="executeDelete()"
+    (cancel)="cancelDelete()"
+  ></app-confirmation-modal>
+</div>

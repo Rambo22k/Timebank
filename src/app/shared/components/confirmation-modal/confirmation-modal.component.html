@@ -1,0 +1,29 @@
+@if (isOpen) {
+  <div class="modal-backdrop" (click)="onCancel()" role="dialog" aria-modal="true">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <button class="modal-close-btn" (click)="onCancel()" aria-label="Cerrar modal">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="modal-icon-wrap" [class.danger-icon]="isDanger">
+        <ion-icon [name]="isDanger ? 'trash-outline' : 'alert-circle-outline'"></ion-icon>
+      </div>
+
+      <h3 class="modal-title">{{ title }}</h3>
+      <p class="modal-message">{{ message }}</p>
+
+      <div class="modal-actions">
+        <button class="tb-btn tb-btn-outline" (click)="onCancel()">
+          {{ cancelText }}
+        </button>
+        <button
+          class="tb-btn"
+          [ngClass]="isDanger ? 'tb-btn-danger' : 'tb-btn-primary'"
+          (click)="onConfirm()"
+        >
+          {{ confirmText }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

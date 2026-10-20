@@ -1,0 +1,123 @@
+<header class="tb-navbar-wrapper">
+  <div class="tb-container tb-navbar-inner">
+    <!-- Brand Logo -->
+    <a routerLink="/" class="tb-brand" (click)="closeMobileMenu()">
+      <img src="assets/images/logo.png" alt="TimeBank Logo" class="tb-brand-logo" />
+      <div class="tb-brand-text">
+        <span class="brand-time">Time</span><span class="brand-bank">Bank</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="tb-nav-links" aria-label="Navegación principal">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tb-nav-link">
+        Inicio
+      </a>
+      <a routerLink="/explore" routerLinkActive="active" class="tb-nav-link">
+        <ion-icon name="search-outline"></ion-icon>
+        Explorar
+      </a>
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/skills" routerLinkActive="active" class="tb-nav-link">
+          <ion-icon name="layers-outline"></ion-icon>
+          Mis Habilidades
+        </a>
+        <a routerLink="/profile" routerLinkActive="active" class="tb-nav-link">
+          <ion-icon name="person-circle-outline"></ion-icon>
+          Mi Perfil
+        </a>
+      }
+    </nav>
+
+    <!-- Desktop User Actions -->
+    <div class="tb-nav-actions">
+      @if (authService.isAuthenticated()) {
+        <!-- Time Credits Live Pill -->
+        <div class="tb-credits-pill" title="Tus créditos de tiempo acumulados (1h = 1 crédito)">
+          <div class="credits-pulse"></div>
+          <ion-icon name="time-outline"></ion-icon>
+          <span class="credits-num">{{ authService.currentUser()?.timeCredits }}</span>
+          <span class="credits-unit">créditos</span>
+        </div>
+
+        <!-- User Quick Avatar -->
+        <a routerLink="/profile" class="tb-user-mini" title="Ver mi perfil">
+          <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="user-avatar-mini" />
+          <span class="user-name-mini">{{ authService.currentUser()?.name?.split(' ')?.at(0) }}</span>
+        </a>
+
+        <!-- Exit / Logout -->
+        <button class="tb-btn tb-btn-ghost tb-btn-sm" (click)="onLogout()" title="Cerrar sesión demo">
+          <ion-icon name="log-out-outline"></ion-icon>
+        </button>
+      } @else {
+        <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">
+          Iniciar sesión
+        </a>
+        <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-sm">
+          <ion-icon name="sparkles-outline"></ion-icon>
+          Registrarse
+        </a>
+      }
+
+      <!-- Mobile Hamburger Toggle -->
+      <button class="tb-burger-btn" (click)="toggleMobileMenu()" aria-label="Abrir menú de navegación">
+        <ion-icon [name]="mobileMenuOpen() ? 'close-outline' : 'menu-outline'"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer Menu -->
+  @if (mobileMenuOpen()) {
+    <div class="tb-mobile-drawer" (click)="closeMobileMenu()">
+      <div class="mobile-drawer-content" (click)="$event.stopPropagation()">
+        @if (authService.isAuthenticated()) {
+          <div class="mobile-user-card">
+            <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="drawer-avatar" />
+            <div class="drawer-user-info">
+              <span class="drawer-name">{{ authService.currentUser()?.name }}</span>
+              <div class="tb-credits-pill mobile-pill">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>{{ authService.currentUser()?.timeCredits }} Créditos de tiempo</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <nav class="mobile-nav-list">
+          <a routerLink="/" (click)="closeMobileMenu()" class="mobile-link">
+            Inicio
+          </a>
+          <a routerLink="/explore" (click)="closeMobileMenu()" class="mobile-link">
+            <ion-icon name="search-outline"></ion-icon>
+            Explorar Habilidades
+          </a>
+          @if (authService.isAuthenticated()) {
+            <a routerLink="/skills" (click)="closeMobileMenu()" class="mobile-link">
+              <ion-icon name="layers-outline"></ion-icon>
+              Mis Habilidades
+            </a>
+            <a routerLink="/profile" (click)="closeMobileMenu()" class="mobile-link">
+              <ion-icon name="person-circle-outline"></ion-icon>
+              Mi Perfil
+            </a>
+            <div class="mobile-divider"></div>
+            <button class="tb-btn tb-btn-danger tb-btn-sm" (click)="onLogout()">
+              <ion-icon name="log-out-outline"></ion-icon>
+              Cerrar sesión
+            </button>
+          } @else {
+            <div class="mobile-auth-actions">
+              <a routerLink="/auth/login" (click)="closeMobileMenu()" class="tb-btn tb-btn-outline">
+                Iniciar sesión
+              </a>
+              <a routerLink="/auth/register" (click)="closeMobileMenu()" class="tb-btn tb-btn-primary">
+                Registrarse gratis
+              </a>
+            </div>
+          }
+        </nav>
+      </div>
+    </div>
+  }
+</header>

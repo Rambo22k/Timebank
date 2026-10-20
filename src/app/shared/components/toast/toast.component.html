@@ -1,0 +1,15 @@
+<div class="toast-container" aria-live="polite">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="tb-toast-item" [ngClass]="'toast-' + toast.type">
+      <div class="toast-icon">
+        <ion-icon [name]="getIconName(toast.type)"></ion-icon>
+      </div>
+      <div class="toast-content">
+        <span class="toast-msg">{{ toast.message }}</span>
+      </div>
+      <button class="toast-close" (click)="toastService.dismiss(toast.id)" aria-label="Cerrar notificación">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+  }
+</div>

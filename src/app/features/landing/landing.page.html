@@ -1,0 +1,407 @@
+<div class="landing-page-root">
+  <app-navbar></app-navbar>
+
+  <main>
+    <!-- HERO SECTION: Asymmetric, Editorial, Temporal Geometry -->
+    <section class="tb-hero-section">
+      <div class="tb-container">
+        <div class="hero-split-grid">
+          <!-- Left Column: Value Proposition & Interactive Time Converter -->
+          <div class="hero-text-content">
+            <div class="hero-eyebrow">
+              <span class="eyebrow-dot"></span>
+              <span class="eyebrow-text">Economía colaborativa basada en el tiempo</span>
+            </div>
+
+            <h1 class="hero-title">
+              Tu tiempo tiene valor. <br />
+              <span class="highlight-teal">Intercámbialo</span> y
+              <span class="highlight-orange">multiplica</span> lo que sabes.
+            </h1>
+
+            <p class="hero-description">
+              Una plataforma donde una hora de tus conocimientos equivale a una hora de lo que deseas aprender. Sin dinero, sin intermediarios: solo personas compartiendo talento real.
+            </p>
+
+            <!-- Interactive Live Time Converter Pill -->
+            <div class="hero-converter-box">
+              <div class="converter-header">
+                <span class="converter-label">
+                  <ion-icon name="infinite-outline"></ion-icon>
+                  Equivalencia Universal de Tiempo
+                </span>
+                <span class="converter-rule">1h = 1 Crédito</span>
+              </div>
+
+              <div class="converter-interactive-row">
+                <div class="skill-select-chip">
+                  <span class="chip-prefix">1 hora de</span>
+                  <select [value]="selectedSkillA()" (change)="setSkillA($any($event.target).value)" class="chip-select">
+                    @for (s of sampleSkillsList; track s) {
+                      <option [value]="s">{{ s }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="converter-symbol">
+                  <ion-icon name="swap-horizontal-outline"></ion-icon>
+                </div>
+
+                <div class="skill-select-chip orange-tint">
+                  <span class="chip-prefix">1 hora de</span>
+                  <select [value]="selectedSkillB()" (change)="setSkillB($any($event.target).value)" class="chip-select">
+                    @for (s of sampleSkillsList; track s) {
+                      <option [value]="s">{{ s }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="converter-result-bar">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span>Sin transacción monetaria. Ambos ganan experiencia y expanden su comunidad.</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="hero-actions-row">
+              <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-lg">
+                <ion-icon name="sparkles-outline"></ion-icon>
+                Comenzar a intercambiar
+              </a>
+              <a routerLink="/explore" class="tb-btn tb-btn-outline tb-btn-lg">
+                Explorar habilidades
+                <ion-icon name="arrow-forward-outline"></ion-icon>
+              </a>
+            </div>
+
+            <!-- Proof of equality stats -->
+            <div class="hero-metrics-row">
+              <div class="metric-item">
+                <span class="metric-num">100%</span>
+                <span class="metric-lbl">Sin dinero directo</span>
+              </div>
+              <div class="metric-sep">/</div>
+              <div class="metric-item">
+                <span class="metric-num">1h = 1</span>
+                <span class="metric-lbl">Crédito de tiempo</span>
+              </div>
+              <div class="metric-sep">/</div>
+              <div class="metric-item">
+                <span class="metric-num">+7</span>
+                <span class="metric-lbl">Áreas de talento</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Abstract Time Orbit & Node Connection Graphic -->
+          <div class="hero-graphic-content">
+            <app-time-orbit></app-time-orbit>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: CÓMO FUNCIONA -->
+    <section id="como-funciona" class="tb-section how-it-works-section">
+      <div class="tb-container">
+        <div class="section-header-editorial">
+          <span class="section-tag">Metodología TimeBank</span>
+          <h2 class="section-title">¿Cómo funciona el intercambio de tiempo?</h2>
+          <p class="section-subtitle">
+            Un ciclo colaborativo de cuatro pasos pensado para aprender, enseñar y construir lazos sin barreras financieras.
+          </p>
+        </div>
+
+        <div class="steps-grid">
+          <!-- Step 1 -->
+          <div class="step-card">
+            <div class="step-badge">
+              <span class="step-num">01</span>
+              <div class="step-line"></div>
+            </div>
+            <h3 class="step-title">Crea tu perfil</h3>
+            <p class="step-desc">
+              Define tu bio, intereses y recibe tus primeros créditos de tiempo como bienvenida a la red comunitaria.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="step-card">
+            <div class="step-badge">
+              <span class="step-num">02</span>
+              <div class="step-line"></div>
+            </div>
+            <h3 class="step-title">Publica lo que sabes o buscas</h3>
+            <p class="step-desc">
+              Publica habilidades que ofreces para enseñar o habilidades específicas que te gustaría aprender.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="step-card">
+            <div class="step-badge">
+              <span class="step-num">03</span>
+              <div class="step-line"></div>
+            </div>
+            <h3 class="step-title">Conecta con pares</h3>
+            <p class="step-desc">
+              Encuentra personas con talentos complementarios mediante el buscador inteligente y propón un intercambio.
+            </p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="step-card">
+            <div class="step-badge step-badge-accent">
+              <span class="step-num">04</span>
+            </div>
+            <h3 class="step-title">Intercambia y acumula</h3>
+            <p class="step-desc">
+              Realiza la sesión de 1 hora. Recibes 1 crédito de tiempo que podrás reinvertir con cualquier otro miembro.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: EL VALOR DEL TIEMPO (Philosophy & Multi-Party Diagram) -->
+    <section id="valor-tiempo" class="tb-section time-value-section">
+      <div class="tb-container">
+        <div class="time-value-box">
+          <div class="value-text-side">
+            <span class="value-eyebrow">Filosofía & Principio Fundamental</span>
+            <h2 class="value-title">El tiempo humano vale lo mismo para todos</h2>
+            <p class="value-lead">
+              En el mercado convencional, una hora de programación suele tasarse muy diferente a una hora de música o tutoría escolar.
+            </p>
+            <p class="value-body">
+              En <strong>TimeBank</strong> reivindicamos la igualdad: una hora dedicada a compartir conocimientos representa el mismo esfuerzo, atención y generosidad humana. Por eso:
+            </p>
+
+            <div class="equality-formula-box">
+              <div class="formula-element">
+                <span class="formula-label">Tu dedicación</span>
+                <span class="formula-val">1 Hora</span>
+              </div>
+              <span class="formula-operator">=</span>
+              <div class="formula-element highlight">
+                <span class="formula-label">Valor universal</span>
+                <span class="formula-val">1 Crédito</span>
+              </div>
+              <span class="formula-operator">=</span>
+              <div class="formula-element">
+                <span class="formula-label">Cualquier conocimiento</span>
+                <span class="formula-val">1 Hora</span>
+              </div>
+            </div>
+
+            <div class="principles-list">
+              <div class="principle-item">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span><strong>Intercambio multilateral:</strong> No necesitas pagarle a la misma persona; ayudas a uno y recibes de otro.</span>
+              </div>
+              <div class="principle-item">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span><strong>Cero especulación monetaria:</strong> El valor no se devalúa ni depende de divisas externas.</span>
+              </div>
+              <div class="principle-item">
+                <ion-icon name="checkmark-circle-outline"></ion-icon>
+                <span><strong>Inclusión total:</strong> Toda persona tiene al menos un conocimiento digno de compartir.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Multi-party Mesh visual diagram -->
+          <div class="mesh-visual-side">
+            <div class="mesh-card">
+              <div class="mesh-card-title">Intercambio Circular Comunitario</div>
+              <div class="circular-flow-diagram">
+                <!-- User A -->
+                <div class="flow-node node-a">
+                  <span class="node-name">Elena</span>
+                  <span class="node-teach">Enseña Python</span>
+                </div>
+
+                <div class="flow-arrow arrow-1">
+                  <span>1 hora</span>
+                  <ion-icon name="arrow-forward-outline"></ion-icon>
+                </div>
+
+                <!-- User B -->
+                <div class="flow-node node-b">
+                  <span class="node-name">Carlos</span>
+                  <span class="node-teach">Enseña Guitarra</span>
+                </div>
+
+                <div class="flow-arrow arrow-2">
+                  <span>1 hora</span>
+                  <ion-icon name="arrow-forward-outline"></ion-icon>
+                </div>
+
+                <!-- User C -->
+                <div class="flow-node node-c">
+                  <span class="node-name">Sofía</span>
+                  <span class="node-teach">Enseña Figma</span>
+                </div>
+
+                <div class="flow-arrow arrow-3">
+                  <span>1 hora</span>
+                  <ion-icon name="arrow-forward-outline"></ion-icon>
+                </div>
+              </div>
+
+              <div class="mesh-card-footer">
+                <ion-icon name="infinite-outline"></ion-icon>
+                <span>El círculo se completa sin dinero en efectivo: todos aprenden, todos enseñan.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: DESCUBRIMIENTO DE HABILIDADES -->
+    <section id="categorias" class="tb-section skills-discovery-section">
+      <div class="tb-container">
+        <div class="section-header-split">
+          <div>
+            <span class="section-tag">Talentos de la comunidad</span>
+            <h2 class="section-title">Explora por categorías de conocimiento</h2>
+          </div>
+          <a routerLink="/explore" class="tb-btn tb-btn-outline">
+            Ver todas las habilidades
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </a>
+        </div>
+
+        <!-- Asymmetric Category Grid -->
+        <div class="category-cards-grid">
+          @for (cat of skillsService.categories(); track cat.id) {
+            <a routerLink="/explore" [queryParams]="{ category: cat.id }" class="cat-editorial-card">
+              <div class="cat-icon-pill" [style.color]="cat.colorAccent">
+                <ion-icon [name]="cat.icon"></ion-icon>
+              </div>
+              <div class="cat-card-body">
+                <h4 class="cat-name">{{ cat.name }}</h4>
+                <p class="cat-desc">{{ cat.description }}</p>
+                <div class="cat-count">
+                  <span>{{ cat.skillsCount }} habilidades disponibles</span>
+                  <ion-icon name="arrow-forward-outline"></ion-icon>
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+
+        <!-- Featured Skills Showcase -->
+        <div class="featured-showcase-wrap">
+          <div class="featured-header">
+            <span class="featured-eyebrow">Habilidades en tendencia</span>
+            <h3 class="featured-title">Publicaciones destacadas listas para intercambiar</h3>
+          </div>
+
+          <div class="featured-skills-grid">
+            @for (skill of featuredSkills; track skill.id) {
+              <app-skill-card
+                [skill]="skill"
+                (viewDetail)="onViewDetail($event)"
+                (exchange)="onExchange($event)"
+              ></app-skill-card>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: COMUNIDAD E IMPACTO (Manifesto) -->
+    <section class="tb-section manifesto-section">
+      <div class="tb-container">
+        <div class="manifesto-box">
+          <div class="manifesto-badge">
+            <ion-icon name="heart-outline"></ion-icon>
+            <span>Manifiesto TimeBank</span>
+          </div>
+          <h2 class="manifesto-title">
+            "Creemos que el conocimiento acumulado en una comunidad no debería depender del poder adquisitivo para fluir."
+          </h2>
+          <p class="manifesto-body">
+            Cada persona domina algo que otra anhela aprender. Cuando eliminamos las barreras financieras y usamos el tiempo compartido como puente, fortalecemos el tejido social, cultivamos la empatía y abrimos caminos a oportunidades genuinas.
+          </p>
+          <div class="manifesto-author-pill">
+            <span>Iniciativa comunitaria TimeBank &bull; Enfoque Humano y Colaborativo</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: PREGUNTAS FRECUENTES (FAQ) -->
+    <section id="faq" class="tb-section faq-section">
+      <div class="tb-container">
+        <div class="section-header-editorial">
+          <span class="section-tag">Claridad y Confianza</span>
+          <h2 class="section-title">Preguntas Frecuentes</h2>
+          <p class="section-subtitle">
+            Todo lo que necesitas saber sobre el funcionamiento del banco de tiempo.
+          </p>
+        </div>
+
+        <div class="faq-accordion-list">
+          @for (faq of faqs; track $index) {
+            <div class="faq-item" [class.is-open]="faq.isOpen">
+              <button class="faq-question-btn" (click)="toggleFaq($index)" [attr.aria-expanded]="faq.isOpen">
+                <span class="faq-question-text">{{ faq.question }}</span>
+                <ion-icon [name]="faq.isOpen ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+              </button>
+              @if (faq.isOpen) {
+                <div class="faq-answer-pane">
+                  <p>{{ faq.answer }}</p>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: FINAL CTA -->
+    <section class="tb-section final-cta-section">
+      <div class="tb-container">
+        <div class="final-cta-card">
+          <div class="cta-decorative-arc"></div>
+          <div class="cta-inner-content">
+            <span class="cta-pill">Empieza hoy mismo</span>
+            <h2 class="cta-title">¿Listo para convertir tu tiempo en nuevas habilidades?</h2>
+            <p class="cta-description">
+              Crea tu perfil en segundos, publica lo que sabes y comienza a descubrir a personas con conocimientos complementarios.
+            </p>
+            <div class="cta-buttons-wrap">
+              <a routerLink="/auth/register" class="tb-btn tb-btn-accent tb-btn-lg">
+                <ion-icon name="sparkles-outline"></ion-icon>
+                Crear cuenta con 5 créditos de regalo
+              </a>
+              <a routerLink="/explore" class="tb-btn tb-btn-outline tb-btn-lg white-outline">
+                Explorar catálogo de talentos
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+
+  <!-- Modals -->
+  <app-skill-detail-modal
+    [isOpen]="detailModalOpen"
+    [skill]="selectedSkillForDetail"
+    (close)="onCloseDetail()"
+    (exchange)="onExchange($event)"
+  ></app-skill-detail-modal>
+
+  <app-exchange-modal
+    [isOpen]="exchangeModalOpen"
+    [skill]="selectedSkillForExchange"
+    (close)="onCloseExchange()"
+  ></app-exchange-modal>
+</div>

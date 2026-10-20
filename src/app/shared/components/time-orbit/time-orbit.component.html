@@ -1,0 +1,101 @@
+<div class="time-orbit-container" aria-hidden="true">
+  <!-- Decorative Background Glow -->
+  <div class="orbit-ambient-glow"></div>
+
+  <!-- SVG Orbit Rings & Curved Paths -->
+  <svg class="orbit-svg" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer Track -->
+    <circle cx="250" cy="250" r="220" stroke="#087B76" stroke-width="1.2" stroke-dasharray="4 8" opacity="0.35" />
+    
+    <!-- Middle Dynamic Track -->
+    <circle cx="250" cy="250" r="160" stroke="#F59A00" stroke-width="1.5" stroke-dasharray="6 10" opacity="0.45" />
+    
+    <!-- Inner Track -->
+    <circle cx="250" cy="250" r="100" stroke="#087B76" stroke-width="1" opacity="0.25" />
+
+    <!-- Connecting Directional Arc -->
+    <path d="M 90 250 A 160 160 0 0 1 410 250" stroke="#087B76" stroke-width="2" stroke-linecap="round" opacity="0.6" />
+    <path d="M 410 250 A 160 160 0 0 1 90 250" stroke="#F59A00" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 7" opacity="0.7" />
+
+    <!-- Ticking Orbit Markers -->
+    <line x1="250" y1="20" x2="250" y2="35" stroke="#087B76" stroke-width="2.5" stroke-linecap="round" />
+    <line x1="250" y1="465" x2="250" y2="480" stroke="#087B76" stroke-width="2.5" stroke-linecap="round" />
+    <line x1="20" y1="250" x2="35" y2="250" stroke="#F59A00" stroke-width="2.5" stroke-linecap="round" />
+    <line x1="465" y1="250" x2="480" y2="250" stroke="#F59A00" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Rotating Clock Hands -->
+    <g class="orbit-clock-hands">
+      <line x1="250" y1="250" x2="250" y2="175" stroke="#087B76" stroke-width="3" stroke-linecap="round" />
+      <line x1="250" y1="250" x2="315" y2="215" stroke="#F59A00" stroke-width="2.5" stroke-linecap="round" />
+      <circle cx="250" cy="250" r="6" fill="#142927" />
+    </g>
+  </svg>
+
+  <!-- Central TimeBank Hub Badge -->
+  <div class="central-hub">
+    <div class="hub-pill">
+      <span class="hub-val">1h</span>
+      <span class="hub-equal">=</span>
+      <span class="hub-val orange">1 Crédito</span>
+    </div>
+    <span class="hub-sub">Tiempo Universal</span>
+  </div>
+
+  <!-- Peer Node: Node 1 (Top Left: Elena - Python) -->
+  <div class="orbit-node node-elena">
+    <div class="node-avatar-wrap">
+      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="Elena" />
+      <div class="node-tag"><ion-icon name="code-slash-outline"></ion-icon></div>
+    </div>
+    <div class="node-caption">
+      <strong>Elena</strong>
+      <span>Python & Data</span>
+    </div>
+  </div>
+
+  <!-- Peer Node: Node 2 (Top Right: Carlos - Músico) -->
+  <div class="orbit-node node-carlos">
+    <div class="node-avatar-wrap">
+      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Carlos" />
+      <div class="node-tag orange"><ion-icon name="musical-notes-outline"></ion-icon></div>
+    </div>
+    <div class="node-caption">
+      <strong>Carlos</strong>
+      <span>Guitarra Clásica</span>
+    </div>
+  </div>
+
+  <!-- Peer Node: Node 3 (Bottom Right: Sofía - UI/UX) -->
+  <div class="orbit-node node-sofia">
+    <div class="node-avatar-wrap">
+      <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" alt="Sofía" />
+      <div class="node-tag"><ion-icon name="color-palette-outline"></ion-icon></div>
+    </div>
+    <div class="node-caption">
+      <strong>Sofía</strong>
+      <span>Figma & Design</span>
+    </div>
+  </div>
+
+  <!-- Peer Node: Node 4 (Bottom Left: Mateo - Idiomas) -->
+  <div class="orbit-node node-mateo">
+    <div class="node-avatar-wrap">
+      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80" alt="Mateo" />
+      <div class="node-tag orange"><ion-icon name="globe-outline"></ion-icon></div>
+    </div>
+    <div class="node-caption">
+      <strong>Mateo</strong>
+      <span>Inglés & Francés</span>
+    </div>
+  </div>
+
+  <!-- Floating Time Value Badges -->
+  <div class="floating-bubble bubble-left">
+    <ion-icon name="swap-horizontal-outline"></ion-icon>
+    <span>Sin intermediarios</span>
+  </div>
+  <div class="floating-bubble bubble-right">
+    <ion-icon name="time-outline"></ion-icon>
+    <span>100% Reciprocidad</span>
+  </div>
+</div>

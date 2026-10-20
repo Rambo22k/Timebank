@@ -1,0 +1,313 @@
+.auth-page-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--tb-bg);
+}
+
+.auth-main-wrapper {
+  flex: 1;
+  padding: 48px 0 64px;
+  display: flex;
+  align-items: center;
+}
+
+.auth-card-shell {
+  background: var(--tb-white);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-lg);
+  box-shadow: 0 12px 36px rgba(20, 41, 39, 0.08);
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+  max-width: 980px;
+  margin: 0 auto;
+
+  @media (min-width: 860px) {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+
+/* Brand Side */
+.auth-brand-side {
+  background: linear-gradient(135deg, var(--tb-teal-dark) 0%, var(--tb-teal) 100%);
+  color: var(--tb-white);
+  padding: 48px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+
+  .brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 4px 12px;
+    border-radius: var(--tb-radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--tb-orange-light);
+    margin-bottom: 20px;
+  }
+
+  .brand-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--tb-white);
+    line-height: 1.25;
+    margin-bottom: 16px;
+  }
+
+  .brand-sub {
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+
+  .quote-tile {
+    background: rgba(0, 0, 0, 0.15);
+    border-left: 3px solid var(--tb-orange);
+    padding: 16px;
+    border-radius: 0 var(--tb-radius-xs) var(--tb-radius-xs) 0;
+    margin-bottom: 32px;
+
+    .quote-rule {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--tb-orange);
+      margin-bottom: 4px;
+    }
+
+    .quote-text {
+      font-size: 0.875rem;
+      font-style: italic;
+      color: var(--tb-white);
+    }
+  }
+
+  .demo-environment-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+
+    ion-icon {
+      font-size: 1rem;
+      color: var(--tb-orange);
+    }
+  }
+}
+
+/* Form Side */
+.auth-form-side {
+  padding: 44px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (max-width: 480px) {
+    padding: 32px 20px;
+  }
+}
+
+.auth-form-header {
+  margin-bottom: 24px;
+
+  .auth-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--tb-text-primary);
+    margin-bottom: 6px;
+  }
+
+  .auth-subtitle {
+    font-size: 0.9375rem;
+    color: var(--tb-text-secondary);
+    margin: 0;
+
+    .link-bold {
+      font-weight: 700;
+      color: var(--tb-teal);
+    }
+  }
+}
+
+/* Quick demo profiles */
+.quick-demo-section {
+  background: var(--tb-bg);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-sm);
+  padding: 14px;
+  margin-bottom: 20px;
+
+  .quick-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--tb-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .quick-profiles-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+
+    @media (max-width: 500px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .profile-quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--tb-white);
+    border: 1px solid var(--tb-border);
+    border-radius: var(--tb-radius-xs);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+
+    &:hover {
+      border-color: var(--tb-teal);
+      box-shadow: 0 2px 6px rgba(8, 123, 118, 0.1);
+    }
+
+    img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .quick-btn-info {
+      display: flex;
+      flex-direction: column;
+
+      strong {
+        font-size: 0.75rem;
+        color: var(--tb-text-primary);
+        line-height: 1.2;
+      }
+
+      span {
+        font-size: 0.6875rem;
+        color: var(--tb-teal);
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.form-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--tb-border);
+  }
+
+  span {
+    padding: 0 12px;
+    font-size: 0.75rem;
+    color: var(--tb-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  > ion-icon:first-child {
+    position: absolute;
+    left: 12px;
+    color: var(--tb-text-muted);
+    font-size: 1.15rem;
+    pointer-events: none;
+  }
+
+  .tb-input {
+    padding-left: 38px;
+    padding-right: 38px;
+  }
+
+  .password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--tb-text-muted);
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+
+    &:hover {
+      color: var(--tb-text-primary);
+    }
+  }
+}
+
+.label-row-split {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+
+  .tb-label {
+    margin-bottom: 0;
+  }
+
+  .forgot-link {
+    font-size: 0.8125rem;
+    color: var(--tb-teal);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.remember-row {
+  margin-bottom: 22px;
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--tb-text-secondary);
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      accent-color: var(--tb-teal);
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.full-btn {
+  width: 100%;
+}

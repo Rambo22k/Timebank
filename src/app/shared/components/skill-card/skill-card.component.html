@@ -1,0 +1,79 @@
+<div class="skill-card-item" [class.is-compact]="compact" (click)="onViewDetail($event)">
+  <!-- Header: Category & Type Badge -->
+  <div class="card-top-row">
+    <span class="card-category-tag">
+      {{ skill.categoryName }}
+    </span>
+    
+    @if (skill.type === 'offered') {
+      <span class="tb-badge tb-badge-teal">
+        <ion-icon name="sparkles-outline"></ion-icon>
+        Ofrezco
+      </span>
+    } @else {
+      <span class="tb-badge tb-badge-orange">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        Busco aprender
+      </span>
+    }
+  </div>
+
+  <!-- Title & Description -->
+  <h3 class="card-skill-title">{{ skill.title }}</h3>
+  <p class="card-skill-desc">{{ skill.description }}</p>
+
+  <!-- Tags Row -->
+  @if (skill.tags && skill.tags.length > 0 && !compact) {
+    <div class="card-tags-row">
+      @for (tag of skill.tags.slice(0, 3); track tag) {
+        <span class="tag-chip">#{{ tag }}</span>
+      }
+    </div>
+  }
+
+  <!-- Modality & Time Value -->
+  <div class="card-meta-row">
+    <div class="meta-item">
+      <ion-icon name="location-outline"></ion-icon>
+      <span>{{ skill.modality }}</span>
+    </div>
+    <div class="meta-item time-badge">
+      <ion-icon name="time-outline"></ion-icon>
+      <span>{{ skill.hoursValue }}h = 1 Crédito</span>
+    </div>
+  </div>
+
+  <!-- Author and Actions Footer -->
+  <div class="card-footer-row">
+    <!-- Author snippet -->
+    <div class="card-author-info">
+      <img [src]="skill.authorAvatar" [alt]="skill.authorName" class="author-img" />
+      <div class="author-texts">
+        <span class="author-name">{{ skill.authorName }}</span>
+        @if (skill.authorRating) {
+          <div class="author-rating">
+            <ion-icon name="star"></ion-icon>
+            <span>{{ skill.authorRating }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="card-actions">
+      @if (isOwner) {
+        <button class="action-btn edit-btn" (click)="onEdit($event)" title="Editar habilidad">
+          <ion-icon name="create-outline"></ion-icon>
+        </button>
+        <button class="action-btn delete-btn" (click)="onDelete($event)" title="Eliminar habilidad">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      } @else {
+        <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="onExchange($event)">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+          Intercambiar
+        </button>
+      }
+    </div>
+  </div>
+</div>

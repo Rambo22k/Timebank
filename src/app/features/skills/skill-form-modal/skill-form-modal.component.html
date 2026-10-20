@@ -1,0 +1,142 @@
+@if (isOpen) {
+  <div class="modal-backdrop" (click)="onClose()" role="dialog" aria-modal="true">
+    <div class="form-modal-card" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="onClose()" aria-label="Cerrar modal">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+
+      <div class="modal-header">
+        <span class="sub-label">Gestión de Conocimientos</span>
+        <h2 class="modal-title">
+          {{ skillToEdit ? 'Editar Habilidad' : 'Publicar Nueva Habilidad' }}
+        </h2>
+        <p class="modal-intro">
+          Recuerda: En TimeBank, 1 hora equivale a 1 crédito de tiempo sin importar la disciplina.
+        </p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="modal-form">
+        <!-- Segmented Type Selector -->
+        <div class="type-selector-box">
+          <button
+            type="button"
+            class="type-pill"
+            [class.active]="form.get('type')?.value === 'offered'"
+            (click)="setType('offered')"
+          >
+            <ion-icon name="sparkles-outline"></ion-icon>
+            Habilidad que Ofrezco (Enseño)
+          </button>
+          <button
+            type="button"
+            class="type-pill"
+            [class.active]="form.get('type')?.value === 'wanted'"
+            (click)="setType('wanted')"
+          >
+            <ion-icon name="swap-horizontal-outline"></ion-icon>
+            Habilidad que Busco Aprender
+          </button>
+        </div>
+
+        <!-- Title -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="skill-title">Título de la habilidad *</label>
+          <input
+            id="skill-title"
+            type="text"
+            class="tb-input"
+            [class.is-invalid]="form.get('title')?.invalid && form.get('title')?.touched"
+            placeholder="Ej: Programación Frontend con Angular y TypeScript"
+            formControlName="title"
+          />
+          @if (form.get('title')?.invalid && form.get('title')?.touched) {
+            <span class="tb-error-text">El título debe tener entre 5 y 90 caracteres.</span>
+          }
+        </div>
+
+        <!-- Category & Level Grid -->
+        <div class="form-row-2">
+          <div class="tb-form-group">
+            <label class="tb-label" for="skill-cat">Categoría *</label>
+            <select id="skill-cat" class="tb-select" formControlName="categoryId">
+              @for (cat of categories; track cat.id) {
+                <option [value]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="tb-form-group">
+            <label class="tb-label" for="skill-level">Nivel requerido / ofrecido</label>
+            <select id="skill-level" class="tb-select" formControlName="level">
+              @for (lvl of levels; track lvl) {
+                <option [value]="lvl">{{ lvl }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Modality & Availability Grid -->
+        <div class="form-row-2">
+          <div class="tb-form-group">
+            <label class="tb-label" for="skill-modality">Modalidad</label>
+            <select id="skill-modality" class="tb-select" formControlName="modality">
+              @for (m of modalities; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="tb-form-group">
+            <label class="tb-label" for="skill-avail">Disponibilidad semanal *</label>
+            <input
+              id="skill-avail"
+              type="text"
+              class="tb-input"
+              placeholder="Ej: 2 horas / semana"
+              formControlName="availability"
+            />
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="skill-desc">Descripción detallada *</label>
+          <textarea
+            id="skill-desc"
+            class="tb-textarea"
+            [class.is-invalid]="form.get('description')?.invalid && form.get('description')?.touched"
+            placeholder="Explica qué temas puedes enseñar, cuál es tu metodología o qué buscas aprender específicamente..."
+            formControlName="description"
+          ></textarea>
+          @if (form.get('description')?.invalid && form.get('description')?.touched) {
+            <span class="tb-error-text">Describe tu propuesta con al menos 20 caracteres.</span>
+          }
+        </div>
+
+        <!-- Tags -->
+        <div class="tb-form-group">
+          <label class="tb-label" for="skill-tags">Etiquetas (separadas por comas)</label>
+          <input
+            id="skill-tags"
+            type="text"
+            class="tb-input"
+            placeholder="Angular, TypeScript, Frontend, Mentoria"
+            formControlName="tagsInput"
+          />
+          <span class="tb-help-text">Ejemplo: Figma, Diseño, Francés, Cálculo</span>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="modal-actions-bar">
+          <button type="button" class="tb-btn tb-btn-outline" (click)="onClose()">
+            Cancelar
+          </button>
+          <button type="submit" class="tb-btn tb-btn-primary" [disabled]="isSubmitting">
+            <ion-icon name="checkmark-outline"></ion-icon>
+            {{ isSubmitting ? 'Guardando...' : (skillToEdit ? 'Guardar Cambios' : 'Publicar Habilidad') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

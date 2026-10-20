@@ -1,0 +1,226 @@
+.time-orbit-container {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  aspect-ratio: 1 / 1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.orbit-ambient-glow {
+  position: absolute;
+  inset: 15%;
+  background: radial-gradient(circle, rgba(8, 123, 118, 0.08) 0%, rgba(245, 154, 0, 0.05) 50%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.orbit-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.orbit-clock-hands {
+  transform-origin: 250px 250px;
+  animation: rotate-hands 24s linear infinite;
+}
+
+.central-hub {
+  position: absolute;
+  z-index: 10;
+  background: var(--tb-white);
+  border: 1.5px solid var(--tb-border);
+  box-shadow: 0 10px 28px rgba(20, 41, 39, 0.08);
+  border-radius: var(--tb-radius-md);
+  padding: 12px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  animation: hub-pulse 6s ease-in-out infinite;
+
+  .hub-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+
+    .hub-val {
+      color: var(--tb-teal);
+      &.orange {
+        color: var(--tb-orange);
+      }
+    }
+
+    .hub-equal {
+      color: var(--tb-text-muted);
+    }
+  }
+
+  .hub-sub {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tb-text-muted);
+  }
+}
+
+.orbit-node {
+  position: absolute;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--tb-white);
+  padding: 6px 12px 6px 6px;
+  border-radius: var(--tb-radius-full);
+  border: 1px solid var(--tb-border);
+  box-shadow: 0 4px 14px rgba(20, 41, 39, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(8, 123, 118, 0.15);
+  }
+
+  .node-avatar-wrap {
+    position: relative;
+
+    img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .node-tag {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--tb-teal);
+      color: var(--tb-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+
+      &.orange {
+        background: var(--tb-orange);
+      }
+    }
+  }
+
+  .node-caption {
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-size: 0.8125rem;
+      color: var(--tb-text-primary);
+    }
+
+    span {
+      font-size: 0.6875rem;
+      color: var(--tb-text-secondary);
+    }
+  }
+
+  &.node-elena {
+    top: 8%;
+    left: 4%;
+  }
+
+  &.node-carlos {
+    top: 10%;
+    right: 4%;
+  }
+
+  &.node-sofia {
+    bottom: 12%;
+    right: 4%;
+  }
+
+  &.node-mateo {
+    bottom: 10%;
+    left: 4%;
+  }
+}
+
+.floating-bubble {
+  position: absolute;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--tb-radius-full);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid var(--tb-border);
+  box-shadow: 0 4px 12px rgba(20, 41, 39, 0.05);
+
+  ion-icon {
+    font-size: 0.95rem;
+  }
+
+  &.bubble-left {
+    top: 48%;
+    left: -4%;
+    color: var(--tb-teal-dark);
+    ion-icon { color: var(--tb-teal); }
+  }
+
+  &.bubble-right {
+    top: 48%;
+    right: -4%;
+    color: var(--tb-orange-dark);
+    ion-icon { color: var(--tb-orange); }
+  }
+}
+
+@keyframes rotate-hands {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hub-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+@media (max-width: 520px) {
+  .orbit-node {
+    padding: 4px 8px 4px 4px;
+
+    .node-avatar-wrap img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .node-caption strong {
+      font-size: 0.75rem;
+    }
+
+    .node-caption span {
+      display: none;
+    }
+  }
+
+  .floating-bubble {
+    display: none;
+  }
+}

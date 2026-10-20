@@ -1,0 +1,203 @@
+.auth-page-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--tb-bg);
+}
+
+.auth-main-wrapper {
+  flex: 1;
+  padding: 48px 0 64px;
+  display: flex;
+  align-items: center;
+}
+
+.auth-card-shell {
+  background: var(--tb-white);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-lg);
+  box-shadow: 0 12px 36px rgba(20, 41, 39, 0.08);
+  display: grid;
+  grid-template-columns: 1fr;
+  overflow: hidden;
+  max-width: 980px;
+  margin: 0 auto;
+
+  @media (min-width: 860px) {
+    grid-template-columns: 1fr 1.25fr;
+  }
+}
+
+.auth-brand-side {
+  background: linear-gradient(135deg, #142927 0%, var(--tb-teal-dark) 100%);
+  color: var(--tb-white);
+  padding: 48px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245, 154, 0, 0.2);
+    border: 1px solid rgba(245, 154, 0, 0.3);
+    padding: 4px 12px;
+    border-radius: var(--tb-radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--tb-orange);
+    margin-bottom: 20px;
+  }
+
+  .brand-heading {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--tb-white);
+    line-height: 1.25;
+    margin-bottom: 16px;
+  }
+
+  .brand-sub {
+    font-size: 0.9375rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.6;
+    margin-bottom: 28px;
+
+    strong {
+      color: var(--tb-orange);
+    }
+  }
+
+  .perks-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 32px;
+
+    .perk-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.9);
+
+      ion-icon {
+        font-size: 1.15rem;
+        color: var(--tb-orange);
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .demo-environment-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+
+    ion-icon {
+      font-size: 1rem;
+      color: var(--tb-teal-light);
+    }
+  }
+}
+
+.auth-form-side {
+  padding: 44px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (max-width: 480px) {
+    padding: 32px 20px;
+  }
+}
+
+.auth-form-header {
+  margin-bottom: 24px;
+
+  .auth-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--tb-text-primary);
+    margin-bottom: 6px;
+  }
+
+  .auth-subtitle {
+    font-size: 0.9375rem;
+    color: var(--tb-text-secondary);
+    margin: 0;
+
+    .link-bold {
+      font-weight: 700;
+      color: var(--tb-teal);
+    }
+  }
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  > ion-icon:first-child {
+    position: absolute;
+    left: 12px;
+    color: var(--tb-text-muted);
+    font-size: 1.15rem;
+    pointer-events: none;
+  }
+
+  .tb-input {
+    padding-left: 38px;
+    padding-right: 38px;
+  }
+
+  .password-toggle-btn {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: var(--tb-text-muted);
+    font-size: 1.15rem;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+
+    &:hover {
+      color: var(--tb-text-primary);
+    }
+  }
+}
+
+.terms-row {
+  margin-bottom: 22px;
+
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.8125rem;
+    color: var(--tb-text-secondary);
+    line-height: 1.45;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      accent-color: var(--tb-orange);
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+    }
+  }
+}
+
+.full-btn {
+  width: 100%;
+}

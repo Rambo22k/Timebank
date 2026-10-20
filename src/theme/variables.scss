@@ -1,0 +1,92 @@
+// TimeBank Official Design Tokens & Palette
+
+:root {
+  // Brand Colors
+  --tb-teal: #087B76;
+  --tb-teal-dark: #075B58;
+  --tb-teal-light: #EBF5F4;
+  --tb-teal-subtle: #D6ECE9;
+  
+  --tb-orange: #F59A00;
+  --tb-orange-dark: #D48400;
+  --tb-orange-light: #FFF7EC;
+  --tb-orange-subtle: #FDE8C7;
+
+  --tb-bg: #F7F8F5;
+  --tb-bg-alt: #F0F3EF;
+  --tb-white: #FFFFFF;
+  --tb-surface: #FFFFFF;
+  
+  --tb-text-primary: #142927;
+  --tb-text-secondary: #687773;
+  --tb-text-muted: #8E9C98;
+  
+  --tb-border: #E4E9E5;
+  --tb-border-subtle: #ECEFEA;
+  --tb-border-dark: #CAD2CE;
+
+  --tb-danger: #D64545;
+  --tb-danger-light: #FDECEC;
+  --tb-success: #1E9E67;
+  --tb-success-light: #E9F8F1;
+
+  // Editorial Geometric Radii (Restrained, crisp, non-pill everywhere)
+  --tb-radius-xs: 4px;
+  --tb-radius-sm: 8px;
+  --tb-radius-md: 14px;
+  --tb-radius-lg: 20px;
+  --tb-radius-xl: 28px;
+  --tb-radius-full: 9999px;
+
+  // Shadows: Clean, architectural, never muddy
+  --tb-shadow-sm: 0 1px 3px rgba(20, 41, 39, 0.05);
+  --tb-shadow-md: 0 4px 14px rgba(20, 41, 39, 0.07);
+  --tb-shadow-lg: 0 12px 30px rgba(20, 41, 39, 0.09);
+  --tb-shadow-card: 0 2px 10px rgba(8, 123, 118, 0.04);
+  --tb-shadow-accent: 0 8px 24px rgba(245, 154, 0, 0.18);
+
+  // Ionic Component Theming Integration
+  --ion-color-primary: var(--tb-teal);
+  --ion-color-primary-rgb: 8, 123, 118;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: var(--tb-teal-dark);
+  --ion-color-primary-tint: #1c8e89;
+
+  --ion-color-secondary: var(--tb-orange);
+  --ion-color-secondary-rgb: 245, 154, 0;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade: var(--tb-orange-dark);
+  --ion-color-secondary-tint: #f7a61a;
+
+  --ion-background-color: var(--tb-bg);
+  --ion-text-color: var(--tb-text-primary);
+  --ion-item-background: var(--tb-surface);
+  --ion-border-color: var(--tb-border);
+}
+
+// SCSS Variables for mixins and component-scoped styling
+$tb-teal: #087B76;
+$tb-teal-dark: #075B58;
+$tb-teal-light: #EBF5F4;
+$tb-teal-subtle: #D6ECE9;
+
+$tb-orange: #F59A00;
+$tb-orange-dark: #D48400;
+$tb-orange-light: #FFF7EC;
+
+$tb-bg: #F7F8F5;
+$tb-bg-alt: #F0F3EF;
+$tb-white: #FFFFFF;
+$tb-surface: #FFFFFF;
+
+$tb-text-primary: #142927;
+$tb-text-secondary: #687773;
+$tb-text-muted: #8E9C98;
+
+$tb-border: #E4E9E5;
+$tb-border-subtle: #ECEFEA;
+
+$tb-radius-sm: 8px;
+$tb-radius-md: 14px;
+$tb-radius-lg: 20px;
+$tb-radius-xl: 28px;
