@@ -1,15 +1,4 @@
 :host {
   display: block;
   width: 100%;
-  min-height: 100vh;
-}
-
-ion-app, ion-router-outlet {
-  position: static !important;
-  display: block !important;
-  width: 100% !important;
-  min-height: 100vh !important;
-  height: auto !important;
-  overflow: visible !important;
-  contain: none !important;
 }
