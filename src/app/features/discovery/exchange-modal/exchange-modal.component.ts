@@ -49,7 +49,7 @@ export class ExchangeModalComponent {
     });
   }
 
-  onSendProposal(): void {
+  async onSendProposal(): Promise<void> {
     if (!this.skill) return;
     const currentUser = this.authService.currentUser();
     const startAt = new Date(this.proposedStartAt);
@@ -61,18 +61,22 @@ export class ExchangeModalComponent {
     if (currentUser.timeCredits < this.requestedHours) { this.proposalError = 'No tienes créditos suficientes para esta duración.'; return; }
     this.proposalError = '';
     this.isSubmitting = true;
-    this.exchangeService.createRequest({
-      providerId: this.skill.userId,
-      providerName: this.skill.authorName,
-      providerAvatar: this.skill.authorAvatar,
-      skillId: this.skill.id,
-      skillTitle: this.skill.title,
-      message: this.proposedMessage.trim(),
-      proposedStartAt: startAt.toISOString(),
-      requestedHours: this.requestedHours
-    });
-    this.isSubmitting = false;
-    this.close.emit();
+    try {
+      const created = await this.exchangeService.createRequest({
+        providerId: this.skill.userId,
+        providerName: this.skill.authorName,
+        providerAvatar: this.skill.authorAvatar,
+        skillId: this.skill.id,
+        skillTitle: this.skill.title,
+        message: this.proposedMessage.trim(),
+        proposedStartAt: startAt.toISOString(),
+        requestedHours: this.requestedHours
+      });
+      if (created) this.close.emit();
+      else this.proposalError = 'No se pudo enviar la solicitud. Revisa los datos e inténtalo de nuevo.';
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   private defaultStartAt(): string {
