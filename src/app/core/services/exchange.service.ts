@@ -39,6 +39,27 @@ interface SessionRow {
   provider_confirmed_at: string | null;
 }
 
+interface CreditTransactionRow {
+  id: string;
+  transaction_type: string;
+  amount: number;
+  requester_id: string | null;
+  provider_id: string | null;
+  session_id: string | null;
+  description: string;
+  created_at: string;
+}
+
+interface ReviewRow {
+  id: string;
+  session_id: string;
+  author_id: string;
+  recipient_id: string;
+  rating: number;
+  comment: string;
+  created_at: string;
+}
+
 const DEMO_REQUESTS: ExchangeRequest[] = [
   {
     id: 'request-demo-1', requesterId: 'user-elena', requesterName: 'Elena Vance',
@@ -69,33 +90,42 @@ const DEMO_REQUESTS: ExchangeRequest[] = [
   }
 ];
 
-const DEMO_ACTIVITY: CreditActivity[] = [
-  { id: 'tx-demo-1', title: 'Créditos de bienvenida', detail: 'Saldo inicial de TimeBank', date: '2026-10-24T09:00:00', amount: 5, type: 'welcome' },
-  { id: 'tx-demo-2', title: 'Sesión impartida', detail: 'Introducción a TypeScript · Elena Vance', date: '2026-10-28T15:00:00', amount: 1, type: 'earned' },
-  { id: 'tx-demo-3', title: 'Sesión recibida', detail: 'Design Systems en Figma · Sofía Alarcón', date: '2026-10-20T17:30:00', amount: -1, type: 'spent' }
-];
-
 @Injectable({ providedIn: 'root' })
 export class ExchangeService {
   private requestsSignal = signal<ExchangeRequest[]>([]);
   private requestsLoadingSignal = signal(false);
   private requestsLoadVersion = 0;
+  private walletLoadVersion = 0;
+  private reviewsLoadVersion = 0;
+  private activeDataUserId: string | null = null;
   private sessionsSignal = signal<ExchangeSession[]>([]);
   private sessionActionsSignal = signal<Set<string>>(new Set());
-  private activitySignal = signal([...DEMO_ACTIVITY]);
+  private activitySignal = signal<CreditActivity[]>([]);
+  private reservedBalanceSignal = signal(0);
+  private walletLoadingSignal = signal(false);
   private reviewsSignal = signal<ExchangeReview[]>([]);
+  private reviewsLoadingSignal = signal(false);
 
   readonly requests = this.requestsSignal.asReadonly();
   readonly isLoadingRequests = this.requestsLoadingSignal.asReadonly();
   readonly sessions = this.sessionsSignal.asReadonly();
   readonly sessionActions = this.sessionActionsSignal.asReadonly();
   readonly activity = this.activitySignal.asReadonly();
+  readonly reservedBalance = this.reservedBalanceSignal.asReadonly();
+  readonly isLoadingWallet = this.walletLoadingSignal.asReadonly();
   readonly reviews = this.reviewsSignal.asReadonly();
+  readonly isLoadingReviews = this.reviewsLoadingSignal.asReadonly();
   readonly balance = computed(() => this.auth.currentUser()?.timeCredits ?? 0);
 
   constructor(private auth: AuthService, private toast: ToastService, private supabase: SupabaseService) {
     effect(() => {
-      this.auth.authUser()?.id;
+      const userId = this.auth.authUser()?.id ?? null;
+      if (userId !== this.activeDataUserId) {
+        this.activeDataUserId = userId;
+        this.activitySignal.set([]);
+        this.reservedBalanceSignal.set(0);
+        this.reviewsSignal.set([]);
+      }
       void this.loadRequests();
     });
   }
@@ -132,6 +162,166 @@ export class ExchangeService {
     return this.reviewsSignal().filter(r => r.recipientId === this.currentUserId);
   }
 
+  async loadWalletActivity(): Promise<void> {
+    const version = ++this.walletLoadVersion;
+    const userId = this.auth.authUser()?.id;
+    const client = this.supabase.client;
+    if (!userId || !client) {
+      this.activitySignal.set([]);
+      this.reservedBalanceSignal.set(0);
+      this.walletLoadingSignal.set(false);
+      return;
+    }
+
+    this.walletLoadingSignal.set(true);
+    try {
+      const accountResult = await client.from('credit_accounts')
+        .select('id,reserved_balance').eq('user_id', userId).maybeSingle();
+      if (accountResult.error) throw accountResult.error;
+      const account = accountResult.data as { id: string; reserved_balance: number } | null;
+      const transactions: CreditTransactionRow[] = [];
+      for (let from = 0; ; from += 500) {
+        const { data, error } = await client.from('credit_transactions')
+          .select('id,transaction_type,amount,requester_id,provider_id,session_id,description,created_at')
+          .or(`requester_id.eq.${userId},provider_id.eq.${userId}`)
+          .order('created_at', { ascending: false }).range(from, from + 499);
+        if (error) throw error;
+        const page = (data ?? []) as CreditTransactionRow[];
+        transactions.push(...page);
+        if (page.length < 500) break;
+        if (version !== this.walletLoadVersion || userId !== this.auth.authUser()?.id) return;
+      }
+      const adjustmentIds = transactions.filter(row => row.transaction_type === 'admin_adjustment').map(row => row.id);
+      let adjustmentDeltas = new Map<string, number>();
+      if (account?.id && adjustmentIds.length) {
+        for (let offset = 0; offset < adjustmentIds.length; offset += 500) {
+          const ids = adjustmentIds.slice(offset, offset + 500);
+          const { data, error } = await client.from('credit_ledger_entries')
+            .select('transaction_id,available_delta').eq('account_id', account.id).in('transaction_id', ids);
+          if (error) throw error;
+          for (const row of data ?? []) adjustmentDeltas.set(row.transaction_id as string, Number(row.available_delta));
+        }
+      }
+
+      if (version !== this.walletLoadVersion || userId !== this.auth.authUser()?.id) return;
+
+      this.reservedBalanceSignal.set(Number(account?.reserved_balance ?? 0));
+      this.activitySignal.set(transactions.flatMap(row => {
+        const value = Number(row.amount);
+        let title = '';
+        let detail = '';
+        let amount = 0;
+        let type: CreditActivity['type'] = 'spent';
+        switch (row.transaction_type) {
+          case 'welcome':
+            title = 'Créditos de bienvenida'; detail = 'Saldo inicial de TimeBank'; amount = value; type = 'welcome'; break;
+          case 'session_reservation':
+            title = 'Créditos reservados'; detail = 'Se reservaron créditos para una sesión agendada.'; amount = -value; type = 'reserved'; break;
+          case 'session_payment':
+            if (row.requester_id === userId) {
+              title = 'Sesión recibida'; detail = 'Créditos liquidados al completar el intercambio.'; amount = -value; type = 'spent';
+            } else if (row.provider_id === userId) {
+              title = 'Sesión impartida'; detail = 'Créditos recibidos al completar el intercambio.'; amount = value; type = 'earned';
+            } else return [];
+            break;
+          case 'session_refund':
+            if (row.requester_id !== userId) return [];
+            title = 'Créditos devueltos'; detail = 'Créditos reservados devueltos a tu billetera.'; amount = value; type = 'refund'; break;
+          case 'solidarity_donation':
+            if (row.requester_id !== userId) return [];
+            title = 'Donación solidaria'; detail = 'Aporte al fondo solidario.'; amount = -value; type = 'spent'; break;
+          case 'solidarity_award':
+            if (row.provider_id !== userId) return [];
+            title = 'Apoyo solidario recibido'; detail = 'Créditos recibidos del fondo solidario.'; amount = value; type = 'earned'; break;
+          case 'admin_adjustment': {
+            if (row.provider_id !== userId) return [];
+            const delta = adjustmentDeltas.get(row.id) ?? value;
+            title = 'Ajuste de créditos'; detail = row.description || 'Actualización administrativa del saldo.';
+            amount = delta; type = delta >= 0 ? 'earned' : 'spent'; break;
+          }
+          default: return [];
+        }
+        return [{ id: row.id, title, detail, date: row.created_at, amount, type }];
+      }));
+    } catch {
+      if (version === this.walletLoadVersion && userId === this.auth.authUser()?.id) {
+        this.toast.danger('No se pudo cargar el historial de tu billetera. Inténtalo de nuevo.');
+      }
+    } finally {
+      if (version === this.walletLoadVersion) this.walletLoadingSignal.set(false);
+    }
+  }
+
+  async loadReviews(): Promise<void> {
+    const version = ++this.reviewsLoadVersion;
+    const userId = this.auth.authUser()?.id;
+    const client = this.supabase.client;
+    if (!userId || !client) {
+      this.reviewsSignal.set([]);
+      this.reviewsLoadingSignal.set(false);
+      return;
+    }
+
+    this.reviewsLoadingSignal.set(true);
+    try {
+      const { data, error } = await client.from('reviews')
+        .select('id,session_id,author_id,recipient_id,rating,comment,created_at')
+        .eq('recipient_id', userId).order('created_at', { ascending: false }).limit(100);
+      if (error) throw error;
+      const rows = (data ?? []) as ReviewRow[];
+      const authorIds = [...new Set(rows.map(row => row.author_id))];
+      const sessionIds = [...new Set(rows.map(row => row.session_id))];
+      const [profileResult, sessionResult] = await Promise.all([
+        authorIds.length ? client.from('profiles').select('id,display_name,avatar_path').in('id', authorIds) : Promise.resolve({ data: [], error: null }),
+        sessionIds.length ? client.from('sessions').select('id,request_id').in('id', sessionIds) : Promise.resolve({ data: [], error: null })
+      ]);
+      if (profileResult.error) throw profileResult.error;
+      if (sessionResult.error) throw sessionResult.error;
+      const sessionRows = (sessionResult.data ?? []) as { id: string; request_id: string }[];
+      const requestIds = [...new Set(sessionRows.map(row => row.request_id))];
+      const requestResult = requestIds.length
+        ? await client.from('session_requests').select('id,skill_id').in('id', requestIds)
+        : { data: [], error: null };
+      if (requestResult.error) throw requestResult.error;
+      const skillIds = [...new Set((requestResult.data ?? []).map(row => row.skill_id as string))];
+      const skillResult = skillIds.length
+        ? await client.from('skills').select('id,title').in('id', skillIds)
+        : { data: [], error: null };
+      if (skillResult.error) throw skillResult.error;
+
+      if (version !== this.reviewsLoadVersion || userId !== this.auth.authUser()?.id) return;
+
+      const profiles = new Map((profileResult.data ?? []).map(row => [row.id as string, row]));
+      const sessions = new Map(sessionRows.map(row => [row.id, row.request_id]));
+      const requests = new Map((requestResult.data ?? []).map(row => [row.id as string, row.skill_id as string]));
+      const skills = new Map((skillResult.data ?? []).map(row => [row.id as string, row.title as string]));
+      this.reviewsSignal.set(rows.map(row => {
+        const author = profiles.get(row.author_id);
+        const requestId = sessions.get(row.session_id);
+        const skillId = requestId ? requests.get(requestId) : undefined;
+        return {
+          id: row.id,
+          sessionId: row.session_id,
+          authorId: row.author_id,
+          authorName: author?.display_name ?? 'Miembro de TimeBank',
+          authorAvatar: this.avatarUrl(author?.avatar_path as string | null | undefined),
+          recipientId: row.recipient_id,
+          recipientName: this.auth.currentUser()?.name ?? 'Miembro de TimeBank',
+          skillTitle: skillId ? skills.get(skillId) ?? 'Intercambio de habilidades' : 'Intercambio de habilidades',
+          rating: Number(row.rating),
+          comment: row.comment,
+          createdAt: row.created_at
+        };
+      }));
+    } catch {
+      if (version === this.reviewsLoadVersion && userId === this.auth.authUser()?.id) {
+        this.toast.danger('No se pudieron cargar las reseñas recibidas. Inténtalo de nuevo.');
+      }
+    } finally {
+      if (version === this.reviewsLoadVersion) this.reviewsLoadingSignal.set(false);
+    }
+  }
+
   async loadRequests(): Promise<void> {
     const version = ++this.requestsLoadVersion;
     const userId = this.auth.authUser()?.id;
@@ -139,14 +329,19 @@ export class ExchangeService {
     if (!userId || !client) {
       this.requestsSignal.set([]);
       this.sessionsSignal.set([]);
+      this.walletLoadVersion++;
+      this.reviewsLoadVersion++;
+      this.activitySignal.set([]);
+      this.reservedBalanceSignal.set(0);
       this.reviewsSignal.set([]);
+      this.walletLoadingSignal.set(false);
+      this.reviewsLoadingSignal.set(false);
       this.requestsLoadingSignal.set(false);
       return;
     }
 
     this.requestsSignal.set([]);
     this.sessionsSignal.set([]);
-    this.reviewsSignal.set([]);
     this.requestsLoadingSignal.set(true);
     try {
       const { data, error } = await client.from('session_requests')
@@ -264,7 +459,7 @@ export class ExchangeService {
         p_new_start_at: null
       });
       if (error) throw error;
-      await this.loadRequests();
+      await Promise.all([this.loadRequests(), ...(action === 'accept' ? [this.auth.reloadAuthenticatedUser()] : [])]);
       this.toast.success(action === 'accept' ? 'Solicitud aceptada y sesión agendada.' : 'Solicitud rechazada.');
     } catch (error) {
       this.toast.danger(this.requestErrorMessage(error));
@@ -278,7 +473,7 @@ export class ExchangeService {
         p_reason: null
       });
       if (error) throw error;
-      await this.loadRequests();
+      await Promise.all([this.loadRequests(), this.auth.reloadAuthenticatedUser()]);
       this.toast.info('Solicitud cancelada.');
     } catch (error) {
       this.toast.danger(this.requestErrorMessage(error));
@@ -312,7 +507,7 @@ export class ExchangeService {
     try {
       const { error } = await this.supabase.requireClient().rpc('accept_rescheduled_request', { p_request_id: id });
       if (error) throw error;
-      await this.loadRequests();
+      await Promise.all([this.loadRequests(), this.auth.reloadAuthenticatedUser()]);
       this.toast.success('Horario aceptado. La sesión ya está agendada.');
     } catch (error) {
       this.toast.danger(this.requestErrorMessage(error));
@@ -378,15 +573,26 @@ export class ExchangeService {
     }
   }
 
-  submitReview(sessionId: string, rating: number, comment: string): void {
+  async submitReview(sessionId: string, rating: number, comment: string): Promise<void> {
     const session = this.sessionsSignal().find(item => item.id === sessionId);
-    const user = this.auth.currentUser();
-    if (!session || !user || rating < 1 || rating > 5 || session.status !== 'completed' || session.reviewSubmitted) return;
-    const partner = this.partnerFor(session);
-    const partnerId = session.requesterId === this.currentUserId ? session.providerId : session.requesterId;
-    this.reviewsSignal.update(items => [{ id: `review-${Date.now()}`, sessionId, authorId: user.id, authorName: user.name, authorAvatar: user.avatar, recipientId: partnerId, recipientName: partner.name, skillTitle: session.skillTitle, rating, comment: comment.trim(), createdAt: new Date().toISOString() }, ...items]);
-    this.sessionsSignal.update(items => items.map(item => item.id === sessionId ? { ...item, reviewSubmitted: true } : item));
-    this.toast.success('Reseña publicada. Gracias por compartir tu experiencia.');
+    const text = comment.trim();
+    if (!session || !this.auth.authUser() || rating < 1 || rating > 5 || session.status !== 'completed' || session.reviewSubmitted) return;
+    if (text.length > 2000) { this.toast.warning('La reseña no puede superar los 2000 caracteres.'); return; }
+    try {
+      const { error } = await this.supabase.requireClient().rpc('submit_review', {
+        p_session_id: sessionId,
+        p_rating: rating,
+        p_comment: text
+      });
+      if (error) throw error;
+      await Promise.all([this.loadReviews(), this.loadRequests(), this.auth.reloadAuthenticatedUser()]);
+      this.toast.success('Reseña publicada. Gracias por compartir tu experiencia.');
+    } catch (error) {
+      const message = (error instanceof Error ? error.message : String(error ?? '')).toLowerCase();
+      if (message.includes('duplicate key')) this.toast.warning('Ya publicaste una reseña para esta sesión.');
+      else if (message.includes('only participants of completed sessions')) this.toast.warning('Solo puedes reseñar una sesión completada en la que participaste.');
+      else this.toast.danger('No se pudo publicar la reseña. Inténtalo de nuevo.');
+    }
   }
 
   private avatarUrl(path: string | null | undefined): string {

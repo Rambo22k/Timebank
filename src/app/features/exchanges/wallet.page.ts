@@ -11,10 +11,13 @@ import { ExchangeService } from '../../core/services/exchange.service';
 
 @Component({ selector: 'app-time-wallet', standalone: true, imports: [CommonModule, DatePipe, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './wallet.page.html', styleUrls: ['./exchanges.page.scss'] })
 export class WalletPage {
-  constructor(public exchanges: ExchangeService) { addIcons({ timeOutline, trendingUpOutline, trendingDownOutline, giftOutline, calendarOutline, arrowForwardOutline }); }
-  get earned() { return this.exchanges.activity().filter(tx => tx.amount > 0 && tx.type !== 'welcome').reduce((sum, tx) => sum + tx.amount, 0); }
+  constructor(public exchanges: ExchangeService) {
+    addIcons({ timeOutline, trendingUpOutline, trendingDownOutline, giftOutline, calendarOutline, arrowForwardOutline });
+    void this.exchanges.loadWalletActivity();
+  }
+  get earned() { return this.exchanges.activity().filter(tx => tx.type === 'earned').reduce((sum, tx) => sum + tx.amount, 0); }
   get spent() { return Math.abs(this.exchanges.activity().filter(tx => tx.type === 'spent').reduce((sum, tx) => sum + tx.amount, 0)); }
-  get reserved() { return Math.abs(this.exchanges.activity().filter(tx => tx.type === 'reserved').reduce((sum, tx) => sum + tx.amount, 0)); }
+  get reserved() { return this.exchanges.reservedBalance(); }
   get activity() { return [...this.exchanges.activity()].sort((a,b) => b.date.localeCompare(a.date)); }
   icon(type: string) { return type === 'welcome' ? 'gift-outline' : type === 'earned' ? 'trending-up-outline' : type === 'refund' ? 'time-outline' : 'trending-down-outline'; }
 }

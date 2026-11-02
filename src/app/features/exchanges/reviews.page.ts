@@ -13,10 +13,23 @@ import { ExchangeService } from '../../core/services/exchange.service';
 export class ExchangeReviewsPage {
   ratings: Record<string, number> = {};
   comments: Record<string, string> = {};
+  submitting = new Set<string>();
   readonly stars = [1, 2, 3, 4, 5];
-  constructor(public exchanges: ExchangeService) { addIcons({ starOutline, star, chatbubbleEllipsesOutline, checkmarkCircleOutline }); }
+  constructor(public exchanges: ExchangeService) {
+    addIcons({ starOutline, star, chatbubbleEllipsesOutline, checkmarkCircleOutline });
+    void this.exchanges.loadRequests();
+    void this.exchanges.loadReviews();
+  }
   get pending() { return this.exchanges.pendingReviews(); }
   get received() { return this.exchanges.reviewsForCurrentUser(); }
   setRating(sessionId: string, rating: number) { this.ratings[sessionId] = rating; }
-  submit(sessionId: string) { this.exchanges.submitReview(sessionId, this.ratings[sessionId] || 0, this.comments[sessionId] || ''); }
+  async submit(sessionId: string) {
+    if (this.submitting.has(sessionId)) return;
+    this.submitting.add(sessionId);
+    try {
+      await this.exchanges.submitReview(sessionId, this.ratings[sessionId] || 0, this.comments[sessionId] || '');
+    } finally {
+      this.submitting.delete(sessionId);
+    }
+  }
 }
