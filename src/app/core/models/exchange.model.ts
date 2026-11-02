@@ -28,6 +28,7 @@ export interface ExchangeSession {
   partnerAvatar: string;
   skillTitle: string;
   startAt: string;
+  meetingUrl: string;
   hours: number;
   status: ExchangeSessionStatus;
   requesterConfirmed: boolean;
