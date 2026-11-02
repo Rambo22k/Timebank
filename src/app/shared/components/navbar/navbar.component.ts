@@ -15,10 +15,14 @@ import {
   calendarOutline,
   walletOutline,
   mailOutline,
-  starOutline
+  starOutline,
+  notificationsOutline,
+  checkmarkDoneOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { NotificationsService } from '../../../core/services/notifications.service';
+import { AppNotification } from '../../../core/models/notification.model';
 
 @Component({
   selector: 'app-navbar',
@@ -29,8 +33,14 @@ import { ToastService } from '../../../core/services/toast.service';
 })
 export class NavbarComponent {
   mobileMenuOpen = signal(false);
+  notificationPanelOpen = signal(false);
 
-  constructor(public authService: AuthService, private router: Router, private toastService: ToastService) {
+  constructor(
+    public authService: AuthService,
+    public notifications: NotificationsService,
+    private router: Router,
+    private toastService: ToastService
+  ) {
     addIcons({
       menuOutline,
       closeOutline,
@@ -43,7 +53,9 @@ export class NavbarComponent {
       calendarOutline,
       walletOutline,
       mailOutline,
-      starOutline
+      starOutline,
+      notificationsOutline,
+      checkmarkDoneOutline
     });
   }
 
@@ -53,6 +65,27 @@ export class NavbarComponent {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  toggleNotifications(): void {
+    this.notificationPanelOpen.update(open => !open);
+    if (this.notificationPanelOpen()) void this.notifications.refresh();
+  }
+
+  async openNotification(notification: AppNotification): Promise<void> {
+    if (!notification.readAt) await this.notifications.markRead(notification.id);
+    this.notificationPanelOpen.set(false);
+    this.closeMobileMenu();
+
+    const requestId = notification.data['request_id'];
+    const sessionId = notification.data['session_id'];
+    if (sessionId || notification.type === 'session_completed' || notification.type === 'review_received') {
+      await this.router.navigate(['/exchanges/sessions'], { queryParams: sessionId ? { session: sessionId } : undefined });
+    } else if (notification.type === 'credit_activity') {
+      await this.router.navigate(['/wallet']);
+    } else {
+      await this.router.navigate(['/exchanges/requests'], { queryParams: requestId ? { request: requestId } : undefined });
+    }
   }
 
   async onLogout(): Promise<void> {

@@ -48,6 +48,51 @@
           <span class="credits-unit">créditos</span>
         </div>
 
+        <div class="tb-notification-area">
+          <button class="tb-notification-button" type="button" (click)="toggleNotifications()"
+            [attr.aria-expanded]="notificationPanelOpen()" aria-label="Notificaciones">
+            <ion-icon name="notifications-outline"></ion-icon>
+            @if (notifications.unreadCount() > 0) {
+              <span class="tb-notification-badge">{{ notifications.unreadCount() > 9 ? '9+' : notifications.unreadCount() }}</span>
+            }
+          </button>
+          @if (notificationPanelOpen()) {
+            <section class="tb-notification-panel" aria-label="Notificaciones recientes">
+              <header class="tb-notification-header">
+                <div>
+                  <strong>Notificaciones</strong>
+                  <span>{{ notifications.unreadCount() }} sin leer</span>
+                </div>
+                @if (notifications.unreadCount() > 0) {
+                  <button type="button" class="tb-mark-all" (click)="notifications.markAllRead()">
+                    <ion-icon name="checkmark-done-outline"></ion-icon>
+                    Marcar leídas
+                  </button>
+                }
+              </header>
+              <div class="tb-notification-list">
+                @if (notifications.isLoading() && notifications.notifications().length === 0) {
+                  <p class="tb-notification-empty">Cargando notificaciones…</p>
+                } @else if (notifications.notifications().length === 0) {
+                  <p class="tb-notification-empty">Todavía no tienes notificaciones.</p>
+                } @else {
+                  @for (notification of notifications.notifications(); track notification.id) {
+                    <button type="button" class="tb-notification-item" [class.unread]="!notification.readAt"
+                      (click)="openNotification(notification)">
+                      <span class="tb-notification-dot"></span>
+                      <span class="tb-notification-copy">
+                        <strong>{{ notification.title }}</strong>
+                        <span>{{ notification.body }}</span>
+                        <time>{{ notification.createdAt | date:'short' }}</time>
+                      </span>
+                    </button>
+                  }
+                }
+              </div>
+            </section>
+          }
+        </div>
+
         <!-- User Quick Avatar -->
         <a routerLink="/profile" class="tb-user-mini" title="Ver mi perfil">
           <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="user-avatar-mini" />
