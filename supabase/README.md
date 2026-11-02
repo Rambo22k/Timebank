@@ -34,6 +34,8 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 
 Perfiles y roles, idiomas, categorías, habilidades ofrecidas y solicitadas, disponibilidad recurrente, solicitudes de sesiones y sesiones, prevención de solapamientos, cuentas de monedero, historial inmutable de transacciones y del libro mayor, reseñas y reputación, verificación de identidad, solicitudes de solidaridad y donaciones, chat privado, bloqueos de usuarios, reportes, notificaciones dentro de la aplicación, tokens de dispositivos para notificaciones push, historial de auditoría, indicadores de abuso, configuración de la aplicación, resumen público del fondo de solidaridad y políticas de Storage.
 
+La migración `20261102000000_timebank_demo_and_skill_fields.sql` ajusta el crédito de bienvenida a 5 y agrega a `skills` los campos de modalidad, etiquetas, nota de disponibilidad, ubicación y destacado que utiliza la interfaz. Si la migración anterior ya se aplicó al proyecto remoto, ejecuta `supabase db push` para aplicar este cambio incremental.
+
 ## Consideraciones de seguridad
 
 - Los perfiles exponen únicamente los campos públicos. La fecha de nacimiento, la aceptación de políticas y el estado de la cuenta se almacenan en `profile_private`.

@@ -11,7 +11,11 @@ import {
   logOutOutline,
   sparklesOutline,
   searchOutline,
-  layersOutline
+  layersOutline,
+  calendarOutline,
+  walletOutline,
+  mailOutline,
+  starOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -34,7 +38,11 @@ export class NavbarComponent {
       logOutOutline,
       sparklesOutline,
       searchOutline,
-      layersOutline
+      layersOutline,
+      calendarOutline,
+      walletOutline,
+      mailOutline,
+      starOutline
     });
   }
 

@@ -77,9 +77,16 @@ Inspirado en la marca oficial de TimeBank (el reloj abstracto, las manos entrela
 - **Filtros por Categoría:** Carrusel de botones de categorías con conteo de publicaciones activas.
 - **Filtros Adicionales:** Segmento de tipo (*Todas*, *Ofrecidas*, *Buscadas*), selector de modalidad (*Online*, *Presencial*, *Híbrido*) y ordenamiento (*Más recientes*, *Mejor calificación*, *Alfabético*).
 - **Feedback & Estados Vacíos:** Contador en vivo de resultados encontrados, botón para limpiar filtros y `<app-empty-state>` personalizado.
-- **Modal de Propuesta de Intercambio (`<app-exchange-modal>`):** Permite simular el envío de una propuesta de sesión de 1 hora, reconociendo explícitamente la integración con el módulo de Intercambios a cargo de Ernesto.
+- **Modal de Propuesta de Intercambio (`<app-exchange-modal>`):** Permite proponer una fecha, una duración en bloques de 15 minutos y un mensaje. La solicitud demo se muestra en el módulo de Intercambios.
 
-### F. Sistema Visual Compartido & Componentes
+### F. Intercambios y créditos (módulo demo de Ernesto)
+- **Solicitudes (`/exchanges/requests`):** Vistas de solicitudes recibidas y enviadas, con acciones para aceptar, rechazar, cancelar o proponer y aceptar otro horario.
+- **Sesiones (`/exchanges/sessions`):** Próximas sesiones e historial, confirmación de finalización por ambas partes y apertura de disputas demo.
+- **Billetera (`/wallet`):** Saldo disponible e historial demo de créditos de bienvenida, reservas, créditos ganados, gastos y devoluciones.
+- **Reseñas (`/exchanges/reviews`):** Reseñas pendientes y recibidas; permite publicar una calificación de 1 a 5 estrellas tras completar una sesión.
+- Las interacciones de este módulo usan estado en memoria. Se conectarán a Supabase después de integrar Auth.
+
+### G. Sistema Visual Compartido & Componentes
 - `NavbarComponent`: Navegación sticky responsive y drawer móvil.
 - `FooterComponent`: Pie de página editorial con arquitectura e información.
 - `SkillCardComponent`: Tarjeta de habilidad con tags, modalidad, valor de tiempo y autor.
@@ -103,6 +110,7 @@ Timebank/
 │   │   ├── features/
 │   │   │   ├── auth/            # Login, Register, Forgot Password
 │   │   │   ├── discovery/       # Búsqueda interactiva y modal de intercambio
+│   │   │   ├── exchanges/       # Solicitudes, sesiones, billetera e historial de reseñas
 │   │   │   ├── landing/         # Landing page pública editorial
 │   │   │   ├── profile/         # Perfil de usuario y modal de edición
 │   │   │   └── skills/          # Gestión CRUD de habilidades y modales
@@ -156,9 +164,10 @@ Abre [http://localhost:4200](http://localhost:4200) (o el puerto indicado en la 
 
 ---
 
-## 6. Delimitación de Responsabilidad (Foco Exclusivo en Frontend)
+## 6. Delimitación de Responsabilidad (Frontend demo; Supabase pendiente)
 
 Conforme a las especificaciones del encargo:
-- **No se implementó backend, bases de datos ni servicios en la nube (como Supabase o Firebase).**
-- Todo el ciclo de vida, autenticación, creación de habilidades, edición de perfiles, conteos de créditos y filtros funcionan de manera interactiva **en memoria mediante estado local y servicios reactivos de Angular**.
-- Los módulos de agendamiento detallado de sesiones, libro mayor de créditos, historial de transacciones y disputas corresponden a la entrega de Ernesto.
+- **La aplicación todavía no está conectada al backend de Supabase.** El esquema SQL vive en `supabase/migrations/`, pero los servicios Angular usan datos de demostración en memoria.
+- Todo el ciclo de vida, autenticación, creación de habilidades, edición de perfiles, solicitudes, sesiones, movimientos demo de créditos y filtros funcionan de manera interactiva **en memoria mediante estado local y servicios reactivos de Angular**.
+- Las pantallas de solicitudes, sesiones, billetera, historial, disputas y reseñas ya están implementadas como demo. Sus operaciones reales dependen de Supabase Auth y de las funciones RPC descritas en `supabase/README.md`.
+- El saldo de bienvenida de la experiencia demo es de **5 créditos**. La migración incremental de Supabase actualiza la configuración para que las cuentas nuevas reciban 5 créditos cuando se aplique al proyecto remoto.

@@ -22,6 +22,14 @@
           <ion-icon name="layers-outline"></ion-icon>
           Mis Habilidades
         </a>
+        <a routerLink="/exchanges/requests" routerLinkActive="active" class="tb-nav-link">
+          <ion-icon name="mail-outline"></ion-icon>
+          Intercambios
+        </a>
+        <a routerLink="/wallet" routerLinkActive="active" class="tb-nav-link">
+          <ion-icon name="wallet-outline"></ion-icon>
+          Billetera
+        </a>
         <a routerLink="/profile" routerLinkActive="active" class="tb-nav-link">
           <ion-icon name="person-circle-outline"></ion-icon>
           Mi Perfil
@@ -96,6 +104,22 @@
             <a routerLink="/skills" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="layers-outline"></ion-icon>
               Mis Habilidades
+            </a>
+            <a routerLink="/exchanges/requests" (click)="closeMobileMenu()" class="mobile-link">
+              <ion-icon name="mail-outline"></ion-icon>
+              Intercambios y solicitudes
+            </a>
+            <a routerLink="/exchanges/sessions" (click)="closeMobileMenu()" class="mobile-link">
+              <ion-icon name="calendar-outline"></ion-icon>
+              Mis sesiones
+            </a>
+            <a routerLink="/wallet" (click)="closeMobileMenu()" class="mobile-link">
+              <ion-icon name="wallet-outline"></ion-icon>
+              Billetera e historial
+            </a>
+            <a routerLink="/exchanges/reviews" (click)="closeMobileMenu()" class="mobile-link">
+              <ion-icon name="star-outline"></ion-icon>
+              Reseñas
             </a>
             <a routerLink="/profile" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="person-circle-outline"></ion-icon>

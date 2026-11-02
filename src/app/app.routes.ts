@@ -20,6 +20,30 @@ export const routes: Routes = [
     title: 'Mis Habilidades — TimeBank'
   },
   {
+    path: 'exchanges/requests',
+    loadComponent: () =>
+      import('./features/exchanges/requests.page').then(m => m.ExchangeRequestsPage),
+    title: 'Solicitudes de Intercambio — TimeBank'
+  },
+  {
+    path: 'exchanges/sessions',
+    loadComponent: () =>
+      import('./features/exchanges/sessions.page').then(m => m.ExchangeSessionsPage),
+    title: 'Mis Sesiones — TimeBank'
+  },
+  {
+    path: 'wallet',
+    loadComponent: () =>
+      import('./features/exchanges/wallet.page').then(m => m.WalletPage),
+    title: 'Billetera de Tiempo — TimeBank'
+  },
+  {
+    path: 'exchanges/reviews',
+    loadComponent: () =>
+      import('./features/exchanges/reviews.page').then(m => m.ExchangeReviewsPage),
+    title: 'Reseñas — TimeBank'
+  },
+  {
     path: 'profile',
     loadComponent: () =>
       import('./features/profile/profile.page').then(m => m.ProfilePage),

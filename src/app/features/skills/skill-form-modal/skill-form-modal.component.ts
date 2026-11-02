@@ -7,6 +7,7 @@ import { closeOutline, checkmarkOutline, sparklesOutline, swapHorizontalOutline 
 import { Skill, SkillType, SkillLevel, SkillModality } from '../../../core/models/skill.model';
 import { SkillCategory } from '../../../core/models/category.model';
 import { MOCK_CATEGORIES } from '../../../core/mock-data/categories.mock';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-skill-form-modal',
@@ -30,7 +31,7 @@ export class SkillFormModalComponent implements OnChanges {
   levels: SkillLevel[] = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
   modalities: SkillModality[] = ['Online', 'Presencial', 'Híbrido'];
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private authService: AuthService) {
     addIcons({ closeOutline, checkmarkOutline, sparklesOutline, swapHorizontalOutline });
 
     this.form = this.fb.group({
@@ -92,14 +93,19 @@ export class SkillFormModalComponent implements OnChanges {
       const tags = formVal.tagsInput
         ? formVal.tagsInput.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0)
         : [];
+      const currentUser = this.authService.currentUser();
+      if (!currentUser) {
+        this.isSubmitting = false;
+        return;
+      }
 
       this.save.emit({
-        userId: this.skillToEdit ? this.skillToEdit.userId : 'user-enyel',
-        authorName: this.skillToEdit ? this.skillToEdit.authorName : 'Enyel Reyes',
-        authorAvatar: this.skillToEdit ? this.skillToEdit.authorAvatar : 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-        authorHeadline: this.skillToEdit ? this.skillToEdit.authorHeadline : 'Senior Frontend Developer & UI Designer',
-        authorLocation: 'Santo Domingo, Rep. Dom.',
-        authorRating: 4.9,
+        userId: currentUser.id,
+        authorName: currentUser.name,
+        authorAvatar: currentUser.avatar,
+        authorHeadline: currentUser.headline,
+        authorLocation: currentUser.location,
+        authorRating: currentUser.rating,
         type: formVal.type,
         title: formVal.title.trim(),
         categoryId: selectedCat.id,

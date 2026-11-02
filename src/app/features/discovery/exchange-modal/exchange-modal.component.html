@@ -25,8 +25,8 @@
         <div class="time-cost-badge">
           <ion-icon name="time-outline"></ion-icon>
           <div class="cost-texts">
-            <span class="cost-num">1 Crédito</span>
-            <span class="cost-label">1 Hora de sesión</span>
+            <span class="cost-num">{{ requestedHours }} {{ requestedHours === 1 ? 'crédito' : 'créditos' }}</span>
+            <span class="cost-label">{{ requestedHours }} {{ requestedHours === 1 ? 'hora' : 'horas' }} de sesión</span>
           </div>
         </div>
       </div>
@@ -39,6 +39,19 @@
 
       <!-- Proposal Message -->
       <div class="tb-form-group">
+        <label class="tb-label" for="exchange-start">Fecha y hora propuestas</label>
+        <input id="exchange-start" class="tb-input" type="datetime-local" [(ngModel)]="proposedStartAt" />
+      </div>
+
+      <div class="tb-form-group">
+        <label class="tb-label" for="exchange-duration">Duración de la sesión</label>
+        <select id="exchange-duration" class="tb-select" [(ngModel)]="requestedHours">
+          @for (duration of durationOptions; track duration) { <option [ngValue]="duration">{{ duration }} {{ duration === 1 ? 'hora' : 'horas' }}</option> }
+        </select>
+        <p class="tb-help-text">La duración debe cubrirse con tu saldo actual. Se permiten bloques de 15 minutos.</p>
+      </div>
+
+      <div class="tb-form-group">
         <label class="tb-label" for="exchange-msg">Mensaje inicial para {{ skill.authorName }}</label>
         <textarea
           id="exchange-msg"
@@ -48,23 +61,16 @@
         ></textarea>
       </div>
 
-      <!-- Division of Labor / Scope Note -->
-      <div class="integration-note">
-        <ion-icon name="information-circle-outline"></ion-icon>
-        <div class="note-content">
-          <strong>Arquitectura TimeBank:</strong>
-          <span>El agendamiento de calendarios, confirmación mutua de sesiones, billetera de créditos y calificaciones son gestionados por el módulo de Intercambios a cargo de Ernesto.</span>
-        </div>
-      </div>
+      @if (proposalError) { <p class="tb-error-text" role="alert"><ion-icon name="information-circle-outline"></ion-icon>{{ proposalError }}</p> }
 
       <!-- Actions -->
       <div class="modal-footer">
         <button class="tb-btn tb-btn-outline" (click)="onClose()">
           Cancelar
         </button>
-        <button class="tb-btn tb-btn-accent" (click)="onSendProposal()" [disabled]="isSubmitting">
+        <button class="tb-btn tb-btn-accent" (click)="onSendProposal()" [disabled]="isSubmitting || !proposedMessage.trim()">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
-          {{ isSubmitting ? 'Enviando...' : 'Confirmar Propuesta (Demo)' }}
+          {{ isSubmitting ? 'Enviando...' : 'Enviar solicitud' }}
         </button>
       </div>
     </div>

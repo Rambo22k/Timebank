@@ -39,7 +39,7 @@ export class AuthService {
             bio: 'Nuevo usuario explorando el intercambio de habilidades.',
             avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
             location: 'Comunidad Global',
-            timeCredits: 5, // Bienvenida con 5 créditos de tiempo
+            timeCredits: 5, // Demo welcome balance
             hoursGiven: 0,
             hoursReceived: 0,
             completedExchanges: 0,
@@ -69,7 +69,7 @@ export class AuthService {
           bio: 'Listo para compartir conocimientos y aprender nuevas habilidades con la comunidad.',
           avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
           location: 'República Dominicana / Online',
-          timeCredits: 5, // Bonificación inicial de 5 créditos
+          timeCredits: 5, // Demo welcome balance
           hoursGiven: 0,
           hoursReceived: 0,
           completedExchanges: 0,
@@ -100,7 +100,7 @@ export class AuthService {
     }
   }
 
-  updateCurrentUserProfile(updates: Partial<UserProfile>): void {
+  updateCurrentUserProfile(updates: Partial<UserProfile>, notify = true): void {
     const current = this.currentUserSignal();
     if (!current) return;
 
@@ -109,6 +109,6 @@ export class AuthService {
     this.usersSignal.update(users =>
       users.map(u => (u.id === current.id ? updated : u))
     );
-    this.toastService.success('Perfil actualizado correctamente en memoria.');
+    if (notify) this.toastService.success('Perfil actualizado correctamente en memoria.');
   }
 }

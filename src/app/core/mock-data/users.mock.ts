@@ -9,7 +9,7 @@ export const MOCK_USERS: UserProfile[] = [
     bio: 'Apasionado por la arquitectura frontend, Angular, Ionic y el diseño de interfaces limpias, memorables y funcionales. Creo en una economía colaborativa donde compartir conocimiento sea tan natural como respirar.',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
     location: 'Santo Domingo, República Dominicana',
-    timeCredits: 6,
+    timeCredits: 5,
     hoursGiven: 14,
     hoursReceived: 8,
     completedExchanges: 11,
