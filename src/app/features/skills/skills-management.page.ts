@@ -49,6 +49,7 @@ export class SkillsManagementPage {
 
   // Modals state
   isFormModalOpen = false;
+  isSavingSkill = false;
   skillToEdit: Skill | null = null;
 
   isDetailModalOpen = false;
@@ -132,13 +133,16 @@ export class SkillsManagementPage {
     this.skillToEdit = null;
   }
 
-  onSaveSkill(skillData: Omit<Skill, 'id' | 'createdAt'>): void {
-    if (this.skillToEdit) {
-      this.skillsService.updateSkill(this.skillToEdit.id, skillData);
-    } else {
-      this.skillsService.addSkill(skillData);
+  async onSaveSkill(skillData: Omit<Skill, 'id' | 'createdAt'>): Promise<void> {
+    this.isSavingSkill = true;
+    try {
+      const saved = this.skillToEdit
+        ? await this.skillsService.updateSkill(this.skillToEdit.id, skillData)
+        : await this.skillsService.addSkill(skillData);
+      if (saved) this.onCloseForm();
+    } finally {
+      this.isSavingSkill = false;
     }
-    this.onCloseForm();
   }
 
   onViewDetail(skill: Skill): void {
@@ -156,11 +160,13 @@ export class SkillsManagementPage {
     this.isDeleteModalOpen = true;
   }
 
-  executeDelete(): void {
+  async executeDelete(): Promise<void> {
     if (this.skillToDelete) {
-      this.skillsService.deleteSkill(this.skillToDelete.id);
-      this.skillToDelete = null;
-      this.isDeleteModalOpen = false;
+      const deleted = await this.skillsService.deleteSkill(this.skillToDelete.id);
+      if (deleted) {
+        this.skillToDelete = null;
+        this.isDeleteModalOpen = false;
+      }
     }
   }
 

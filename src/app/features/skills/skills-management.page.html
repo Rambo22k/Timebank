@@ -123,6 +123,7 @@
   <app-skill-form-modal
     [isOpen]="isFormModalOpen"
     [skillToEdit]="skillToEdit"
+    [isSubmitting]="isSavingSkill"
     [defaultType]="selectedFilter() === 'wanted' ? 'wanted' : 'offered'"
     (close)="onCloseForm()"
     (save)="onSaveSkill($event)"

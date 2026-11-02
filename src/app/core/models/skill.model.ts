@@ -1,5 +1,5 @@
 export type SkillType = 'offered' | 'wanted';
-export type SkillLevel = 'Principiante' | 'Intermedio' | 'Avanzado' | 'Experto';
+export type SkillLevel = 'Principiante' | 'Intermedio' | 'Avanzado' | 'Experto' | 'Cualquiera';
 export type SkillModality = 'Online' | 'Presencial' | 'Híbrido';
 
 export interface Skill {
@@ -23,4 +23,5 @@ export interface Skill {
   availability: string;
   createdAt: string;
   featured?: boolean;
+  status?: 'active' | 'hidden' | 'pending_review' | 'rejected' | 'removed';
 }

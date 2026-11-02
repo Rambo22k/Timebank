@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -6,8 +6,8 @@ import { addIcons } from 'ionicons';
 import { closeOutline, checkmarkOutline, sparklesOutline, swapHorizontalOutline } from 'ionicons/icons';
 import { Skill, SkillType, SkillLevel, SkillModality } from '../../../core/models/skill.model';
 import { SkillCategory } from '../../../core/models/category.model';
-import { MOCK_CATEGORIES } from '../../../core/mock-data/categories.mock';
 import { AuthService } from '../../../core/services/auth.service';
+import { SkillsService } from '../../../core/services/skills.service';
 
 @Component({
   selector: 'app-skill-form-modal',
@@ -20,29 +20,36 @@ export class SkillFormModalComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() skillToEdit: Skill | null = null;
   @Input() defaultType: SkillType = 'offered';
+  @Input() isSubmitting = false;
 
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<Omit<Skill, 'id' | 'createdAt'>>();
 
   form: FormGroup;
-  categories: SkillCategory[] = MOCK_CATEGORIES;
-  isSubmitting = false;
+  get categories(): SkillCategory[] { return this.skillsService.categories(); }
 
-  levels: SkillLevel[] = ['Principiante', 'Intermedio', 'Avanzado', 'Experto'];
+  levels: SkillLevel[] = ['Cualquiera', 'Principiante', 'Intermedio', 'Avanzado', 'Experto'];
   modalities: SkillModality[] = ['Online', 'Presencial', 'Híbrido'];
 
-  constructor(private fb: FormBuilder, private authService: AuthService) {
+  constructor(private fb: FormBuilder, private authService: AuthService, private skillsService: SkillsService) {
     addIcons({ closeOutline, checkmarkOutline, sparklesOutline, swapHorizontalOutline });
 
     this.form = this.fb.group({
       type: ['offered', Validators.required],
       title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(90)]],
-      categoryId: [this.categories[0].id, Validators.required],
+      categoryId: [this.categories[0]?.id ?? '', Validators.required],
       level: ['Intermedio', Validators.required],
       modality: ['Online', Validators.required],
       availability: ['2 horas / semana', [Validators.required, Validators.maxLength(50)]],
       description: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(500)]],
       tagsInput: ['']
+    });
+
+    effect(() => {
+      const firstCategoryId = this.skillsService.categories()[0]?.id;
+      if (firstCategoryId && !this.form.get('categoryId')?.value) {
+        this.form.patchValue({ categoryId: firstCategoryId }, { emitEvent: false });
+      }
     });
   }
 
@@ -63,7 +70,7 @@ export class SkillFormModalComponent implements OnChanges {
         this.form.reset({
           type: this.defaultType,
           title: '',
-          categoryId: this.categories[0].id,
+          categoryId: this.categories[0]?.id ?? '',
           level: 'Intermedio',
           modality: 'Online',
           availability: '2 horas / semana',
@@ -84,22 +91,15 @@ export class SkillFormModalComponent implements OnChanges {
       return;
     }
 
-    this.isSubmitting = true;
+    const formVal = this.form.value;
+    const selectedCat = this.categories.find(category => category.id === formVal.categoryId);
+    const currentUser = this.authService.currentUser();
+    if (!currentUser || !selectedCat) return;
+    const tags = formVal.tagsInput
+      ? formVal.tagsInput.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
+      : [];
 
-    // Simulate instant client submit
-    setTimeout(() => {
-      const formVal = this.form.value;
-      const selectedCat = this.categories.find(c => c.id === formVal.categoryId) || this.categories[0];
-      const tags = formVal.tagsInput
-        ? formVal.tagsInput.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0)
-        : [];
-      const currentUser = this.authService.currentUser();
-      if (!currentUser) {
-        this.isSubmitting = false;
-        return;
-      }
-
-      this.save.emit({
+    this.save.emit({
         userId: currentUser.id,
         authorName: currentUser.name,
         authorAvatar: currentUser.avatar,
@@ -118,9 +118,6 @@ export class SkillFormModalComponent implements OnChanges {
         location: formVal.modality === 'Online' ? 'Remoto' : 'Presencial',
         availability: formVal.availability.trim()
       });
-
-      this.isSubmitting = false;
-    }, 300);
   }
 
   onClose(): void {

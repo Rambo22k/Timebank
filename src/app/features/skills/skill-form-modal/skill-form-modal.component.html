@@ -59,6 +59,9 @@
           <div class="tb-form-group">
             <label class="tb-label" for="skill-cat">Categoría *</label>
             <select id="skill-cat" class="tb-select" formControlName="categoryId">
+              @if (!categories.length) {
+                <option value="" disabled>Cargando categorías…</option>
+              }
               @for (cat of categories; track cat.id) {
                 <option [value]="cat.id">{{ cat.name }}</option>
               }
@@ -131,7 +134,7 @@
           <button type="button" class="tb-btn tb-btn-outline" (click)="onClose()">
             Cancelar
           </button>
-          <button type="submit" class="tb-btn tb-btn-primary" [disabled]="isSubmitting">
+          <button type="submit" class="tb-btn tb-btn-primary" [disabled]="isSubmitting || !categories.length">
             <ion-icon name="checkmark-outline"></ion-icon>
             {{ isSubmitting ? 'Guardando...' : (skillToEdit ? 'Guardar Cambios' : 'Publicar Habilidad') }}
           </button>

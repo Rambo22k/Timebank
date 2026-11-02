@@ -64,6 +64,7 @@ export class ProfilePage {
 
   skillToEdit: Skill | null = null;
   isSkillFormOpen = false;
+  isSavingSkill = false;
 
   skillToDelete: Skill | null = null;
   isDeleteModalOpen = false;
@@ -157,13 +158,16 @@ export class ProfilePage {
     this.skillToEdit = null;
   }
 
-  onSaveSkill(skillData: Omit<Skill, 'id' | 'createdAt'>): void {
-    if (this.skillToEdit) {
-      this.skillsService.updateSkill(this.skillToEdit.id, skillData);
-    } else {
-      this.skillsService.addSkill(skillData);
+  async onSaveSkill(skillData: Omit<Skill, 'id' | 'createdAt'>): Promise<void> {
+    this.isSavingSkill = true;
+    try {
+      const saved = this.skillToEdit
+        ? await this.skillsService.updateSkill(this.skillToEdit.id, skillData)
+        : await this.skillsService.addSkill(skillData);
+      if (saved) this.onCloseSkillForm();
+    } finally {
+      this.isSavingSkill = false;
     }
-    this.onCloseSkillForm();
   }
 
   onConfirmDeleteSkill(skill: Skill): void {
@@ -171,11 +175,13 @@ export class ProfilePage {
     this.isDeleteModalOpen = true;
   }
 
-  executeDeleteSkill(): void {
+  async executeDeleteSkill(): Promise<void> {
     if (this.skillToDelete) {
-      this.skillsService.deleteSkill(this.skillToDelete.id);
-      this.skillToDelete = null;
-      this.isDeleteModalOpen = false;
+      const deleted = await this.skillsService.deleteSkill(this.skillToDelete.id);
+      if (deleted) {
+        this.skillToDelete = null;
+        this.isDeleteModalOpen = false;
+      }
     }
   }
 

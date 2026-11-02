@@ -221,6 +221,7 @@
   <app-skill-form-modal
     [isOpen]="isSkillFormOpen"
     [skillToEdit]="skillToEdit"
+    [isSubmitting]="isSavingSkill"
     [defaultType]="activeTab()"
     (close)="onCloseSkillForm()"
     (save)="onSaveSkill($event)"
