@@ -48,9 +48,10 @@ Inspirado en la marca oficial de TimeBank (el reloj abstracto, las manos entrela
 - **CTA Final & Footer:** Cierre con acceso rápido y créditos de autoría.
 
 ### B. Registro, Inicio de Sesión y Recuperación (`/auth/*`)
-- **Inicio de Sesión (`/auth/login`):** Validación reactiva, botón de ver/ocultar contraseña, y **selector de acceso rápido con 3 perfiles demo precargados** (Enyel, Elena, Carlos) para probar sin teclear.
-- **Registro (`/auth/register`):** Campos validados de nombre, correo, contraseña, confirmación de coincidencia y términos. Asigna automáticamente **5 créditos de tiempo de bienvenida**.
-- **Recuperación de Contraseña (`/auth/forgot-password`):** Validación y simulación en cliente de envío de correo y código OTP temporal (`849-210`).
+- **Inicio de Sesión (`/auth/login`):** Autenticación real por correo y contraseña o Google, restauración de sesión persistente y protección de rutas privadas.
+- **Registro (`/auth/register`):** Nombre, correo, fecha de nacimiento (mínimo 18 años), contraseña y aceptación explícita de términos y privacidad. Usa la confirmación de correo de Supabase.
+- **Recuperación (`/auth/forgot-password` y `/auth/update-password`):** Enlace real por correo y formulario para guardar una contraseña nueva.
+- **Confirmación y alta (`/auth/callback`, `/auth/complete-profile`):** Procesa el retorno de Auth y solicita los datos privados pendientes para cuentas que llegan desde Google.
 
 ### C. Perfiles de Usuario (`/profile` y `/profile/:id`)
 - **Presentación Personal:** Portada, avatar con indicador de estado activo, nombre, titular profesional, ubicación y fecha de ingreso.
@@ -147,6 +148,10 @@ cd c:\Users\Rambo\Documents\Timebank
 ```bash
 npm install
 ```
+
+El cliente de Supabase se configura en `src/environments/environment.ts` y `src/environments/environment.prod.ts` mediante la URL del proyecto y su clave pública `anon`/publishable. Nunca uses una clave `service_role` o `secret` en la aplicación web.
+
+En Supabase Auth, habilita Email y Google. En **Authentication → URL Configuration**, permite `http://localhost:4200/auth/callback` y `http://localhost:4200/auth/update-password`, además de las rutas equivalentes del dominio publicado. La URL de sitio local para desarrollo es `http://localhost:4200`.
 
 ### Paso 3: Iniciar el Servidor de Desarrollo
 Puedes iniciar la aplicación usando Angular CLI o Ionic CLI:

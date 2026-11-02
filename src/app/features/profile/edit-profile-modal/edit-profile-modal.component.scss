@@ -122,6 +122,31 @@
       }
     }
   }
+
+  .avatar-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    cursor: pointer;
+
+    input[type='file'] {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+  }
+
+  .avatar-file-name {
+    display: inline-block;
+    margin: 14px 0 0 10px;
+    color: var(--tb-text-secondary);
+    font-size: 0.8rem;
+    overflow-wrap: anywhere;
+  }
 }
 
 .modal-footer {

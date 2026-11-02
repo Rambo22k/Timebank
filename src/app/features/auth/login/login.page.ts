@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
@@ -13,13 +13,11 @@ import {
   sparklesOutline,
   shieldCheckmarkOutline,
   timeOutline,
-  personOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { MOCK_USERS } from '../../../core/mock-data/users.mock';
 
 @Component({
   selector: 'app-login',
@@ -40,13 +38,16 @@ export class LoginPage {
   form: FormGroup;
   showPassword = false;
   isLoading = false;
-  demoUsers = MOCK_USERS;
+  isGoogleLoading = false;
+  isResendingConfirmation = false;
+  emailConfirmationNotice = '';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private toastService: ToastService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     addIcons({
       mailOutline,
@@ -56,24 +57,18 @@ export class LoginPage {
       logInOutline,
       sparklesOutline,
       shieldCheckmarkOutline,
-      timeOutline,
-      personOutline
+      timeOutline
     });
 
     this.form = this.fb.group({
-      email: ['enyel@timebank.app', [Validators.required, Validators.email]],
-      password: ['12345678', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [true]
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
+    this.emailConfirmationNotice = this.route.snapshot.queryParamMap.get('emailConfirmation') ?? '';
   }
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
-  }
-
-  quickLoginAs(email: string): void {
-    this.form.patchValue({ email, password: 'password123' });
-    this.onSubmit();
   }
 
   async onSubmit(): Promise<void> {
@@ -87,12 +82,38 @@ export class LoginPage {
     const { email, password } = this.form.value;
 
     try {
-      const success = await this.authService.login(email, password);
-      if (success) {
-        this.router.navigate(['/profile']);
-      }
+      await this.authService.login(email, password);
+      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+      const destination = this.authService.needsProfileCompletion()
+        ? '/auth/complete-profile'
+        : returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/profile';
+      await this.router.navigateByUrl(destination);
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo iniciar sesión.');
     } finally {
       this.isLoading = false;
+    }
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    this.isGoogleLoading = true;
+    try {
+      await this.authService.signInWithGoogle();
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo iniciar con Google.');
+      this.isGoogleLoading = false;
+    }
+  }
+
+  async resendConfirmation(): Promise<void> {
+    if (!this.emailConfirmationNotice) return;
+    this.isResendingConfirmation = true;
+    try {
+      await this.authService.resendSignupConfirmation(this.emailConfirmationNotice);
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo reenviar el correo.');
+    } finally {
+      this.isResendingConfirmation = false;
     }
   }
 }

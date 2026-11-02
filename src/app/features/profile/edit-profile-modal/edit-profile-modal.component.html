@@ -14,7 +14,7 @@
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <!-- Avatar Selector Section -->
         <div class="avatar-selection-section">
-          <label class="tb-label">Selecciona tu avatar</label>
+          <label class="tb-label">Foto de perfil</label>
           <div class="avatars-row">
             @for (av of avatarOptions; track av) {
               <button
@@ -32,6 +32,17 @@
               </button>
             }
           </div>
+          <label class="tb-btn tb-btn-outline avatar-upload-btn">
+            <ion-icon name="camera-outline"></ion-icon>
+            Subir foto
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarFileSelected($event)" />
+          </label>
+          @if (selectedAvatarFile) {
+            <span class="avatar-file-name">{{ selectedAvatarFile.name }}</span>
+          }
+          @if (fileError) {
+            <span class="tb-error-text">{{ fileError }}</span>
+          }
         </div>
 
         <!-- Name -->
@@ -73,7 +84,7 @@
 
         <!-- Bio -->
         <div class="tb-form-group">
-          <label class="tb-label" for="user-bio">Biografía / Acerca de mí *</label>
+            <label class="tb-label" for="user-bio">Biografía / Acerca de mí</label>
           <textarea
             id="user-bio"
             class="tb-textarea"
@@ -85,12 +96,12 @@
 
         <!-- Actions -->
         <div class="modal-footer">
-          <button type="button" class="tb-btn tb-btn-outline" (click)="onClose()">
+          <button type="button" class="tb-btn tb-btn-outline" [disabled]="isSaving" (click)="onClose()">
             Cancelar
           </button>
-          <button type="submit" class="tb-btn tb-btn-primary">
-            <ion-icon name="checkmark-outline"></ion-icon>
-            Guardar Cambios
+          <button type="submit" class="tb-btn tb-btn-primary" [disabled]="isSaving">
+            <ion-icon [name]="isSaving ? 'time-outline' : 'checkmark-outline'"></ion-icon>
+            {{ isSaving ? 'Guardando…' : 'Guardar Cambios' }}
           </button>
         </div>
       </form>

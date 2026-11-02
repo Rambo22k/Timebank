@@ -1,114 +1,279 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
+import { AuthError, User } from '@supabase/supabase-js';
 import { UserProfile } from '../models/user.model';
-import { MOCK_USERS } from '../mock-data/users.mock';
+import { SupabaseService } from './supabase.service';
 import { ToastService } from './toast.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface RegisterCredentials {
+  name: string;
+  email: string;
+  password: string;
+  birthDate: string;
+}
+
+interface PrivateProfile {
+  birth_date: string | null;
+  accepted_terms_at: string | null;
+  accepted_privacy_at: string | null;
+}
+
+export class TimeBankAuthError extends Error {
+  constructor(message: string, readonly originalError?: AuthError) {
+    super(message);
+    this.name = 'TimeBankAuthError';
+  }
+}
+
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private usersSignal = signal<UserProfile[]>([...MOCK_USERS]);
-  // Default to Enyel Reyes for immediate interactive demonstration
-  private currentUserSignal = signal<UserProfile | null>(MOCK_USERS[0]);
+  private currentUserSignal = signal<UserProfile | null>(null);
+  private authUserSignal = signal<User | null>(null);
+  private privateProfileSignal = signal<PrivateProfile | null>(null);
+  private initializedPromise: Promise<void> | null = null;
 
   readonly currentUser = this.currentUserSignal.asReadonly();
-  readonly allUsers = this.usersSignal.asReadonly();
-  readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
+  readonly authUser = this.authUserSignal.asReadonly();
+  readonly isAuthenticated = computed(() => this.authUserSignal() !== null);
+  readonly isReady = signal(false);
+  readonly needsProfileCompletion = computed(() => {
+    if (!this.isAuthenticated()) return false;
+    const profile = this.privateProfileSignal();
+    return !profile?.birth_date || !profile.accepted_terms_at || !profile.accepted_privacy_at;
+  });
+  readonly isPasswordRecovery = signal(false);
 
-  constructor(private toastService: ToastService) {}
-
-  login(email: string, _password: string): Promise<boolean> {
-    return new Promise(resolve => {
-      // Simulate client-side authentication latency
-      setTimeout(() => {
-        const found = this.usersSignal().find(
-          u => u.email.toLowerCase() === email.trim().toLowerCase()
-        );
-
-        if (found) {
-          this.currentUserSignal.set(found);
-          this.toastService.success(`¡Bienvenido de vuelta, ${found.name}!`);
-          resolve(true);
-        } else {
-          // If not in the pre-defined list, create a demo session for the email entered
-          const demoUser: UserProfile = {
-            id: 'user-' + Date.now(),
-            name: email.split('@')[0],
-            email: email,
-            headline: 'Miembro de la Comunidad TimeBank',
-            bio: 'Nuevo usuario explorando el intercambio de habilidades.',
-            avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
-            location: 'Comunidad Global',
-            timeCredits: 5, // Demo welcome balance
-            hoursGiven: 0,
-            hoursReceived: 0,
-            completedExchanges: 0,
-            memberSince: 'Octubre 2026',
-            rating: 5.0,
-            reviewsCount: 0,
-            badges: ['Nuevo Miembro', '5 Créditos de Bienvenida']
-          };
-
-          this.usersSignal.update(users => [demoUser, ...users]);
-          this.currentUserSignal.set(demoUser);
-          this.toastService.success(`Sesión iniciada con éxito para ${demoUser.name}`);
-          resolve(true);
+  constructor(private supabase: SupabaseService, private toastService: ToastService) {
+    if (this.supabase.client) {
+      this.supabase.client.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT' || !session?.user) {
+          this.clearSession();
+          return;
         }
-      }, 500);
-    });
+        if (event === 'PASSWORD_RECOVERY') this.isPasswordRecovery.set(true);
+        queueMicrotask(() => void this.loadAuthenticatedUser(session.user).catch(error => this.toastService.danger(this.messageFor(error))));
+      });
+    } else {
+      this.isReady.set(true);
+    }
+    void this.ensureInitialized().catch(error => this.toastService.danger(this.messageFor(error)));
   }
 
-  register(userData: { name: string; email: string; password?: string }): Promise<boolean> {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        const newUser: UserProfile = {
-          id: 'user-' + Date.now(),
-          name: userData.name,
-          email: userData.email,
-          headline: 'Nuevo Miembro de TimeBank',
-          bio: 'Listo para compartir conocimientos y aprender nuevas habilidades con la comunidad.',
-          avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80',
-          location: 'República Dominicana / Online',
-          timeCredits: 5, // Demo welcome balance
-          hoursGiven: 0,
-          hoursReceived: 0,
-          completedExchanges: 0,
-          memberSince: 'Octubre 2026',
-          rating: 5.0,
-          reviewsCount: 0,
-          badges: ['Pionero 2026', 'Crédito Inicial Otorgado']
-        };
-
-        this.usersSignal.update(users => [newUser, ...users]);
-        this.currentUserSignal.set(newUser);
-        this.toastService.success(`¡Cuenta creada con éxito! Has recibido 5 créditos de bienvenida.`);
-        resolve(true);
-      }, 600);
-    });
+  ensureInitialized(): Promise<void> {
+    if (!this.initializedPromise) this.initializedPromise = this.restoreSession();
+    return this.initializedPromise;
   }
 
-  logout(): void {
-    this.currentUserSignal.set(null);
-    this.toastService.info('Has cerrado sesión en modo demostración.');
-  }
-
-  switchUser(userId: string): void {
-    const user = this.usersSignal().find(u => u.id === userId);
-    if (user) {
-      this.currentUserSignal.set(user);
-      this.toastService.info(`Cambiado a perfil: ${user.name}`);
+  private async restoreSession(): Promise<void> {
+    if (!this.supabase.client) { this.isReady.set(true); return; }
+    try {
+      const { data, error } = await this.supabase.client.auth.getSession();
+      if (error) throw error;
+      if (data.session?.user) await this.loadAuthenticatedUser(data.session.user);
+    } catch (error) {
+      this.clearSession();
+      throw new TimeBankAuthError(this.messageFor(error), error as AuthError);
+    } finally {
+      this.isReady.set(true);
     }
   }
 
-  updateCurrentUserProfile(updates: Partial<UserProfile>, notify = true): void {
-    const current = this.currentUserSignal();
-    if (!current) return;
+  async login(email: string, password: string): Promise<void> {
+    await this.ensureInitialized();
+    const client = this.supabase.requireClient();
+    const { data, error } = await client.auth.signInWithPassword({ email: email.trim(), password });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+    if (data.user) await this.loadAuthenticatedUser(data.user);
+    this.toastService.success(`¡Bienvenido${this.currentUser()?.name ? `, ${this.currentUser()?.name}` : ''}!`);
+  }
 
-    const updated = { ...current, ...updates };
-    this.currentUserSignal.set(updated);
-    this.usersSignal.update(users =>
-      users.map(u => (u.id === current.id ? updated : u))
-    );
-    if (notify) this.toastService.success('Perfil actualizado correctamente en memoria.');
+  async register(credentials: RegisterCredentials): Promise<{ emailConfirmationRequired: boolean }> {
+    await this.ensureInitialized();
+    const acceptedAt = new Date().toISOString();
+    const { data, error } = await this.supabase.requireClient().auth.signUp({
+      email: credentials.email.trim(),
+      password: credentials.password,
+      options: {
+        emailRedirectTo: this.redirectUrl('/auth/callback'),
+        data: {
+          full_name: credentials.name.trim(),
+          birth_date: credentials.birthDate,
+          accepted_terms_at: acceptedAt,
+          accepted_privacy_at: acceptedAt
+        }
+      }
+    });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+    if (data.session && data.user) await this.loadAuthenticatedUser(data.user);
+    return { emailConfirmationRequired: !data.session };
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    const { error } = await this.supabase.requireClient().auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: this.redirectUrl('/auth/callback') }
+    });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+  }
+
+  async resendSignupConfirmation(email: string): Promise<void> {
+    const { error } = await this.supabase.requireClient().auth.resend({
+      type: 'signup',
+      email: email.trim(),
+      options: { emailRedirectTo: this.redirectUrl('/auth/callback') }
+    });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+    this.toastService.info('Si el correo puede recibir una confirmación, recibirás un nuevo mensaje en tu bandeja de entrada.');
+  }
+
+  async requestPasswordReset(email: string): Promise<void> {
+    const { error } = await this.supabase.requireClient().auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: this.redirectUrl('/auth/update-password')
+    });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+  }
+
+  async updatePassword(password: string): Promise<void> {
+    const { error } = await this.supabase.requireClient().auth.updateUser({ password });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+    this.isPasswordRecovery.set(false);
+    this.toastService.success('Tu contraseña se actualizó.');
+  }
+
+  async completeOnboarding(birthDate: string): Promise<void> {
+    const userId = this.authUserSignal()?.id;
+    if (!userId) throw new TimeBankAuthError('Inicia sesión para completar tu perfil.');
+    const acceptedAt = new Date().toISOString();
+    const { error } = await this.supabase.requireClient()
+      .from('profile_private')
+      .update({ birth_date: birthDate, accepted_terms_at: acceptedAt, accepted_privacy_at: acceptedAt })
+      .eq('user_id', userId);
+    if (error) throw new TimeBankAuthError(this.messageFor(error));
+    await this.reloadAuthenticatedUser();
+  }
+
+  async logout(): Promise<void> {
+    const { error } = await this.supabase.requireClient().auth.signOut();
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+    this.clearSession();
+    this.toastService.info('Has cerrado sesión.');
+  }
+
+  async reloadAuthenticatedUser(): Promise<void> {
+    const user = this.authUserSignal();
+    if (user) await this.loadAuthenticatedUser(user);
+  }
+
+  async updateCurrentUserProfile(updates: Partial<UserProfile>, notify = true, avatarFile?: File): Promise<void> {
+    const current = this.currentUserSignal();
+    const userId = this.authUserSignal()?.id;
+    if (!current || !userId) return;
+
+    const client = this.supabase.requireClient();
+    const databaseUpdates: { display_name?: string; headline?: string; location?: string; avatar_path?: string; bio?: string } = {};
+    if (updates.name !== undefined) databaseUpdates.display_name = updates.name.trim();
+    if (updates.headline !== undefined) databaseUpdates.headline = updates.headline.trim();
+    if (updates.location !== undefined) databaseUpdates.location = updates.location.trim();
+    if (updates.bio !== undefined) databaseUpdates.bio = updates.bio.trim();
+    if (updates.avatar !== undefined && updates.avatar !== current.avatar && !avatarFile) {
+      databaseUpdates.avatar_path = updates.avatar;
+    }
+
+    let uploadedAvatarPath: string | null = null;
+    if (avatarFile) {
+      const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
+      const extension = extensions[avatarFile.type];
+      if (!extension || avatarFile.size > 5 * 1024 * 1024) {
+        throw new TimeBankAuthError('La foto debe ser JPG, PNG o WebP y no superar los 5 MB.');
+      }
+      uploadedAvatarPath = `${userId}/${crypto.randomUUID()}.${extension}`;
+      const { error } = await client.storage.from('profile-avatars').upload(uploadedAvatarPath, avatarFile, {
+        cacheControl: '3600',
+        contentType: avatarFile.type,
+        upsert: false
+      });
+      if (error) throw new TimeBankAuthError(this.messageFor(error));
+      databaseUpdates.avatar_path = uploadedAvatarPath;
+    }
+
+    if (Object.keys(databaseUpdates).length) {
+      const { error } = await client.from('profiles').update(databaseUpdates).eq('id', userId);
+      if (error) {
+        if (uploadedAvatarPath) await client.storage.from('profile-avatars').remove([uploadedAvatarPath]);
+        throw new TimeBankAuthError(this.messageFor(error));
+      }
+      await this.reloadAuthenticatedUser();
+    } else {
+      this.currentUserSignal.set({ ...current, ...updates });
+    }
+    if (notify) this.toastService.success('Perfil actualizado.');
+  }
+
+  private async loadAuthenticatedUser(authUser: User): Promise<void> {
+    this.authUserSignal.set(authUser);
+    const client = this.supabase.requireClient();
+    const [profileResult, privateResult, accountResult] = await Promise.all([
+      client.from('profiles').select('display_name, headline, location, avatar_path, bio, country_code, reputation_average, reputation_count, offered_hours, received_hours, completed_sessions, created_at, is_verified').eq('id', authUser.id).maybeSingle(),
+      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at').eq('user_id', authUser.id).maybeSingle(),
+      client.from('credit_accounts').select('available_balance').eq('user_id', authUser.id).maybeSingle()
+    ]);
+    if (profileResult.error) throw new TimeBankAuthError(this.messageFor(profileResult.error));
+    if (privateResult.error) throw new TimeBankAuthError(this.messageFor(privateResult.error));
+    if (accountResult.error) throw new TimeBankAuthError(this.messageFor(accountResult.error));
+
+    const profile = profileResult.data;
+    const privateProfile = privateResult.data as PrivateProfile | null;
+    this.privateProfileSignal.set(privateProfile);
+    const name = profile?.display_name || String(authUser.user_metadata?.['full_name'] ?? authUser.user_metadata?.['name'] ?? authUser.email?.split('@')[0] ?? 'Miembro TimeBank');
+    const avatarPath = profile?.avatar_path;
+    const avatar = avatarPath
+      ? /^https?:\/\//i.test(avatarPath) ? avatarPath : client.storage.from('profile-avatars').getPublicUrl(avatarPath).data.publicUrl
+      : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80';
+    const memberSince = profile?.created_at
+      ? new Intl.DateTimeFormat('es-DO', { month: 'long', year: 'numeric' }).format(new Date(profile.created_at))
+      : '';
+    const userProfile: UserProfile = {
+      id: authUser.id,
+      name,
+      email: authUser.email ?? '',
+      headline: profile?.headline ?? 'Miembro de la comunidad TimeBank',
+      bio: profile?.bio ?? '',
+      avatar,
+      location: profile?.location ?? profile?.country_code ?? 'En línea',
+      timeCredits: Number(accountResult.data?.available_balance ?? 0),
+      hoursGiven: Number(profile?.offered_hours ?? 0),
+      hoursReceived: Number(profile?.received_hours ?? 0),
+      completedExchanges: Number(profile?.completed_sessions ?? 0),
+      memberSince,
+      rating: Number(profile?.reputation_average ?? 0),
+      reviewsCount: Number(profile?.reputation_count ?? 0),
+      badges: profile?.is_verified ? ['Miembro verificado'] : []
+    };
+    this.currentUserSignal.set(userProfile);
+    this.isReady.set(true);
+  }
+
+  private clearSession(): void {
+    this.authUserSignal.set(null);
+    this.currentUserSignal.set(null);
+    this.privateProfileSignal.set(null);
+    this.isPasswordRecovery.set(false);
+  }
+
+  private redirectUrl(path: string): string {
+    return `${window.location.origin}${path}`;
+  }
+
+  private messageFor(error: unknown): string {
+    const message = error instanceof Error ? error.message : String(error ?? '');
+    const normalized = message.toLowerCase();
+    if (normalized.includes('el servicio de acceso no está disponible') || normalized.includes('supabase aún no está configurado')) {
+      return 'El servicio de acceso no está disponible. Inténtalo de nuevo más tarde.';
+    }
+    if (normalized.includes('invalid login credentials')) return 'Correo o contraseña incorrectos.';
+    if (normalized.includes('email not confirmed')) return 'Confirma tu correo desde el enlace que te enviamos antes de iniciar sesión.';
+    if (normalized.includes('user already registered')) return 'Ya existe una cuenta con este correo. Inicia sesión o recupera tu contraseña.';
+    if (normalized.includes('password should be at least')) return 'La contraseña no cumple los requisitos mínimos.';
+    if (normalized.includes('rate limit')) return 'Se hicieron demasiados intentos. Espera un momento y vuelve a probar.';
+    return 'No se pudo completar la operación. Revisa los datos e inténtalo de nuevo.';
   }
 }

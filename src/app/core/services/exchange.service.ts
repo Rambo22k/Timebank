@@ -2,6 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
 import { CreditActivity, ExchangeRequest, ExchangeReview, ExchangeSession } from '../models/exchange.model';
+import { MOCK_USERS } from '../mock-data/users.mock';
 
 const DEMO_REQUESTS: ExchangeRequest[] = [
   {
@@ -81,7 +82,7 @@ export class ExchangeService {
   }
   partnerFor(session: ExchangeSession): { name: string; avatar: string } {
     const partnerId = session.requesterId === this.currentUserId ? session.providerId : session.requesterId;
-    const user = this.auth.allUsers().find(item => item.id === partnerId);
+    const user = MOCK_USERS.find(item => item.id === partnerId);
     if (user) return { name: user.name, avatar: user.avatar };
     return { name: session.partnerName, avatar: session.partnerAvatar };
   }

@@ -26,7 +26,7 @@
 
             <div class="demo-environment-badge">
               <ion-icon name="shield-checkmark-outline"></ion-icon>
-              <span>Entorno de Demostración 100% Frontend</span>
+              <span>Acceso seguro con Supabase Auth</span>
             </div>
           </div>
         </div>
@@ -41,30 +41,13 @@
             </p>
           </div>
 
-          <!-- Quick Test Profile Selector -->
-          <div class="quick-demo-section">
-            <span class="quick-label">Acceso rápido con perfiles de demostración:</span>
-            <div class="quick-profiles-row">
-              @for (user of demoUsers.slice(0, 3); track user.id) {
-                <button
-                  type="button"
-                  class="profile-quick-btn"
-                  (click)="quickLoginAs(user.email)"
-                  [title]="'Ingresar como ' + user.name"
-                >
-                  <img [src]="user.avatar" [alt]="user.name" />
-                  <div class="quick-btn-info">
-                    <strong>{{ user.name.split(' ')[0] }}</strong>
-                    <span>{{ user.timeCredits }} créditos</span>
-                  </div>
-                </button>
-              }
+          @if (emailConfirmationNotice) {
+            <div class="auth-notice" role="status">
+              <strong>Confirma tu correo</strong>
+              <span>Enviamos un enlace a {{ emailConfirmationNotice }}. Ábrelo para activar tu cuenta.</span>
+              <button type="button" class="tb-btn tb-btn-ghost tb-btn-sm" [disabled]="isResendingConfirmation" (click)="resendConfirmation()">{{ isResendingConfirmation ? 'Reenviando…' : 'Reenviar confirmación' }}</button>
             </div>
-          </div>
-
-          <div class="form-divider">
-            <span>o ingresa con tu correo</span>
-          </div>
+          }
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
             <!-- Email -->
@@ -116,20 +99,18 @@
               }
             </div>
 
-            <!-- Remember checkbox -->
-            <div class="remember-row">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="rememberMe" />
-                <span>Recordar sesión en este dispositivo</span>
-              </label>
-            </div>
-
             <!-- Submit Button -->
             <button type="submit" class="tb-btn tb-btn-primary tb-btn-lg full-btn" [disabled]="isLoading">
               <ion-icon [name]="isLoading ? 'time-outline' : 'log-in-outline'"></ion-icon>
-              {{ isLoading ? 'Iniciando sesión demo...' : 'Entrar a TimeBank' }}
+              {{ isLoading ? 'Iniciando sesión...' : 'Entrar a TimeBank' }}
             </button>
           </form>
+
+          <div class="form-divider"><span>o continúa con</span></div>
+          <button type="button" class="tb-btn tb-btn-outline tb-btn-lg full-btn google-btn" [disabled]="isGoogleLoading" (click)="signInWithGoogle()">
+            <span class="google-mark" aria-hidden="true">G</span>
+            {{ isGoogleLoading ? 'Conectando con Google…' : 'Continuar con Google' }}
+          </button>
         </div>
       </div>
     </div>

@@ -22,7 +22,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { SkillCardComponent } from '../../shared/components/skill-card/skill-card.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
-import { EditProfileModalComponent } from './edit-profile-modal/edit-profile-modal.component';
+import { EditProfileModalComponent, ProfileEditSubmission } from './edit-profile-modal/edit-profile-modal.component';
 import { SkillDetailModalComponent } from '../skills/skill-detail-modal/skill-detail-modal.component';
 import { SkillFormModalComponent } from '../skills/skill-form-modal/skill-form-modal.component';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
@@ -56,6 +56,7 @@ import { Skill } from '../../core/models/skill.model';
 export class ProfilePage {
   activeTab = signal<'offered' | 'wanted'>('offered');
   isEditProfileModalOpen = false;
+  isSavingProfile = false;
 
   // Skill CRUD modals
   selectedSkillForDetail: Skill | null = null;
@@ -118,13 +119,16 @@ export class ProfilePage {
     this.isEditProfileModalOpen = false;
   }
 
-  onSaveProfile(updates: Partial<UserProfile>): void {
-    this.authService.updateCurrentUserProfile(updates);
-    this.closeEditProfile();
-  }
-
-  switchPerspective(userId: string): void {
-    this.authService.switchUser(userId);
+  async onSaveProfile(submission: ProfileEditSubmission): Promise<void> {
+    this.isSavingProfile = true;
+    try {
+      await this.authService.updateCurrentUserProfile(submission.updates, true, submission.avatarFile ?? undefined);
+      this.closeEditProfile();
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo actualizar el perfil.');
+    } finally {
+      this.isSavingProfile = false;
+    }
   }
 
   // Skill interactions

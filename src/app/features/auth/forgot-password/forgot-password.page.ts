@@ -14,6 +14,7 @@ import {
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -38,7 +39,8 @@ export class ForgotPasswordPage {
 
   constructor(
     private fb: FormBuilder,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private authService: AuthService
   ) {
     addIcons({
       mailOutline,
@@ -53,7 +55,7 @@ export class ForgotPasswordPage {
     });
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -61,12 +63,15 @@ export class ForgotPasswordPage {
 
     this.isSubmitting = true;
     this.submittedEmail = this.form.value.email;
-
-    setTimeout(() => {
-      this.isSubmitting = false;
+    try {
+      await this.authService.requestPasswordReset(this.submittedEmail);
       this.isSent = true;
-      this.toastService.info('Enlace de recuperación simulado enviado.');
-    }, 500);
+      this.toastService.info('Si el correo corresponde a una cuenta, recibirás un enlace para cambiar tu contraseña.');
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo solicitar el restablecimiento.');
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 
   resetForm(): void {

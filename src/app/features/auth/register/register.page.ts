@@ -30,6 +30,16 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
   return null;
 }
 
+function adultValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+  const birthDate = new Date(`${control.value}T00:00:00`);
+  if (Number.isNaN(birthDate.getTime())) return { invalidDate: true };
+  const latestAllowedDate = new Date();
+  latestAllowedDate.setHours(0, 0, 0, 0);
+  latestAllowedDate.setFullYear(latestAllowedDate.getFullYear() - 18);
+  return birthDate <= latestAllowedDate ? null : { minimumAge: 18 };
+}
+
 @Component({
   selector: 'app-register',
   standalone: true,
@@ -50,6 +60,8 @@ export class RegisterPage {
   showPassword = false;
   showConfirmPassword = false;
   isLoading = false;
+  isGoogleLoading = false;
+  readonly maxBirthDate = this.latestAdultBirthDate();
 
   constructor(
     private fb: FormBuilder,
@@ -73,9 +85,11 @@ export class RegisterPage {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
+      birthDate: ['', [Validators.required, adultValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
-      agreeTerms: [true, [Validators.requiredTrue]]
+      agreeTerms: [false, [Validators.requiredTrue]],
+      agreePrivacy: [false, [Validators.requiredTrue]]
     }, { validators: passwordMatchValidator });
   }
 
@@ -95,15 +109,38 @@ export class RegisterPage {
     }
 
     this.isLoading = true;
-    const { name, email, password } = this.form.value;
+    const { name, email, password, birthDate } = this.form.getRawValue();
 
     try {
-      const success = await this.authService.register({ name, email, password });
-      if (success) {
-        this.router.navigate(['/profile']);
+      const result = await this.authService.register({ name, email, password, birthDate });
+      if (result.emailConfirmationRequired) {
+        await this.router.navigate(['/auth/login'], { queryParams: { emailConfirmation: email.trim() } });
+      } else if (this.authService.needsProfileCompletion()) {
+        await this.router.navigate(['/auth/complete-profile']);
+      } else {
+        await this.router.navigate(['/profile']);
       }
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo crear la cuenta.');
     } finally {
       this.isLoading = false;
     }
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    this.isGoogleLoading = true;
+    try {
+      await this.authService.signInWithGoogle();
+    } catch (error) {
+      this.toastService.danger(error instanceof Error ? error.message : 'No se pudo continuar con Google.');
+      this.isGoogleLoading = false;
+    }
+  }
+
+  private latestAdultBirthDate(): string {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 18);
+    const pad = (value: number) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 }

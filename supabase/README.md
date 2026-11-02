@@ -9,6 +9,7 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 3. Inicia sesión con `supabase login` y vincula el proyecto hospedado con `supabase link --project-ref TU_PROJECT_REF`.
 4. Aplica la migración con `supabase db push`.
 5. En Supabase Auth, habilita el inicio de sesión mediante correo electrónico y contraseña, así como mediante Google. Configura las URL de redirección permitidas para la PWA y el enlace profundo de Capacitor, y exige la confirmación del correo electrónico.
+   Para desarrollo web, añade `http://localhost:4200/auth/callback` y `http://localhost:4200/auth/update-password` a **Authentication → URL Configuration** y usa `http://localhost:4200` como Site URL. Añade las rutas equivalentes del dominio publicado antes de desplegar.
 6. Después de crear la primera cuenta, asigna el rol de administrador de confianza desde el Editor SQL de Supabase:
 
    ```sql
@@ -21,6 +22,7 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 ## Contrato de integración de la aplicación
 
 - El registro debe proporcionar `birth_date`, `accepted_terms_at` y `accepted_privacy_at` en los metadatos del usuario de Supabase Auth. Los usuarios también pueden actualizar sus campos privados del perfil después del registro. La edad mínima es de 18 años por defecto.
+- La aplicación web configura `@supabase/supabase-js` con la URL del proyecto y una clave pública (`anon`/publishable) en `src/environments`. Nunca incluyas una clave `service_role`/secret en el cliente.
 - La aplicación debe utilizar funciones RPC para las solicitudes de sesiones, la aceptación, la cancelación, la confirmación de sesiones, las disputas, las donaciones de créditos, las aprobaciones de solidaridad, los ajustes administrativos, los cambios de estado de las cuentas y las decisiones de verificación. Nunca debe modificar directamente los saldos ni los registros del libro mayor.
 - Los usuarios pueden desactivar temporalmente su cuenta mediante `public.deactivate_my_account()` después de resolver las solicitudes y sesiones pendientes. La eliminación permanente de un usuario de Auth debe realizarse en el servidor mediante la API de administración de Supabase Auth, después de gestionar cualquier saldo de créditos restante.
 - Las cantidades de créditos son valores numéricos, donde un crédito representa una hora. La duración de las sesiones debe utilizar incrementos de 15 minutos.

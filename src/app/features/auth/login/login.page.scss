@@ -311,3 +311,21 @@
 .full-btn {
   width: 100%;
 }
+
+.auth-notice {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border: 1px solid var(--tb-teal-subtle);
+  border-radius: var(--tb-radius-sm);
+  background: var(--tb-teal-light);
+  color: var(--tb-teal-dark);
+  font-size: .84rem;
+
+  strong { font-size: .92rem; }
+  .tb-btn { justify-self: start; color: var(--tb-teal-dark); }
+}
+
+.google-btn { position: relative; }
+.google-mark { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #dadce0; border-radius: 50%; color: #4285f4; background: #fff; font: 700 14px Arial,sans-serif; }

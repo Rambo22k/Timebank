@@ -4,27 +4,6 @@
   <main class="profile-main-content">
     <div class="tb-container">
       @if (user) {
-        <!-- Perspective Switcher Tool Bar (Great for Evaluators!) -->
-        <div class="perspective-switch-bar">
-          <div class="perspective-label">
-            <ion-icon name="person-circle-outline"></ion-icon>
-            <span>Ver perfil como:</span>
-          </div>
-          <div class="perspective-pills">
-            @for (demo of authService.allUsers(); track demo.id) {
-              <button
-                type="button"
-                class="perspective-btn"
-                [class.is-active]="demo.id === user.id"
-                (click)="switchPerspective(demo.id)"
-              >
-                <img [src]="demo.avatar" [alt]="demo.name" />
-                <span>{{ demo.name.split(' ')[0] }}</span>
-              </button>
-            }
-          </div>
-        </div>
-
         <!-- PROFILE HERO HEADER -->
         <div class="profile-hero-card">
           <div class="hero-cover-pattern"></div>
@@ -226,6 +205,7 @@
   <app-edit-profile-modal
     [isOpen]="isEditProfileModalOpen"
     [user]="user"
+    [isSaving]="isSavingProfile"
     (close)="closeEditProfile()"
     (save)="onSaveProfile($event)"
   ></app-edit-profile-modal>

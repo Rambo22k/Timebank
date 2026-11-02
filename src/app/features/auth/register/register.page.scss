@@ -201,3 +201,27 @@
 .full-btn {
   width: 100%;
 }
+
+.form-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 18px 0;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--tb-border);
+  }
+
+  span {
+    padding: 0 12px;
+    font-size: 0.75rem;
+    color: var(--tb-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.google-btn { position: relative; }
+.google-mark { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #dadce0; border-radius: 50%; color: #4285f4; background: #fff; font: 700 14px Arial,sans-serif; }

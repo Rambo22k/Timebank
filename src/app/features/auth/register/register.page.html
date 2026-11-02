@@ -17,7 +17,7 @@
             </h2>
 
             <p class="brand-sub">
-              Al registrarte en esta demostración, tu cuenta se iniciará automáticamente con <strong>5 créditos de tiempo</strong> listos para probar solicitudes de intercambio.
+              Crea tu cuenta para ofrecer habilidades, aprender de otras personas e intercambiar tiempo.
             </p>
 
             <div class="perks-checklist">
@@ -37,7 +37,7 @@
 
             <div class="demo-environment-badge">
               <ion-icon name="shield-checkmark-outline"></ion-icon>
-              <span>Demostración de Frontend (Sin conexión a base de datos)</span>
+              <span>Cuenta protegida con confirmación de correo</span>
             </div>
           </div>
         </div>
@@ -88,6 +88,16 @@
               </div>
               @if (form.get('email')?.invalid && form.get('email')?.touched) {
                 <span class="tb-error-text">Introduce un correo electrónico con formato válido.</span>
+              }
+            </div>
+
+            <div class="tb-form-group">
+              <label class="tb-label" for="reg-birth-date">Fecha de nacimiento *</label>
+              <input id="reg-birth-date" type="date" class="tb-input" [max]="maxBirthDate" [class.is-invalid]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched" formControlName="birthDate" />
+              @if (form.get('birthDate')?.hasError('minimumAge')) {
+                <span class="tb-error-text">Debes tener al menos 18 años para registrarte.</span>
+              } @else if (form.get('birthDate')?.invalid && form.get('birthDate')?.touched) {
+                <span class="tb-error-text">Introduce tu fecha de nacimiento.</span>
               }
             </div>
 
@@ -145,23 +155,36 @@
               }
             </div>
 
-            <!-- Agree terms -->
+            <!-- Required policy acceptance -->
             <div class="terms-row">
               <label class="checkbox-label">
                 <input type="checkbox" formControlName="agreeTerms" />
-                <span>Acepto las normas de colaboración y respeto de la comunidad TimeBank</span>
+                <span>Acepto los términos y condiciones de TimeBank *</span>
               </label>
               @if (form.get('agreeTerms')?.invalid && form.get('agreeTerms')?.touched) {
-                <span class="tb-error-text">Debes aceptar las normas para continuar.</span>
+                <span class="tb-error-text">Debes aceptar los términos para continuar.</span>
+              }
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="agreePrivacy" />
+                <span>He leído y acepto la política de privacidad *</span>
+              </label>
+              @if (form.get('agreePrivacy')?.invalid && form.get('agreePrivacy')?.touched) {
+                <span class="tb-error-text">Debes aceptar la política de privacidad para continuar.</span>
               }
             </div>
 
             <!-- Submit Button -->
             <button type="submit" class="tb-btn tb-btn-accent tb-btn-lg full-btn" [disabled]="isLoading">
               <ion-icon [name]="isLoading ? 'time-outline' : 'sparkles-outline'"></ion-icon>
-              {{ isLoading ? 'Creando perfil demo...' : 'Crear mi cuenta con 5 créditos' }}
+              {{ isLoading ? 'Creando cuenta...' : 'Crear mi cuenta' }}
             </button>
           </form>
+
+          <div class="form-divider"><span>o regístrate con</span></div>
+          <button type="button" class="tb-btn tb-btn-outline tb-btn-lg full-btn google-btn" [disabled]="isGoogleLoading" (click)="signInWithGoogle()">
+            <span class="google-mark" aria-hidden="true">G</span>
+            {{ isGoogleLoading ? 'Conectando con Google…' : 'Continuar con Google' }}
+          </button>
         </div>
       </div>
     </div>
