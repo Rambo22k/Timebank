@@ -2,7 +2,6 @@ import { Injectable, computed, effect, signal } from '@angular/core';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
 import { CreditActivity, ExchangeRequest, ExchangeReview, ExchangeSession } from '../models/exchange.model';
-import { MOCK_USERS } from '../mock-data/users.mock';
 import { SupabaseService } from './supabase.service';
 
 interface RequestRow {
@@ -59,36 +58,6 @@ interface ReviewRow {
   comment: string;
   created_at: string;
 }
-
-const DEMO_REQUESTS: ExchangeRequest[] = [
-  {
-    id: 'request-demo-1', requesterId: 'user-elena', requesterName: 'Elena Vance',
-    requesterAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
-    providerId: 'user-enyel', providerName: 'Enyel Reyes',
-    providerAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    skillId: 'skill-1', skillTitle: 'Arquitectura Frontend con Angular, Ionic y TypeScript',
-    message: 'Me gustaría revisar la estructura de mi aplicación y entender mejor cómo organizar los servicios.',
-    proposedStartAt: '2026-11-06T15:00:00', requestedHours: 1, status: 'pending', createdAt: '2026-11-01T13:20:00'
-  },
-  {
-    id: 'request-demo-2', requesterId: 'user-enyel', requesterName: 'Enyel Reyes',
-    requesterAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    providerId: 'user-carlos', providerName: 'Carlos Mendoza',
-    providerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    skillId: 'skill-7', skillTitle: 'Guitarra: técnica, acordes y ritmo',
-    message: 'Quiero aprender algunos acordes para principiantes. ¿Te viene bien una sesión online?',
-    proposedStartAt: '2026-11-08T17:00:00', requestedHours: 1, status: 'accepted', createdAt: '2026-10-30T10:15:00'
-  },
-  {
-    id: 'request-demo-3', requesterId: 'user-sofia', requesterName: 'Sofía Alarcón',
-    requesterAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-    providerId: 'user-enyel', providerName: 'Enyel Reyes',
-    providerAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
-    skillId: 'skill-2', skillTitle: 'Diseño UI/UX con Enfoque Minimalista',
-    message: '¿Podríamos mover la sesión al sábado por la mañana?',
-    proposedStartAt: '2026-11-04T16:00:00', requestedHours: 1.5, status: 'pending', createdAt: '2026-10-31T09:00:00'
-  }
-];
 
 @Injectable({ providedIn: 'root' })
 export class ExchangeService {
@@ -160,9 +129,6 @@ export class ExchangeService {
     return session.status === 'scheduled' && new Date(session.startAt) > new Date();
   }
   partnerFor(session: ExchangeSession): { name: string; avatar: string } {
-    const partnerId = session.requesterId === this.currentUserId ? session.providerId : session.requesterId;
-    const user = MOCK_USERS.find(item => item.id === partnerId);
-    if (user) return { name: user.name, avatar: user.avatar };
     return { name: session.partnerName, avatar: session.partnerAvatar };
   }
   pendingReviews(): ExchangeSession[] {

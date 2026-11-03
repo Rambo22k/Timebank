@@ -5,10 +5,7 @@ import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import {
   timeOutline,
-  sparklesOutline,
-  heartOutline,
-  globeOutline,
-  shieldCheckmarkOutline
+  sparklesOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -24,10 +21,7 @@ export class FooterComponent {
   constructor() {
     addIcons({
       timeOutline,
-      sparklesOutline,
-      heartOutline,
-      globeOutline,
-      shieldCheckmarkOutline
+      sparklesOutline
     });
   }
 }

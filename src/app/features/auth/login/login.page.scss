@@ -92,7 +92,7 @@
     }
   }
 
-  .demo-environment-badge {
+  .auth-security-badge {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -138,77 +138,6 @@
     .link-bold {
       font-weight: 700;
       color: var(--tb-teal);
-    }
-  }
-}
-
-/* Quick demo profiles */
-.quick-demo-section {
-  background: var(--tb-bg);
-  border: 1px solid var(--tb-border);
-  border-radius: var(--tb-radius-sm);
-  padding: 14px;
-  margin-bottom: 20px;
-
-  .quick-label {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--tb-text-muted);
-    margin-bottom: 10px;
-  }
-
-  .quick-profiles-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-
-    @media (max-width: 500px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .profile-quick-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
-    background: var(--tb-white);
-    border: 1px solid var(--tb-border);
-    border-radius: var(--tb-radius-xs);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
-
-    &:hover {
-      border-color: var(--tb-teal);
-      box-shadow: 0 2px 6px rgba(8, 123, 118, 0.1);
-    }
-
-    img {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .quick-btn-info {
-      display: flex;
-      flex-direction: column;
-
-      strong {
-        font-size: 0.75rem;
-        color: var(--tb-text-primary);
-        line-height: 1.2;
-      }
-
-      span {
-        font-size: 0.6875rem;
-        color: var(--tb-teal);
-        font-weight: 600;
-      }
     }
   }
 }

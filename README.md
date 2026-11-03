@@ -1,6 +1,5 @@
 # TimeBank — Plataforma de Intercambio de Tiempo y Habilidades
 
-> **Responsabilidad de Desarrollo:** Frontend Only  
 > **Desarrollador & Diseñador UI/UX:** Enyel Reyes  
 > **Framework:** Angular 22 & Ionic 9 (Standalone Components, TypeScript, SCSS Modular)  
 > **Regla de Valor:** **1 hora de ayuda = 1 crédito de tiempo**
@@ -34,7 +33,7 @@ Inspirado en la marca oficial de TimeBank (el reloj abstracto, las manos entrela
 
 ---
 
-## 3. Módulos y Funcionalidades Frontend Implementadas
+## 3. Módulos y Funcionalidades
 
 ### A. Landing Page (`/`)
 - **Navegación Dinámica:** Navbar con logo oficial, selector de rutas, pill de créditos de tiempo en vivo, avatar y menú lateral animado (*drawer*) para dispositivos móviles.
@@ -61,31 +60,31 @@ Inspirado en la marca oficial de TimeBank (el reloj abstracto, las manos entrela
   - Horas recibidas aprendiendo de otros miembros.
   - Total de intercambios exitosos y calificación comunitaria con estrellas.
 - **Pestañas de Habilidades:** Separador entre *Habilidades que Ofrezco* y *Habilidades que Busco Aprender*.
-- **Selector de Perspectiva:** Barra para alternar instantáneamente la vista entre los diferentes miembros de la comunidad demo (Enyel, Elena, Carlos, Sofía, Mateo, Claudia).
-- **Modal de Edición de Perfil (`<app-edit-profile-modal>`):** Formulario para actualizar titular, bio, ubicación y selector de avatares fotográficos, reflejado inmediatamente en memoria.
+- **Perfil autenticado:** Cada persona ve y edita su propio perfil conectado a Supabase; también puede consultar perfiles públicos de otros miembros.
+- **Modal de Edición de Perfil (`<app-edit-profile-modal>`):** Permite actualizar titular, biografía, ubicación y foto de perfil usando Supabase Storage.
 
 ### D. Gestión de Habilidades (`/skills`)
-- **Panel CRUD Completo en Memoria:**
+- **Gestión de habilidades conectada a Supabase:**
   - **Listar:** Visualización de todas las habilidades del usuario activo.
   - **Filtrar:** Filtros rápidos por *Todas*, *Ofrezco* y *Busco* con contadores en tiempo real.
   - **Crear (`<app-skill-form-modal>`):** Formulario con validación para registrar título, categoría, nivel de dominio, modalidad (Online/Presencial), disponibilidad y descripción.
   - **Consultar Detalle (`<app-skill-detail-modal>`):** Vista modal completa de la habilidad.
   - **Editar:** Modificación reactiva de los datos existentes.
-  - **Eliminar (`<app-confirmation-modal>`):** Diálogo modal de confirmación antes de eliminar permanentemente del estado local.
+  - **Eliminar (`<app-confirmation-modal>`):** Diálogo modal de confirmación antes de eliminar la publicación.
 
 ### E. Búsqueda y Descubrimiento (`/explore`)
 - **Buscador Reactivo en Tiempo Real:** Filtra sobre el título, descripción, autor o etiquetas (`#Python`, `#Figma`, etc.).
 - **Filtros por Categoría:** Carrusel de botones de categorías con conteo de publicaciones activas.
 - **Filtros Adicionales:** Segmento de tipo (*Todas*, *Ofrecidas*, *Buscadas*), selector de modalidad (*Online*, *Presencial*, *Híbrido*) y ordenamiento (*Más recientes*, *Mejor calificación*, *Alfabético*).
 - **Feedback & Estados Vacíos:** Contador en vivo de resultados encontrados, botón para limpiar filtros y `<app-empty-state>` personalizado.
-- **Modal de Propuesta de Intercambio (`<app-exchange-modal>`):** Permite proponer una fecha, una duración en bloques de 15 minutos y un mensaje. La solicitud demo se muestra en el módulo de Intercambios.
+- **Modal de Propuesta de Intercambio (`<app-exchange-modal>`):** Permite proponer fecha, duración y mensaje; las solicitudes se guardan y gestionan en Supabase.
 
-### F. Intercambios y créditos (módulo demo de Ernesto)
-- **Solicitudes (`/exchanges/requests`):** Vistas de solicitudes recibidas y enviadas, con acciones para aceptar, rechazar, cancelar o proponer y aceptar otro horario.
-- **Sesiones (`/exchanges/sessions`):** Próximas sesiones e historial, confirmación de finalización por ambas partes y apertura de disputas demo.
-- **Billetera (`/wallet`):** Saldo disponible e historial demo de créditos de bienvenida, reservas, créditos ganados, gastos y devoluciones.
-- **Reseñas (`/exchanges/reviews`):** Reseñas pendientes y recibidas; permite publicar una calificación de 1 a 5 estrellas tras completar una sesión.
-- Las interacciones de este módulo usan estado en memoria. Se conectarán a Supabase después de integrar Auth.
+### F. Intercambios, mensajes y créditos
+- **Solicitudes (`/exchanges/requests`):** Solicitudes recibidas y enviadas, con acciones seguras para responder, cancelar o proponer otro horario.
+- **Sesiones (`/exchanges/sessions`):** Sesiones e historial, confirmación por ambas partes y gestión de disputas.
+- **Mensajes (`/exchanges/messages`):** Conversaciones privadas asociadas a intercambios aceptados, con actualizaciones en tiempo real y notificaciones.
+- **Billetera (`/wallet`):** Saldo e historial de movimientos de créditos mantenidos por las funciones seguras de Supabase.
+- **Reseñas (`/exchanges/reviews`):** Reseñas posteriores a sesiones completadas.
 
 ### G. Sistema Visual Compartido & Componentes
 - `NavbarComponent`: Navegación sticky responsive y drawer móvil.
@@ -105,9 +104,8 @@ Timebank/
 ├── src/
 │   ├── app/
 │   │   ├── core/
-│   │   │   ├── mock-data/       # Datos ficticios coherentes (usuarios, habilidades, categorías)
-│   │   │   ├── models/          # Interfaces TypeScript (user, skill, category)
-│   │   │   └── services/        # Servicios reactivos en memoria (auth, skills, toast)
+│   │   │   ├── models/          # Interfaces de usuario, habilidades, intercambios y mensajes
+│   │   │   └── services/        # Autenticación, datos de Supabase y notificaciones
 │   │   ├── features/
 │   │   │   ├── auth/            # Login, Register, Forgot Password
 │   │   │   ├── discovery/       # Búsqueda interactiva y modal de intercambio
@@ -133,7 +131,7 @@ Timebank/
 
 ---
 
-## 5. Instrucciones para Ejecutar el Frontend
+## 5. Instrucciones para Ejecutar la Aplicación
 
 ### Requisitos Previos
 - **Node.js** (v18, v20 o v22 LTS)
@@ -165,14 +163,12 @@ npx ionic serve
 ```
 
 ### Paso 4: Abrir en el Navegador
-Abre [http://localhost:4200](http://localhost:4200) (o el puerto indicado en la terminal) para interactuar con toda la experiencia visual de TimeBank.
+Abre [http://localhost:4200](http://localhost:4200) (o el puerto indicado en la terminal) para usar TimeBank.
 
 ---
 
-## 6. Delimitación de Responsabilidad (Frontend demo; Supabase pendiente)
+## 6. Supabase y configuración
 
-Conforme a las especificaciones del encargo:
-- **La aplicación todavía no está conectada al backend de Supabase.** El esquema SQL vive en `supabase/migrations/`, pero los servicios Angular usan datos de demostración en memoria.
-- Todo el ciclo de vida, autenticación, creación de habilidades, edición de perfiles, solicitudes, sesiones, movimientos demo de créditos y filtros funcionan de manera interactiva **en memoria mediante estado local y servicios reactivos de Angular**.
-- Las pantallas de solicitudes, sesiones, billetera, historial, disputas y reseñas ya están implementadas como demo. Sus operaciones reales dependen de Supabase Auth y de las funciones RPC descritas en `supabase/README.md`.
-- El saldo de bienvenida de la experiencia demo es de **5 créditos**. La migración incremental de Supabase actualiza la configuración para que las cuentas nuevas reciban 5 créditos cuando se aplique al proyecto remoto.
+TimeBank usa Supabase Auth para las cuentas, Postgres para perfiles, habilidades e intercambios, Storage para fotos de perfil y Realtime para notificaciones y mensajes. Las operaciones que afectan créditos y estados de sesiones se ejecutan mediante funciones seguras de base de datos.
+
+Para aplicar migraciones pendientes al proyecto vinculado, ejecuta `supabase db push`. Consulta `supabase/README.md` para el esquema, las políticas de acceso y la configuración necesaria de Auth. Las cuentas nuevas reciben los créditos iniciales definidos por la configuración de Supabase.
