@@ -1,0 +1,42 @@
+<app-navbar></app-navbar>
+<main class="messages-page"><div class="tb-container">
+  <div class="messages-heading"><div><span class="eyebrow">Tu actividad · Intercambios</span><h1>Mensajes</h1><p>Coordina los detalles de tus intercambios directamente con la otra persona.</p></div></div>
+  <app-exchange-nav></app-exchange-nav>
+  <section class="chat-shell">
+    <aside class="conversation-list" aria-label="Conversaciones">
+      <header><h2>Conversaciones</h2><span>{{ chat.conversations().length }}</span></header>
+      @if (chat.isLoadingConversations() && chat.conversations().length === 0) {
+        <p class="list-state">Cargando conversaciones…</p>
+      } @else if (chat.conversations().length === 0) {
+        <div class="list-state empty"><ion-icon name="chatbubble-ellipses-outline"></ion-icon><strong>Aún no tienes conversaciones</strong><span>Cuando una solicitud sea aceptada, podrás escribirle a la otra persona desde aquí.</span></div>
+      } @else {
+        @for (conversation of chat.conversations(); track conversation.id) {
+          <button type="button" class="conversation-item" [class.selected]="chat.activeConversationId() === conversation.id" (click)="chat.selectConversation(conversation.id)">
+            <img [src]="conversation.peerAvatar" [alt]="conversation.peerName" />
+            <span class="conversation-copy"><strong>{{ conversation.peerName }}</strong><small>{{ conversation.skillTitle }}</small><span class="last-message">{{ conversation.lastMessage || 'Inicia la conversación' }}</span></span>
+            @if (conversation.unreadCount > 0) { <span class="unread-badge">{{ conversation.unreadCount > 9 ? '9+' : conversation.unreadCount }}</span> }
+          </button>
+        }
+      }
+    </aside>
+
+    <section class="chat-panel" aria-label="Chat">
+      @if (chat.activeConversation(); as conversation) {
+        <header class="chat-header"><img [src]="conversation.peerAvatar" [alt]="conversation.peerName" /><div><strong>{{ conversation.peerName }}</strong><span>{{ conversation.skillTitle }} · Intercambio {{ conversation.requestStatus === 'accepted' ? 'aceptado' : 'en seguimiento' }}</span></div></header>
+        <div class="message-list" #messageList>
+          @if (chat.isLoadingMessages()) { <p class="chat-state">Cargando mensajes…</p> }
+          @else if (chat.messages().length === 0) { <div class="chat-state"><ion-icon name="chatbubble-ellipses-outline"></ion-icon><strong>Empieza la conversación</strong><span>Acuerden objetivos y detalles de la sesión.</span></div> }
+          @for (message of chat.messages(); track message.id) {
+            <article class="message-row" [class.mine]="message.senderId === currentUserId">
+              <div class="message-bubble"><p>{{ message.deletedAt ? 'Este mensaje fue eliminado.' : message.body }}</p><time>{{ message.createdAt | date:'d MMM, h:mm a' }}</time></div>
+            </article>
+          }
+        </div>
+        <form class="composer" (ngSubmit)="send()"><textarea name="message" [(ngModel)]="draft" maxlength="5000" rows="2" placeholder="Escribe un mensaje…" aria-label="Escribe un mensaje" [disabled]="chat.isSending()"></textarea><button class="tb-btn tb-btn-primary" type="submit" [disabled]="!draft.trim() || chat.isSending()" aria-label="Enviar mensaje"><ion-icon name="send-outline"></ion-icon><span>{{ chat.isSending() ? 'Enviando…' : 'Enviar' }}</span></button><small>{{ draft.length }}/5000</small></form>
+      } @else {
+        <div class="chat-placeholder"><ion-icon name="chatbubble-ellipses-outline"></ion-icon><h2>Elige una conversación</h2><p>Selecciona una conversación de la lista para ver y enviar mensajes.</p></div>
+      }
+    </section>
+  </section>
+</div></main>
+<app-footer></app-footer>

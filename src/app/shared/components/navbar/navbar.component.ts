@@ -79,7 +79,10 @@ export class NavbarComponent {
 
     const requestId = notification.data['request_id'];
     const sessionId = notification.data['session_id'];
-    if (sessionId || notification.type === 'session_completed' || notification.type === 'review_received') {
+    const conversationId = notification.data['conversation_id'];
+    if (conversationId) {
+      await this.router.navigate(['/exchanges/messages'], { queryParams: { conversation: conversationId } });
+    } else if (sessionId || notification.type === 'session_completed' || notification.type === 'review_received') {
       await this.router.navigate(['/exchanges/sessions'], { queryParams: sessionId ? { session: sessionId } : undefined });
     } else if (notification.type === 'credit_activity') {
       await this.router.navigate(['/wallet']);

@@ -107,6 +107,7 @@ export class NotificationsService {
     let title = row.title;
     let body = row.body;
     const translations: Record<string, [string, string]> = {
+      'New message': ['Nuevo mensaje', 'Recibiste un mensaje nuevo.'],
       'New session request': ['Nueva solicitud de intercambio', 'Recibiste una solicitud para intercambiar una habilidad.'],
       'New proposed session time': ['Nuevo horario propuesto', 'La otra persona propuso un nuevo horario para el intercambio.'],
       'Request accepted': ['Solicitud aceptada', 'La solicitud fue aceptada y la sesión quedó agendada.'],

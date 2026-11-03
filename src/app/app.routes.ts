@@ -29,6 +29,13 @@ export const routes: Routes = [
     title: 'Solicitudes de Intercambio — TimeBank'
   },
   {
+    path: 'exchanges/messages',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/exchanges/messages.page').then(m => m.ExchangeMessagesPage),
+    title: 'Mensajes — TimeBank'
+  },
+  {
     path: 'exchanges/sessions',
     canActivate: [authGuard],
     loadComponent: () =>

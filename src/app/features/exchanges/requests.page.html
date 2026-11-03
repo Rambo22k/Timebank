@@ -17,7 +17,7 @@
             @else { <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="exchanges.cancelRequest(request.id)">Cancelar solicitud</button> }
           </div> }
           @if (request.status==='rescheduled' && direction==='outgoing') { <div class="card-actions"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="exchanges.acceptRescheduledRequest(request.id)"><ion-icon name="checkmark-circle-outline"></ion-icon>Aceptar nuevo horario</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="exchanges.cancelRequest(request.id)">Cancelar solicitud</button></div> }
-          @if (request.status==='accepted') { <div class="card-actions"><a class="tb-btn tb-btn-secondary tb-btn-sm" routerLink="/exchanges/sessions">Ver en mis sesiones <ion-icon name="arrow-forward-outline"></ion-icon></a></div> }
+          @if (request.status==='accepted') { <div class="card-actions"><a class="tb-btn tb-btn-secondary tb-btn-sm" routerLink="/exchanges/messages" [queryParams]="{request: request.id}"><ion-icon name="chatbubble-ellipses-outline"></ion-icon>Abrir conversación</a><a class="tb-btn tb-btn-outline tb-btn-sm" routerLink="/exchanges/sessions">Ver en mis sesiones <ion-icon name="arrow-forward-outline"></ion-icon></a></div> }
         </article>
       } @empty { <div class="empty-note">No tienes solicitudes {{ direction==='incoming' ? 'recibidas' : 'enviadas' }} en esta vista.</div> }
       }

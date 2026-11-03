@@ -1,0 +1,189 @@
+import { Injectable, computed, effect, signal } from '@angular/core';
+import { RealtimeChannel } from '@supabase/supabase-js';
+import { ChatConversation, ChatMessage, ConversationSummaryRow, MessageRow } from '../models/chat.model';
+import { AuthService } from './auth.service';
+import { SupabaseService } from './supabase.service';
+import { ToastService } from './toast.service';
+
+@Injectable({ providedIn: 'root' })
+export class ChatService {
+  private readonly conversationsSignal = signal<ChatConversation[]>([]);
+  private readonly messagesSignal = signal<ChatMessage[]>([]);
+  private readonly activeConversationIdSignal = signal<string | null>(null);
+  private readonly conversationsLoadingSignal = signal(false);
+  private readonly messagesLoadingSignal = signal(false);
+  private readonly sendingSignal = signal(false);
+  private channel: RealtimeChannel | null = null;
+  private conversationLoadVersion = 0;
+  private messageLoadVersion = 0;
+
+  readonly conversations = this.conversationsSignal.asReadonly();
+  readonly messages = this.messagesSignal.asReadonly();
+  readonly activeConversationId = this.activeConversationIdSignal.asReadonly();
+  readonly activeConversation = computed(() => this.conversationsSignal().find(item => item.id === this.activeConversationIdSignal()) ?? null);
+  readonly isLoadingConversations = this.conversationsLoadingSignal.asReadonly();
+  readonly isLoadingMessages = this.messagesLoadingSignal.asReadonly();
+  readonly isSending = this.sendingSignal.asReadonly();
+
+  constructor(private auth: AuthService, private supabase: SupabaseService, private toast: ToastService) {
+    effect(onCleanup => {
+      const userId = this.auth.authUser()?.id ?? null;
+      const version = ++this.conversationLoadVersion;
+      this.messageLoadVersion++;
+      this.activeConversationIdSignal.set(null);
+      this.messagesSignal.set([]);
+
+      if (!userId || !this.supabase.client) {
+        this.conversationsSignal.set([]);
+        this.conversationsLoadingSignal.set(false);
+        this.messagesLoadingSignal.set(false);
+        return;
+      }
+
+      const client = this.supabase.requireClient();
+      this.conversationsLoadingSignal.set(true);
+      this.channel = client.channel(`chat:${userId}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+          const row = payload.new as MessageRow;
+          if (!this.conversationsSignal().some(item => item.id === row.conversation_id)) return;
+          const message = this.fromRow(row);
+          const isActive = this.activeConversationIdSignal() === row.conversation_id;
+          this.conversationsSignal.update(items => items.map(item => item.id !== row.conversation_id ? item : {
+            ...item,
+            lastMessage: message.body,
+            lastMessageAt: message.createdAt,
+            unreadCount: row.sender_id === userId || isActive ? 0 : item.unreadCount + 1
+          }));
+          if (isActive) {
+            this.messagesSignal.update(items => items.some(item => item.id === message.id) ? items : [...items, message]);
+            if (row.sender_id !== userId) void this.markConversationRead(row.conversation_id);
+          }
+        })
+        .subscribe();
+
+      onCleanup(() => {
+        if (this.channel) void client.removeChannel(this.channel);
+        this.channel = null;
+      });
+      void this.loadConversationsForUser(userId, version);
+    });
+  }
+
+  async loadConversations(): Promise<void> {
+    const userId = this.auth.authUser()?.id;
+    if (!userId) return;
+    await this.loadConversationsForUser(userId, ++this.conversationLoadVersion);
+  }
+
+  async selectConversation(conversationId: string): Promise<void> {
+    if (!this.conversationsSignal().some(item => item.id === conversationId)) return;
+    const version = ++this.messageLoadVersion;
+    this.activeConversationIdSignal.set(conversationId);
+    this.messagesSignal.set([]);
+    this.messagesLoadingSignal.set(true);
+    try {
+      const { data, error } = await this.supabase.requireClient().from('messages')
+        .select('id,conversation_id,sender_id,body,created_at,deleted_at')
+        .eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(200);
+      if (error) throw error;
+      if (version !== this.messageLoadVersion || this.activeConversationIdSignal() !== conversationId) return;
+      this.messagesSignal.set(((data ?? []) as MessageRow[]).map(row => this.fromRow(row)).reverse());
+      await this.markConversationRead(conversationId);
+    } catch {
+      this.toast.danger('No se pudo abrir la conversación. Inténtalo de nuevo.');
+    } finally {
+      if (version === this.messageLoadVersion) this.messagesLoadingSignal.set(false);
+    }
+  }
+
+  async sendMessage(body: string): Promise<boolean> {
+    const conversationId = this.activeConversationIdSignal();
+    const senderId = this.auth.authUser()?.id;
+    const text = body.trim();
+    if (!conversationId || !senderId || !text || text.length > 5000 || this.sendingSignal()) return false;
+    this.sendingSignal.set(true);
+    try {
+      const { data, error } = await this.supabase.requireClient().from('messages')
+        .insert({ conversation_id: conversationId, sender_id: senderId, body: text })
+        .select('id,conversation_id,sender_id,body,created_at,deleted_at').single();
+      if (error) throw error;
+      const message = this.fromRow(data as MessageRow);
+      this.messagesSignal.update(items => items.some(item => item.id === message.id) ? items : [...items, message]);
+      this.conversationsSignal.update(items => items.map(item => item.id !== conversationId ? item : {
+        ...item, lastMessage: message.body, lastMessageAt: message.createdAt
+      }));
+      return true;
+    } catch {
+      this.toast.danger('No se pudo enviar el mensaje. Inténtalo de nuevo.');
+      return false;
+    } finally {
+      this.sendingSignal.set(false);
+    }
+  }
+
+  closeConversation(): void {
+    this.messageLoadVersion++;
+    this.activeConversationIdSignal.set(null);
+    this.messagesSignal.set([]);
+  }
+
+  private async loadConversationsForUser(userId: string, version: number): Promise<void> {
+    try {
+      const { data, error } = await this.supabase.requireClient().rpc('list_conversation_summaries');
+      if (error) throw error;
+      if (version !== this.conversationLoadVersion || userId !== this.auth.authUser()?.id) return;
+      const rows = (data ?? []) as ConversationSummaryRow[];
+      this.conversationsSignal.set(rows.map(row => ({
+        id: row.conversation_id,
+        requestId: row.session_request_id,
+        peerId: row.peer_id,
+        peerName: row.peer_name,
+        peerAvatar: this.avatarUrl(row.peer_avatar_path),
+        skillTitle: row.skill_title,
+        requestStatus: row.request_status,
+        lastMessage: row.last_message,
+        lastMessageAt: row.last_message_at ?? '',
+        unreadCount: Number(row.unread_count)
+      })));
+    } catch {
+      if (version === this.conversationLoadVersion && userId === this.auth.authUser()?.id) {
+        this.toast.danger('No se pudieron cargar tus conversaciones. Inténtalo de nuevo.');
+      }
+    } finally {
+      if (version === this.conversationLoadVersion) this.conversationsLoadingSignal.set(false);
+    }
+  }
+
+  private async markConversationRead(conversationId: string): Promise<void> {
+    const userId = this.auth.authUser()?.id;
+    if (!userId) return;
+    const client = this.supabase.requireClient();
+    const [readResult, notificationResult] = await Promise.all([
+      client.rpc('mark_conversation_read', { p_conversation_id: conversationId }),
+      client.from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', userId)
+        .is('read_at', null).contains('data', { conversation_id: conversationId })
+    ]);
+    if (readResult.error || notificationResult.error) {
+      this.toast.warning('No se pudo actualizar el estado de lectura de la conversación.');
+      return;
+    }
+    this.conversationsSignal.update(items => items.map(item => item.id === conversationId ? { ...item, unreadCount: 0 } : item));
+  }
+
+  private fromRow(row: MessageRow): ChatMessage {
+    return {
+      id: row.id,
+      conversationId: row.conversation_id,
+      senderId: row.sender_id,
+      body: row.body,
+      createdAt: row.created_at,
+      deletedAt: row.deleted_at
+    };
+  }
+
+  private avatarUrl(path: string | null): string {
+    if (!path) return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80';
+    if (/^https?:\/\//i.test(path)) return path;
+    return this.supabase.client?.storage.from('profile-avatars').getPublicUrl(path).data.publicUrl ?? '';
+  }
+}

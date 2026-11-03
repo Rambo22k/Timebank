@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
-import { calendarOutline, timeOutline, checkmarkCircleOutline, closeCircleOutline, arrowForwardOutline, addOutline } from 'ionicons/icons';
+import { calendarOutline, timeOutline, checkmarkCircleOutline, closeCircleOutline, arrowForwardOutline, addOutline, chatbubbleEllipsesOutline } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { ExchangeNavComponent } from './exchange-nav.component';
@@ -18,7 +18,7 @@ import { ExchangeService } from '../../core/services/exchange.service';
 export class ExchangeRequestsPage {
   direction: 'incoming' | 'outgoing' = 'incoming';
   rescheduleDates: Record<string, string> = {};
-  constructor(public exchanges: ExchangeService) { addIcons({ calendarOutline, timeOutline, checkmarkCircleOutline, closeCircleOutline, arrowForwardOutline, addOutline }); }
+  constructor(public exchanges: ExchangeService) { addIcons({ calendarOutline, timeOutline, checkmarkCircleOutline, closeCircleOutline, arrowForwardOutline, addOutline, chatbubbleEllipsesOutline }); }
   get requests() { return this.exchanges.requestsFor(this.direction); }
   setDirection(direction: 'incoming' | 'outgoing') { this.direction = direction; }
   dateFor(requestId: string): string {
