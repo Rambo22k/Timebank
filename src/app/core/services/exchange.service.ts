@@ -145,6 +145,16 @@ export class ExchangeService {
     return (session.status === 'scheduled' || session.status === 'awaiting_confirmation')
       && !this.hasCurrentUserConfirmed(session) && endAt <= new Date();
   }
+  confirmationCount(session: ExchangeSession): number {
+    return Number(session.requesterConfirmed) + Number(session.providerConfirmed);
+  }
+  confirmationMessage(session: ExchangeSession): string {
+    if (this.hasCurrentUserConfirmed(session)) return 'Ya confirmaste. Estamos esperando la confirmación de la otra persona.';
+    const otherConfirmed = session.requesterId === this.currentUserId ? session.providerConfirmed : session.requesterConfirmed;
+    if (otherConfirmed) return 'La otra persona ya confirmó. Tu confirmación completa el intercambio y liquida los créditos.';
+    if (this.canConfirmSession(session)) return 'La sesión terminó. Confirma que se realizó para que la otra persona también pueda confirmarla.';
+    return 'La confirmación se habilitará cuando termine el horario reservado.';
+  }
   isSessionActionPending(sessionId: string): boolean { return this.sessionActionsSignal().has(sessionId); }
   canCancelSession(session: ExchangeSession): boolean {
     return session.status === 'scheduled' && new Date(session.startAt) > new Date();

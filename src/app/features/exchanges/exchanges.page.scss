@@ -19,6 +19,12 @@
 .meta-row { display:flex; flex-wrap:wrap; gap:10px 18px; color:var(--tb-text-secondary); font-size:.82rem; }
 .meta-row span { display:inline-flex; align-items:center; gap:6px; }
 .meta-row ion-icon { color:var(--tb-teal); font-size:1rem; }
+.session-confirmation-note { display:flex; align-items:flex-start; gap:10px; margin-top:14px; padding:12px 14px; border-radius:12px; background:#f5f6f4; color:var(--tb-text-secondary); font-size:.84rem; line-height:1.45; }
+.session-confirmation-note ion-icon { flex:0 0 auto; margin-top:1px; color:var(--tb-text-secondary); font-size:1.1rem; }
+.session-confirmation-note span { display:flex; flex-direction:column; gap:3px; }
+.session-confirmation-note strong { color:var(--tb-text-primary); }
+.session-confirmation-note.ready { background:var(--tb-teal-light); color:var(--tb-teal-dark); }
+.session-confirmation-note.ready ion-icon { color:var(--tb-teal); }
 .card-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; padding-top:15px; border-top:1px solid var(--tb-border-subtle); }
 .card-actions .tb-btn { min-height:38px; }
 .side-card { background:linear-gradient(145deg,#075b58,#087b76); color:#fff; border-radius:18px; padding:22px; box-shadow:var(--tb-shadow-md); }
