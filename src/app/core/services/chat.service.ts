@@ -13,6 +13,9 @@ export class ChatService {
   private readonly conversationsLoadingSignal = signal(false);
   private readonly messagesLoadingSignal = signal(false);
   private readonly sendingSignal = signal(false);
+  private readonly activeConversationBlockedSignal = signal(false);
+  private readonly blockedByCurrentUserSignal = signal(false);
+  private readonly blockStatusLoadingSignal = signal(false);
   private channel: RealtimeChannel | null = null;
   private conversationLoadVersion = 0;
   private messageLoadVersion = 0;
@@ -24,6 +27,9 @@ export class ChatService {
   readonly isLoadingConversations = this.conversationsLoadingSignal.asReadonly();
   readonly isLoadingMessages = this.messagesLoadingSignal.asReadonly();
   readonly isSending = this.sendingSignal.asReadonly();
+  readonly isActiveConversationBlocked = this.activeConversationBlockedSignal.asReadonly();
+  readonly isBlockedByCurrentUser = this.blockedByCurrentUserSignal.asReadonly();
+  readonly isCheckingBlockStatus = this.blockStatusLoadingSignal.asReadonly();
 
   constructor(private auth: AuthService, private supabase: SupabaseService, private toast: ToastService) {
     effect(onCleanup => {
@@ -32,6 +38,9 @@ export class ChatService {
       this.messageLoadVersion++;
       this.activeConversationIdSignal.set(null);
       this.messagesSignal.set([]);
+      this.activeConversationBlockedSignal.set(false);
+      this.blockedByCurrentUserSignal.set(false);
+      this.blockStatusLoadingSignal.set(false);
 
       if (!userId || !this.supabase.client) {
         this.conversationsSignal.set([]);
@@ -81,7 +90,12 @@ export class ChatService {
     this.activeConversationIdSignal.set(conversationId);
     this.messagesSignal.set([]);
     this.messagesLoadingSignal.set(true);
+    this.blockStatusLoadingSignal.set(true);
+    this.activeConversationBlockedSignal.set(false);
+    this.blockedByCurrentUserSignal.set(false);
     try {
+      const conversation = this.conversationsSignal().find(item => item.id === conversationId);
+      if (conversation) await this.refreshBlockStatus(conversationId, conversation.peerId, version);
       const { data, error } = await this.supabase.requireClient().from('messages')
         .select('id,conversation_id,sender_id,body,created_at,deleted_at')
         .eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(200);
@@ -90,6 +104,10 @@ export class ChatService {
       this.messagesSignal.set(((data ?? []) as MessageRow[]).map(row => this.fromRow(row)).reverse());
       await this.markConversationRead(conversationId);
     } catch {
+      if (version === this.messageLoadVersion) {
+        this.blockStatusLoadingSignal.set(false);
+        this.activeConversationBlockedSignal.set(true);
+      }
       this.toast.danger('No se pudo abrir la conversación. Inténtalo de nuevo.');
     } finally {
       if (version === this.messageLoadVersion) this.messagesLoadingSignal.set(false);
@@ -121,10 +139,100 @@ export class ChatService {
     }
   }
 
+  async reportUser(userId: string, reason: string): Promise<boolean> {
+    return this.createReport('user', userId, reason);
+  }
+
+  async reportMessage(messageId: string, reason: string): Promise<boolean> {
+    const message = this.messagesSignal().find(item => item.id === messageId);
+    if (!message || message.senderId === this.auth.authUser()?.id) return false;
+    return this.createReport('message', messageId, reason);
+  }
+
+  async blockActivePeer(): Promise<boolean> {
+    const currentUserId = this.auth.authUser()?.id;
+    const conversation = this.activeConversation();
+    if (!currentUserId || !conversation || this.blockedByCurrentUserSignal()) return false;
+    const client = this.supabase.requireClient();
+    try {
+      const existing = await client.from('user_blocks').select('blocker_id')
+        .eq('blocker_id', currentUserId).eq('blocked_id', conversation.peerId).maybeSingle();
+      if (existing.error) throw existing.error;
+      if (!existing.data) {
+        const { error } = await client.from('user_blocks').insert({ blocker_id: currentUserId, blocked_id: conversation.peerId });
+        if (error) throw error;
+      }
+      this.activeConversationBlockedSignal.set(true);
+      this.blockedByCurrentUserSignal.set(true);
+      this.toast.success('La cuenta quedó bloqueada. No podrán enviarse mensajes entre ustedes.');
+      return true;
+    } catch {
+      this.toast.danger('No se pudo bloquear esta cuenta. Inténtalo de nuevo.');
+      return false;
+    }
+  }
+
+  async unblockActivePeer(): Promise<boolean> {
+    const currentUserId = this.auth.authUser()?.id;
+    const conversation = this.activeConversation();
+    if (!currentUserId || !conversation || !this.blockedByCurrentUserSignal()) return false;
+    try {
+      const { error } = await this.supabase.requireClient().from('user_blocks').delete()
+        .eq('blocker_id', currentUserId).eq('blocked_id', conversation.peerId);
+      if (error) throw error;
+      this.blockedByCurrentUserSignal.set(false);
+      await this.refreshBlockStatus(conversation.id, conversation.peerId, this.messageLoadVersion);
+      if (!this.activeConversationBlockedSignal()) this.toast.success('La cuenta fue desbloqueada.');
+      return !this.activeConversationBlockedSignal();
+    } catch {
+      this.toast.danger('No se pudo desbloquear esta cuenta. Inténtalo de nuevo.');
+      return false;
+    }
+  }
+
   closeConversation(): void {
     this.messageLoadVersion++;
     this.activeConversationIdSignal.set(null);
     this.messagesSignal.set([]);
+    this.activeConversationBlockedSignal.set(false);
+    this.blockedByCurrentUserSignal.set(false);
+    this.blockStatusLoadingSignal.set(false);
+  }
+
+  private async refreshBlockStatus(conversationId: string, peerId: string, version: number): Promise<void> {
+    const currentUserId = this.auth.authUser()?.id;
+    if (!currentUserId) return;
+    const { data, error } = await this.supabase.requireClient().from('user_blocks')
+      .select('blocker_id,blocked_id')
+      .or(`and(blocker_id.eq.${currentUserId},blocked_id.eq.${peerId}),and(blocker_id.eq.${peerId},blocked_id.eq.${currentUserId})`)
+      .limit(1).maybeSingle();
+    if (version !== this.messageLoadVersion || this.activeConversationIdSignal() !== conversationId) return;
+    this.blockStatusLoadingSignal.set(false);
+    if (error) {
+      this.activeConversationBlockedSignal.set(true);
+      this.blockedByCurrentUserSignal.set(false);
+      this.toast.warning('No se pudo comprobar el estado de seguridad de esta conversación.');
+      return;
+    }
+    this.activeConversationBlockedSignal.set(!!data);
+    this.blockedByCurrentUserSignal.set(data?.blocker_id === currentUserId);
+  }
+
+  private async createReport(targetType: 'user' | 'message', targetId: string, reason: string): Promise<boolean> {
+    const reporterId = this.auth.authUser()?.id;
+    const details = reason.trim();
+    if (!reporterId || !targetId || details.length < 5 || details.length > 2000) return false;
+    try {
+      const { error } = await this.supabase.requireClient().from('reports').insert({
+        reporter_id: reporterId, target_type: targetType, target_id: targetId, reason: details
+      });
+      if (error) throw error;
+      this.toast.success('Gracias. El reporte fue enviado al equipo de moderación.');
+      return true;
+    } catch {
+      this.toast.danger('No se pudo enviar el reporte. Inténtalo de nuevo.');
+      return false;
+    }
   }
 
   private async loadConversationsForUser(userId: string, version: number): Promise<void> {

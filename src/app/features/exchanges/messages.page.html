@@ -22,21 +22,40 @@
 
     <section class="chat-panel" aria-label="Chat">
       @if (chat.activeConversation(); as conversation) {
-        <header class="chat-header"><img [src]="conversation.peerAvatar" [alt]="conversation.peerName" /><div><strong>{{ conversation.peerName }}</strong><span>{{ conversation.skillTitle }} · Intercambio {{ conversation.requestStatus === 'accepted' ? 'aceptado' : 'en seguimiento' }}</span></div></header>
+        <header class="chat-header"><img [src]="conversation.peerAvatar" [alt]="conversation.peerName" /><div class="chat-peer-copy"><strong>{{ conversation.peerName }}</strong><span>{{ conversation.skillTitle }} · Intercambio {{ conversation.requestStatus === 'accepted' ? 'aceptado' : 'en seguimiento' }}</span></div><div class="chat-safety-actions"><button type="button" class="safety-link" (click)="openUserReport()">Reportar</button>@if (chat.isBlockedByCurrentUser()) { <button type="button" class="safety-link" (click)="unblockPeer()" [disabled]="isUnblocking">{{ isUnblocking ? 'Desbloqueando…' : 'Desbloquear' }}</button> } @else { <button type="button" class="safety-link danger-link" (click)="isBlockDialogOpen = true" [disabled]="chat.isCheckingBlockStatus()">Bloquear</button> }</div></header>
         <div class="message-list" #messageList>
           @if (chat.isLoadingMessages()) { <p class="chat-state">Cargando mensajes…</p> }
           @else if (chat.messages().length === 0) { <div class="chat-state"><ion-icon name="chatbubble-ellipses-outline"></ion-icon><strong>Empieza la conversación</strong><span>Acuerden objetivos y detalles de la sesión.</span></div> }
           @for (message of chat.messages(); track message.id) {
             <article class="message-row" [class.mine]="message.senderId === currentUserId">
-              <div class="message-bubble"><p>{{ message.deletedAt ? 'Este mensaje fue eliminado.' : message.body }}</p><time>{{ message.createdAt | date:'d MMM, h:mm a' }}</time></div>
+              <div class="message-content"><div class="message-bubble"><p>{{ message.deletedAt ? 'Este mensaje fue eliminado.' : message.body }}</p><time>{{ message.createdAt | date:'d MMM, h:mm a' }}</time></div>@if (message.senderId !== currentUserId && !message.deletedAt) { <button type="button" class="report-message" (click)="openMessageReport(message.id)">Reportar mensaje</button> }</div>
             </article>
           }
         </div>
-        <form class="composer" (ngSubmit)="send()"><textarea name="message" [(ngModel)]="draft" maxlength="5000" rows="2" placeholder="Escribe un mensaje…" aria-label="Escribe un mensaje" [disabled]="chat.isSending()"></textarea><button class="tb-btn tb-btn-primary" type="submit" [disabled]="!draft.trim() || chat.isSending()" aria-label="Enviar mensaje"><ion-icon name="send-outline"></ion-icon><span>{{ chat.isSending() ? 'Enviando…' : 'Enviar' }}</span></button><small>{{ draft.length }}/5000</small></form>
+        @if (chat.isCheckingBlockStatus()) { <div class="blocked-notice" role="status">Comprobando permisos de conversación…</div> }
+        @else if (chat.isActiveConversationBlocked()) { <div class="blocked-notice" role="status">No se pueden enviar mensajes porque existe un bloqueo entre estas cuentas.</div> }
+        @else { <form class="composer" (ngSubmit)="send()"><textarea name="message" [(ngModel)]="draft" maxlength="5000" rows="2" placeholder="Escribe un mensaje…" aria-label="Escribe un mensaje" [disabled]="chat.isSending()"></textarea><button class="tb-btn tb-btn-primary" type="submit" [disabled]="!draft.trim() || chat.isSending()" aria-label="Enviar mensaje"><ion-icon name="send-outline"></ion-icon><span>{{ chat.isSending() ? 'Enviando…' : 'Enviar' }}</span></button><small>{{ draft.length }}/5000</small></form> }
       } @else {
         <div class="chat-placeholder"><ion-icon name="chatbubble-ellipses-outline"></ion-icon><h2>Elige una conversación</h2><p>Selecciona una conversación de la lista para ver y enviar mensajes.</p></div>
       }
     </section>
   </section>
+  @if (reportTarget) {
+    <div class="dialog-backdrop" (click)="closeReport()">
+      <section class="safety-dialog" role="dialog" aria-modal="true" aria-labelledby="report-title" (click)="$event.stopPropagation()">
+        <button type="button" class="dialog-close" (click)="closeReport()" aria-label="Cerrar">×</button>
+        <span class="eyebrow">Seguridad de la comunidad</span><h2 id="report-title">Reportar {{ reportTarget.label }}</h2>
+        <p>Describe qué ocurrió. El equipo de TimeBank revisará el reporte de forma privada.</p>
+        <form (ngSubmit)="submitReport()"><label for="report-reason">Motivo del reporte</label><textarea id="report-reason" name="reportReason" [(ngModel)]="reportReason" minlength="5" maxlength="2000" rows="5" required placeholder="Cuéntanos los detalles (mínimo 5 caracteres)…"></textarea><small>{{ reportReason.length }}/2000</small><div class="dialog-actions"><button type="button" class="tb-btn tb-btn-outline" (click)="closeReport()">Cancelar</button><button type="submit" class="tb-btn tb-btn-primary" [disabled]="reportReason.trim().length < 5 || isSubmittingReport">{{ isSubmittingReport ? 'Enviando…' : 'Enviar reporte' }}</button></div></form>
+      </section>
+    </div>
+  }
+  @if (isBlockDialogOpen) {
+    <div class="dialog-backdrop" (click)="isBlockDialogOpen = false">
+      <section class="safety-dialog" role="alertdialog" aria-modal="true" aria-labelledby="block-title" (click)="$event.stopPropagation()">
+        <span class="eyebrow">Seguridad de la comunidad</span><h2 id="block-title">¿Bloquear a {{ chat.activeConversation()?.peerName }}?</h2><p>Ambas cuentas dejarán de poder enviarse mensajes y no podrán iniciar nuevos intercambios entre sí.</p><div class="dialog-actions"><button type="button" class="tb-btn tb-btn-outline" (click)="isBlockDialogOpen = false">Cancelar</button><button type="button" class="tb-btn tb-btn-danger" (click)="blockPeer()" [disabled]="isBlocking">{{ isBlocking ? 'Bloqueando…' : 'Bloquear cuenta' }}</button></div>
+      </section>
+    </div>
+  }
 </div></main>
 <app-footer></app-footer>

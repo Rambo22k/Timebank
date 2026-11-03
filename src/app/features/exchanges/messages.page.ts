@@ -20,6 +20,12 @@ import { ChatService } from '../../core/services/chat.service';
 export class ExchangeMessagesPage {
   private readonly destroyRef = inject(DestroyRef);
   draft = '';
+  reportTarget: { type: 'user' | 'message'; id: string; label: string } | null = null;
+  reportReason = '';
+  isSubmittingReport = false;
+  isBlockDialogOpen = false;
+  isBlocking = false;
+  isUnblocking = false;
 
   constructor(
     public chat: ChatService,
@@ -36,6 +42,54 @@ export class ExchangeMessagesPage {
   }
 
   get currentUserId(): string | undefined { return this.auth.authUser()?.id; }
+
+  openUserReport(): void {
+    const peer = this.chat.activeConversation();
+    if (peer) this.reportTarget = { type: 'user', id: peer.peerId, label: peer.peerName };
+  }
+
+  openMessageReport(messageId: string): void {
+    this.reportTarget = { type: 'message', id: messageId, label: 'este mensaje' };
+  }
+
+  closeReport(): void {
+    this.reportTarget = null;
+    this.reportReason = '';
+  }
+
+  async submitReport(): Promise<void> {
+    if (!this.reportTarget || this.reportReason.trim().length < 5 || this.isSubmittingReport) return;
+    this.isSubmittingReport = true;
+    const target = this.reportTarget;
+    try {
+      const sent = target.type === 'user'
+        ? await this.chat.reportUser(target.id, this.reportReason)
+        : await this.chat.reportMessage(target.id, this.reportReason);
+      if (sent) this.closeReport();
+    } finally {
+      this.isSubmittingReport = false;
+    }
+  }
+
+  async blockPeer(): Promise<void> {
+    if (this.isBlocking) return;
+    this.isBlocking = true;
+    try {
+      if (await this.chat.blockActivePeer()) this.isBlockDialogOpen = false;
+    } finally {
+      this.isBlocking = false;
+    }
+  }
+
+  async unblockPeer(): Promise<void> {
+    if (this.isUnblocking) return;
+    this.isUnblocking = true;
+    try {
+      await this.chat.unblockActivePeer();
+    } finally {
+      this.isUnblocking = false;
+    }
+  }
 
   async send(): Promise<void> {
     const value = this.draft;
