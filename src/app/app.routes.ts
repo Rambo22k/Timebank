@@ -50,6 +50,13 @@ export const routes: Routes = [
     title: 'Billetera de Tiempo — TimeBank'
   },
   {
+    path: 'solidarity',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/solidarity/solidarity.page').then(m => m.SolidarityPage),
+    title: 'Horas Solidarias — TimeBank'
+  },
+  {
     path: 'exchanges/reviews',
     canActivate: [authGuard],
     loadComponent: () =>

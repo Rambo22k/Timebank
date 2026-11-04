@@ -122,6 +122,7 @@ export class NotificationsService {
       'Credits refunded': ['Créditos devueltos', 'Los créditos reservados fueron devueltos a tu billetera.'],
       'Donation recorded': ['Donación registrada', 'Tu aporte al fondo solidario quedó registrado.'],
       'Solidarity support received': ['Apoyo solidario recibido', 'Se agregaron créditos de apoyo a tu billetera.'],
+      'Solidarity request declined': ['Solicitud solidaria no aprobada', 'Tu solicitud no fue aprobada. Revisa la respuesta del equipo de TimeBank.'],
       'Credit balance updated': ['Actualización de créditos', 'Se actualizó el saldo de tu billetera.']
     };
     const translation = translations[row.title];
