@@ -1,6 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import {
@@ -20,7 +20,9 @@ import {
   colorPaletteOutline,
   musicalNotesOutline,
   flashOutline,
-  infiniteOutline
+  infiniteOutline,
+  calendarOutline,
+  mailOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -30,6 +32,9 @@ import { SkillDetailModalComponent } from '../skills/skill-detail-modal/skill-de
 import { ExchangeModalComponent } from '../discovery/exchange-modal/exchange-modal.component';
 import { SkillsService } from '../../core/services/skills.service';
 import { AuthService } from '../../core/services/auth.service';
+import { ExchangeService } from '../../core/services/exchange.service';
+import { NotificationsService } from '../../core/services/notifications.service';
+import { AppNotification } from '../../core/models/notification.model';
 import { Skill } from '../../core/models/skill.model';
 
 interface FaqItem {
@@ -105,7 +110,10 @@ export class LandingPage {
 
   constructor(
     public skillsService: SkillsService,
-    public authService: AuthService
+    public authService: AuthService,
+    public exchanges: ExchangeService,
+    public notifications: NotificationsService,
+    private router: Router
   ) {
     addIcons({
       sparklesOutline,
@@ -124,8 +132,56 @@ export class LandingPage {
       colorPaletteOutline,
       musicalNotesOutline,
       flashOutline,
-      infiniteOutline
+      infiniteOutline,
+      calendarOutline,
+      mailOutline
     });
+    effect(() => {
+      if (this.authService.authUser()?.id) void this.exchanges.loadWalletActivity();
+    });
+  }
+
+  get upcomingSessions() {
+    return this.exchanges.sessionsForCurrentUser()
+      .filter(session => (session.status === 'scheduled' || session.status === 'awaiting_confirmation') && new Date(session.startAt) >= new Date())
+      .sort((a, b) => a.startAt.localeCompare(b.startAt));
+  }
+
+  get pendingRequests() {
+    const userId = this.authService.authUser()?.id;
+    return this.exchanges.requests().filter(request => request.status === 'pending' || request.status === 'rescheduled')
+      .filter(request => request.providerId === userId || request.requesterId === userId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  get recommendedSkills(): Skill[] {
+    const userId = this.authService.authUser()?.id;
+    const all = this.skillsService.skills().filter(skill => skill.status === 'active' && skill.type === 'offered' && skill.userId !== userId);
+    const wanted = this.skillsService.skills().filter(skill => skill.status === 'active' && skill.type === 'wanted' && skill.userId === userId);
+    const wantedCategories = new Set(wanted.map(skill => skill.categoryId));
+    const wantedWords = new Set(wanted.flatMap(skill => skill.title.toLowerCase().split(/\W+/).filter(word => word.length > 3)));
+    return all.map(skill => {
+      const title = `${skill.title} ${skill.tags.join(' ')}`.toLowerCase();
+      const matchScore = (wantedCategories.has(skill.categoryId) ? 3 : 0) + [...wantedWords].filter(word => title.includes(word)).length;
+      return { skill, matchScore };
+    }).sort((a, b) => b.matchScore - a.matchScore || (b.skill.authorRating ?? 0) - (a.skill.authorRating ?? 0) || b.skill.createdAt.localeCompare(a.skill.createdAt))
+      .slice(0, 4).map(item => item.skill);
+  }
+
+  get unreadNotifications(): number { return this.notifications.unreadCount(); }
+
+  async openNotification(notification: AppNotification): Promise<void> {
+    if (!notification.readAt) await this.notifications.markRead(notification.id);
+    const data = notification.data;
+    if (data['conversation_id']) await this.router.navigate(['/exchanges/messages'], { queryParams: { conversation: data['conversation_id'] } });
+    else if (data['solidarity_request_id'] || notification.type === 'solidarity_update') await this.router.navigate(['/solidarity']);
+    else if (data['session_id'] || notification.type === 'session_completed' || notification.type === 'review_received') await this.router.navigate(['/exchanges/sessions']);
+    else if (notification.type === 'credit_activity') await this.router.navigate(['/wallet']);
+    else await this.router.navigate(['/exchanges/requests']);
+  }
+
+  async openNotifications(): Promise<void> {
+    await this.router.navigate(['/exchanges/requests']);
   }
 
   get featuredSkills(): Skill[] {

@@ -1,6 +1,39 @@
 <div class="landing-page-root">
   <app-navbar></app-navbar>
 
+  @if (authService.isAuthenticated()) {
+    <main class="member-dashboard">
+      <section class="dashboard-welcome"><div><span class="dashboard-eyebrow">Tu espacio TimeBank</span><h1>¡Hola, {{ authService.currentUser()?.name?.split(' ')?.at(0) || 'miembro' }}!</h1><p>Este es el resumen de tus intercambios y de lo que está pasando en la comunidad.</p></div><a routerLink="/profile" class="tb-btn tb-btn-outline">Ver mi perfil</a></section>
+
+      <section class="dashboard-stats" aria-label="Resumen de tu cuenta">
+        <a routerLink="/wallet" class="dashboard-stat"><span>Créditos disponibles</span><strong>{{ authService.currentUser()?.timeCredits || 0 | number:'1.0-2' }}</strong><small>Consulta tu billetera <ion-icon name="arrow-forward-outline"></ion-icon></small></a>
+        <a routerLink="/wallet" class="dashboard-stat reserved"><span>Créditos reservados</span><strong>{{ exchanges.reservedBalance() | number:'1.0-2' }}</strong><small>Asignados a sesiones futuras</small></a>
+        <a routerLink="/exchanges/sessions" class="dashboard-stat"><span>Próximas sesiones</span><strong>{{ upcomingSessions.length }}</strong><small>Ver agenda <ion-icon name="arrow-forward-outline"></ion-icon></small></a>
+        <a routerLink="/exchanges/requests" class="dashboard-stat"><span>Solicitudes pendientes</span><strong>{{ pendingRequests.length }}</strong><small>{{ unreadNotifications }} notificaciones sin leer</small></a>
+      </section>
+
+      <section class="dashboard-main-grid">
+        <article class="dashboard-panel dashboard-sessions"><header><div><span class="dashboard-eyebrow">Agenda</span><h2>Próximas sesiones</h2></div><a routerLink="/exchanges/sessions">Ver todas</a></header>
+          @for (session of upcomingSessions.slice(0, 3); track session.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon"><ion-icon name="calendar-outline"></ion-icon></span><div><strong>{{ session.skillTitle }}</strong><small>Con {{ session.partnerName }} · {{ session.startAt | date:'EEE d MMM, h:mm a' }}</small></div><span class="dashboard-state">{{ session.status === 'scheduled' ? 'Agendada' : 'Por confirmar' }}</span></div> }
+          @empty { <div class="dashboard-empty"><ion-icon name="calendar-outline"></ion-icon><p>Aún no tienes sesiones próximas.</p><a routerLink="/explore">Explorar habilidades</a></div> }
+        </article>
+
+        <article class="dashboard-panel dashboard-requests"><header><div><span class="dashboard-eyebrow">Actividad</span><h2>Solicitudes pendientes</h2></div><a routerLink="/exchanges/requests">Ver solicitudes</a></header>
+          @for (request of pendingRequests.slice(0, 3); track request.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon request-icon"><ion-icon name="mail-outline"></ion-icon></span><div><strong>{{ request.skillTitle }}</strong><small>{{ request.providerId === authService.authUser()?.id ? 'De ' + request.requesterName : 'Para ' + request.providerName }} · {{ request.createdAt | date:'d MMM' }}</small></div><span class="dashboard-state pending">{{ request.status === 'rescheduled' ? 'Horario propuesto' : 'Pendiente' }}</span></div> }
+          @empty { <div class="dashboard-empty"><ion-icon name="checkmark-circle-outline"></ion-icon><p>No tienes solicitudes por responder.</p><a routerLink="/explore">Buscar algo para aprender</a></div> }
+        </article>
+      </section>
+
+      <section class="dashboard-panel dashboard-suggestions"><header><div><span class="dashboard-eyebrow">Para ti</span><h2>Habilidades que podrías aprender</h2><p>Priorizamos ofertas relacionadas con las habilidades que buscas.</p></div><a routerLink="/explore">Explorar catálogo</a></header>
+        <div class="suggestion-grid">@for (skill of recommendedSkills; track skill.id) { <button class="suggestion-card" type="button" (click)="onViewDetail(skill)"><span class="suggestion-category">{{ skill.categoryName }}</span><strong>{{ skill.title }}</strong><span class="suggestion-author">{{ skill.authorName }} · {{ skill.authorRating || 0 | number:'1.1-1' }} ★</span><span class="suggestion-link">Ver habilidad <ion-icon name="arrow-forward-outline"></ion-icon></span></button> } @empty { <div class="dashboard-empty"><p>Cuando publiques habilidades que buscas, te mostraremos sugerencias relacionadas.</p><a routerLink="/skills">Añadir habilidades que quiero aprender</a></div> }</div>
+      </section>
+
+      <section class="dashboard-panel dashboard-notifications"><header><div><span class="dashboard-eyebrow">Al día</span><h2>Notificaciones recientes</h2></div><button type="button" (click)="openNotifications()">Ver actividad</button></header>
+        @for (notification of notifications.notifications().slice(0, 3); track notification.id) { <button class="dashboard-notification-row" type="button" (click)="openNotification(notification)"><span class="notification-indicator" [class.unread]="!notification.readAt"></span><span><strong>{{ notification.title }}</strong><small>{{ notification.body }}</small></span><time>{{ notification.createdAt | date:'d MMM, h:mm a' }}</time></button> }
+        @empty { <p class="dashboard-empty">Todavía no tienes notificaciones.</p> }
+      </section>
+    </main>
+  } @else {
   <main>
     <!-- HERO SECTION: Asymmetric, Editorial, Temporal Geometry -->
     <section class="tb-hero-section">
@@ -402,6 +435,7 @@
       </div>
     </section>
   </main>
+  }
 
   <app-footer></app-footer>
 
