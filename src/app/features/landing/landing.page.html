@@ -65,10 +65,17 @@
 
             <!-- Action Buttons -->
             <div class="hero-actions-row">
-              <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-lg">
-                <ion-icon name="sparkles-outline"></ion-icon>
-                Comenzar a intercambiar
-              </a>
+              @if (!authService.isAuthenticated()) {
+                <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-lg">
+                  <ion-icon name="sparkles-outline"></ion-icon>
+                  Comenzar a intercambiar
+                </a>
+              } @else {
+                <a routerLink="/exchanges/requests" class="tb-btn tb-btn-primary tb-btn-lg">
+                  <ion-icon name="mail-outline"></ion-icon>
+                  Ver mis intercambios
+                </a>
+              }
               <a routerLink="/explore" class="tb-btn tb-btn-outline tb-btn-lg">
                 Explorar habilidades
                 <ion-icon name="arrow-forward-outline"></ion-icon>
@@ -375,10 +382,17 @@
               Crea tu perfil en segundos, publica lo que sabes y comienza a descubrir a personas con conocimientos complementarios.
             </p>
             <div class="cta-buttons-wrap">
-              <a routerLink="/auth/register" class="tb-btn tb-btn-accent tb-btn-lg">
-                <ion-icon name="sparkles-outline"></ion-icon>
-                Crear cuenta con 5 créditos de regalo
-              </a>
+              @if (!authService.isAuthenticated()) {
+                <a routerLink="/auth/register" class="tb-btn tb-btn-accent tb-btn-lg">
+                  <ion-icon name="sparkles-outline"></ion-icon>
+                  Crear cuenta con 5 créditos de regalo
+                </a>
+              } @else {
+                <a routerLink="/exchanges/requests" class="tb-btn tb-btn-accent tb-btn-lg">
+                  <ion-icon name="mail-outline"></ion-icon>
+                  Ir a mis intercambios
+                </a>
+              }
               <a routerLink="/explore" class="tb-btn tb-btn-outline tb-btn-lg white-outline">
                 Explorar catálogo de talentos
               </a>

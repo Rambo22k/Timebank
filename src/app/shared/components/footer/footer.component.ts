@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
+import { AuthService } from '../../../core/services/auth.service';
 import {
   timeOutline,
   sparklesOutline
@@ -18,7 +19,7 @@ import {
 export class FooterComponent {
   currentYear = new Date().getFullYear();
 
-  constructor() {
+  constructor(public authService: AuthService) {
     addIcons({
       timeOutline,
       sparklesOutline

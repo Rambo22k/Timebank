@@ -30,10 +30,12 @@
           <ion-icon name="wallet-outline"></ion-icon>
           Billetera
         </a>
-        <a routerLink="/profile" routerLinkActive="active" class="tb-nav-link">
-          <ion-icon name="person-circle-outline"></ion-icon>
-          Mi Perfil
-        </a>
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="active" class="tb-nav-link admin-nav-link">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+            Administración
+          </a>
+        }
       }
     </nav>
 
@@ -96,10 +98,9 @@
         <!-- User Quick Avatar -->
         <a routerLink="/profile" class="tb-user-mini" title="Ver mi perfil">
           <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="user-avatar-mini" />
-          <span class="user-name-mini">{{ authService.currentUser()?.name?.split(' ')?.at(0) }}</span>
-          @if (authService.isAdmin()) {
-            <span class="tb-admin-badge">Admin</span>
-          }
+          <span class="user-name-wrap"><span class="user-name-mini">{{ authService.currentUser()?.name?.split(' ')?.at(0) }}</span>
+            @if (authService.isAdmin()) { <span class="tb-admin-badge">Admin</span> }
+          </span>
         </a>
 
         <!-- Exit / Logout -->
@@ -176,6 +177,12 @@
               <ion-icon name="person-circle-outline"></ion-icon>
               Mi Perfil
             </a>
+            @if (authService.isAdmin()) {
+              <a routerLink="/admin" (click)="closeMobileMenu()" class="mobile-link">
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+                Administración
+              </a>
+            }
             <div class="mobile-divider"></div>
             <button class="tb-btn tb-btn-danger tb-btn-sm" (click)="onLogout()">
               <ion-icon name="log-out-outline"></ion-icon>

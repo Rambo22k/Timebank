@@ -1,0 +1,96 @@
+<app-navbar></app-navbar>
+<main class="admin-page"><div class="tb-container">
+  <header class="admin-heading">
+    <div><span class="eyebrow">Control de plataforma</span><h1>Administración</h1><p>Gestiona la comunidad, revisa casos y consulta la actividad de TimeBank.</p></div>
+    <button class="tb-btn tb-btn-outline" type="button" (click)="admin.load()" [disabled]="admin.loading()"><ion-icon name="refresh-outline"></ion-icon>Actualizar</button>
+  </header>
+
+  <nav class="admin-tabs" aria-label="Secciones administrativas">
+    <button [class.active]="activeSection === 'overview'" (click)="go('overview')"><ion-icon name="time-outline"></ion-icon>Resumen</button>
+    <button [class.active]="activeSection === 'users'" (click)="go('users')"><ion-icon name="people-outline"></ion-icon>Usuarios</button>
+    <button [class.active]="activeSection === 'reviews'" (click)="go('reviews')"><ion-icon name="shield-checkmark-outline"></ion-icon>Revisiones</button>
+    <button [class.active]="activeSection === 'disputes'" (click)="go('disputes')"><ion-icon name="alert-circle-outline"></ion-icon>Disputas</button>
+    <button [class.active]="activeSection === 'reports'" (click)="go('reports')"><ion-icon name="list-outline"></ion-icon>Reportes</button>
+    <button [class.active]="activeSection === 'categories'" (click)="go('categories')"><ion-icon name="pricetag-outline"></ion-icon>Categorías</button>
+    <button [class.active]="activeSection === 'credits'" (click)="go('credits')"><ion-icon name="wallet-outline"></ion-icon>Créditos</button>
+    <button [class.active]="activeSection === 'audit'" (click)="go('audit')"><ion-icon name="eye-outline"></ion-icon>Auditoría</button>
+    <button [class.active]="activeSection === 'settings'" (click)="go('settings')"><ion-icon name="settings-outline"></ion-icon>Parámetros</button>
+  </nav>
+
+  @if (admin.loading()) { <p class="admin-loading">Cargando información administrativa…</p> }
+
+  @if (activeSection === 'overview') {
+    <section class="stats-grid" aria-label="Estadísticas de la plataforma">
+      <article><span>Usuarios registrados</span><strong>{{ admin.stats()['users_total'] || 0 }}</strong><small>{{ admin.stats()['users_active'] || 0 }} activos</small></article>
+      <article><span>Sesiones completadas</span><strong>{{ admin.stats()['completed_sessions'] || 0 }}</strong><small>{{ admin.stats()['hours_exchanged'] || 0 | number:'1.0-2' }} horas intercambiadas</small></article>
+      <article><span>Horas donadas</span><strong>{{ admin.stats()['hours_donated'] || 0 | number:'1.0-2' }}</strong><small>{{ admin.stats()['people_helped'] || 0 }} personas ayudadas</small></article>
+      <article><span>Casos por atender</span><strong>{{ (admin.stats()['open_reports'] || 0) + (admin.stats()['pending_verifications'] || 0) + (admin.stats()['disputed_sessions'] || 0) }}</strong><small>reportes, verificaciones y disputas</small></article>
+    </section>
+    <div class="overview-grid">
+      <section class="admin-panel"><header><div><span class="eyebrow">Demanda de la comunidad</span><h2>Categorías populares</h2></div></header>
+        @for (item of admin.stats()['popular_categories'] || []; track item.category) { <div class="metric-row"><span>{{ item.category }}</span><strong>{{ item.skill_count }} habilidades</strong></div> } @empty { <p class="empty-state">Aún no hay datos para mostrar.</p> }
+      </section>
+      <section class="admin-panel"><header><div><span class="eyebrow">Distribución</span><h2>Países con actividad</h2></div></header>
+        @for (item of admin.stats()['active_countries'] || []; track item.country_code) { <div class="metric-row"><span>{{ item.country_code }}</span><strong>{{ item.sessions }} sesiones</strong></div> } @empty { <p class="empty-state">Aún no hay datos para mostrar.</p> }
+      </section>
+    </div>
+    <section class="admin-panel quick-actions"><h2>Atención pendiente</h2><button (click)="go('reviews')">Verificaciones <b>{{ admin.stats()['pending_verifications'] || 0 }}</b></button><button (click)="go('disputes')">Disputas <b>{{ admin.stats()['disputed_sessions'] || 0 }}</b></button><button (click)="go('reports')">Reportes abiertos <b>{{ admin.stats()['open_reports'] || 0 }}</b></button></section>
+  }
+
+  @if (activeSection === 'users') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Cuentas TimeBank</span><h2>Usuarios</h2><p>Busca por nombre o identificador. Suspende, reactiva o cambia el rol.</p></div></header>
+      <label class="search-box"><ion-icon name="search-outline"></ion-icon><input name="userSearch" [(ngModel)]="search" placeholder="Nombre o UUID del usuario"></label>
+      <div class="user-list">@for (user of users(); track user.id) {
+        <article class="user-row"><div class="user-copy"><strong>{{ user.display_name }} @if (user.role === 'admin') { <span class="role-pill">Admin</span> }</strong><small>{{ user.id }} · {{ user.country_code || 'Ubicación no indicada' }} · {{ user.completed_sessions }} sesiones · {{ user.available_balance | number:'1.0-2' }} créditos</small><small>Cuenta {{ user.account_status }} · desde {{ user.created_at | date:'mediumDate' }}</small></div><div class="user-actions">
+          @if (user.account_status === 'active') { <input [name]="'suspension-'+user.id" [(ngModel)]="notes[user.id]" placeholder="Motivo (mín. 5 caracteres)"><button class="danger-link" (click)="suspend(user)">Suspender</button><button class="danger-link" (click)="admin.setUserStatus(user,'deactivated','Desactivada por administración')">Desactivar</button> } @else { <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setUserStatus(user,'active')">Reactivar</button> }
+          <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setUserRole(user,user.role !== 'admin')">{{ user.role === 'admin' ? 'Quitar admin' : 'Hacer admin' }}</button>
+        </div></article>
+      } @empty { <p class="empty-state">No se encontraron usuarios.</p> }</div>
+      <p class="admin-hint">La desactivación conserva el historial y permite reactivar la cuenta. La eliminación permanente de una cuenta de acceso requiere una operación protegida del servidor.</p>
+    </section>
+  }
+
+  @if (activeSection === 'reviews') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Identidad de miembros</span><h2>Verificaciones pendientes</h2></div></header>
+      <div class="case-list">@for (item of admin.verifications(); track item.id) { <article class="case-card"><div class="case-top"><div><strong>{{ item.user_name }}</strong><small>{{ item.user_id }} · {{ item.submitted_at | date:'medium' }}</small></div>@if (item.document_url) { <a class="tb-btn tb-btn-outline tb-btn-sm" [href]="item.document_url" target="_blank" rel="noopener">Ver documento</a> }</div><textarea [name]="'verification-note-'+item.id" [(ngModel)]="notes[item.id]" placeholder="Nota para la persona (opcional)"></textarea><div class="action-row"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="admin.reviewVerification(item.id,true,notes[item.id] || '')"><ion-icon name="checkmark-circle-outline"></ion-icon>Aprobar</button><button class="tb-btn tb-btn-danger tb-btn-sm" (click)="admin.reviewVerification(item.id,false,notes[item.id] || '')"><ion-icon name="close-circle-outline"></ion-icon>Rechazar</button></div></article> } @empty { <p class="empty-state">No hay verificaciones pendientes.</p> }</div>
+    </section>
+  }
+
+  @if (activeSection === 'disputes') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Resolución de casos</span><h2>Sesiones en disputa</h2><p>La decisión registra el resultado del movimiento de créditos.</p></div></header>
+      <div class="case-list">@for (item of admin.disputes(); track item.id) { <article class="case-card"><div class="case-top"><div><strong>{{ item.requester_name }} <span>↔</span> {{ item.provider_name }}</strong><small>{{ item.duration_hours }} horas · {{ item.dispute_opened_at | date:'medium' }}</small></div></div><p>{{ item.dispute_reason || 'No se añadió una explicación.' }}</p><textarea [name]="'dispute-note-'+item.id" [(ngModel)]="notes[item.id]" placeholder="Resolución y motivo (mín. 5 caracteres)"></textarea><div class="action-row"><button class="tb-btn tb-btn-outline tb-btn-sm" [disabled]="(notes[item.id] || '').trim().length < 5" (click)="admin.resolveDispute(item.id,'refund_requester',notes[item.id] || '')">Devolver al solicitante</button><button class="tb-btn tb-btn-primary tb-btn-sm" [disabled]="(notes[item.id] || '').trim().length < 5" (click)="admin.resolveDispute(item.id,'pay_provider',notes[item.id] || '')">Transferir al proveedor</button></div></article> } @empty { <p class="empty-state">No hay sesiones en disputa.</p> }</div>
+    </section>
+  }
+
+  @if (activeSection === 'reports') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Moderación</span><h2>Reportes abiertos</h2></div></header>
+      <div class="case-list">@for (item of admin.reports(); track item.id) { <article class="case-card"><div class="case-top"><div><strong>{{ item.target_type }} reportado · {{ item.reporter_name }}</strong><small>{{ item.created_at | date:'medium' }} · ID de destino {{ item.target_id }}</small></div><span class="status-pill">{{ item.status }}</span></div><p>{{ item.reason }}</p><textarea [name]="'report-note-'+item.id" [(ngModel)]="notes[item.id]" placeholder="Resolución (mín. 5 caracteres)"></textarea><div class="action-row">@if (item.target_type === 'skill') { <button class="tb-btn tb-btn-danger tb-btn-sm" (click)="admin.moderateSkill(item.target_id,notes[item.id] || 'Habilidad retirada tras revisar el reporte')">Retirar habilidad</button> }<button class="tb-btn tb-btn-primary tb-btn-sm" [disabled]="(notes[item.id] || '').trim().length < 5" (click)="admin.resolveReport(item.id,'resolved',notes[item.id] || '')">Resolver</button><button class="tb-btn tb-btn-outline tb-btn-sm" [disabled]="(notes[item.id] || '').trim().length < 5" (click)="admin.resolveReport(item.id,'dismissed',notes[item.id] || '')">Descartar</button></div></article> } @empty { <p class="empty-state">No hay reportes abiertos.</p> }</div>
+    </section>
+  }
+
+  @if (activeSection === 'categories') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Catálogo</span><h2>Gestionar categorías</h2><p>Las categorías archivadas dejan de aparecer en nuevas publicaciones; las habilidades existentes se conservan.</p></div></header>
+      <form class="category-form" (ngSubmit)="saveCategory()"><label>Nombre<input name="categoryName" [(ngModel)]="newCategory.name" required maxlength="100"></label><label>Slug<input name="categorySlug" [(ngModel)]="newCategory.slug" placeholder="Se genera desde el nombre"></label><label>Descripción<input name="categoryDescription" [(ngModel)]="newCategory.description"></label><label>Orden<input name="categoryOrder" type="number" [(ngModel)]="newCategory.sort_order"></label><div class="action-row"><button class="tb-btn tb-btn-primary tb-btn-sm" type="submit">{{ editingCategoryId ? 'Guardar cambios' : 'Crear categoría' }}</button>@if (editingCategoryId) { <button class="tb-btn tb-btn-outline tb-btn-sm" type="button" (click)="cancelCategoryEdit()">Cancelar edición</button> }</div></form>
+      <div class="user-list">@for (category of admin.categories(); track category.id) { <article class="user-row"><div class="user-copy"><strong>{{ category.name }}</strong><small>{{ category.slug }} · {{ category.is_active ? 'Activa' : 'Archivada' }}</small><small>{{ category.description }}</small></div><div class="user-actions"><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="editCategory(category)">Editar</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setCategoryActive(category)">{{ category.is_active ? 'Archivar' : 'Activar' }}</button></div></article> }</div>
+    </section>
+  }
+
+  @if (activeSection === 'credits') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Libro mayor</span><h2>Movimientos y ajustes</h2><p>Selecciona un usuario para consultar movimientos o registrar un ajuste justificado.</p></div></header>
+      <label class="search-box"><ion-icon name="search-outline"></ion-icon><input name="creditSearch" [(ngModel)]="search" placeholder="Filtrar usuarios por nombre o UUID"></label>
+      <div class="user-picker">@for (user of users(); track user.id) { <button [class.selected]="selectedUserId === user.id" (click)="selectUser(user.id)">{{ user.display_name }} <small>{{ user.id.slice(0,8) }} · {{ user.available_balance | number:'1.0-2' }} créditos</small></button> }</div>
+      @if (selectedUserId) { <form class="adjust-form" (ngSubmit)="adjustCredits()"><h3>Ajustar saldo del usuario</h3><label>Cantidad (negativo resta)<input name="adjustmentAmount" type="number" step="0.01" [(ngModel)]="adjustmentAmount" required></label><label>Motivo<input name="adjustmentReason" [(ngModel)]="adjustmentReason" minlength="5" required placeholder="Explica el motivo del ajuste"></label><button class="tb-btn tb-btn-primary tb-btn-sm" type="submit" [disabled]="adjustmentReason.trim().length < 5 || adjustmentAmount === 0">Registrar ajuste</button></form>
+        <h3>Movimientos recientes</h3><div class="transaction-list">@for (tx of admin.transactions(); track tx.id) { <article><strong>{{ tx.transaction_type }} · {{ tx.amount | number:'1.0-2' }} créditos</strong><small>{{ tx.description }} · {{ tx.created_at | date:'medium' }}</small></article> } @empty { <p class="empty-state">No hay movimientos para este usuario.</p> }</div>
+      } @else { <p class="empty-state">Elige un usuario para ver sus movimientos.</p> }
+    </section>
+  }
+
+  @if (activeSection === 'audit') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Registro verificable</span><h2>Bitácora de auditoría</h2><p>Acciones críticas realizadas por administradores.</p></div></header><div class="transaction-list">@for (item of admin.audit(); track item.id) { <article><strong>{{ item.action }} · {{ item.entity_type }}</strong><small>{{ item.created_at | date:'medium' }} · {{ item.actor_id || 'Sistema' }} · {{ item.entity_id || '' }}</small><code>{{ item.details | json }}</code></article> } @empty { <p class="empty-state">Todavía no hay eventos en la bitácora.</p> }</div></section>
+  }
+
+  @if (activeSection === 'settings') {
+    <section class="admin-panel"><header><div><span class="eyebrow">Reglas de la plataforma</span><h2>Parámetros</h2></div></header><div class="settings-list">@for (setting of admin.settings(); track setting.key) { <form class="setting-row" (ngSubmit)="saveSetting(setting.key)"><div><strong>{{ setting.key }}</strong><small>{{ setting.description }}</small></div><input [name]="'setting-'+setting.key" type="number" min="0" step="0.01" [(ngModel)]="settingDrafts[setting.key]" [placeholder]="setting.value"><button class="tb-btn tb-btn-outline tb-btn-sm" type="submit">Guardar</button></form> }</div></section>
+  }
+</div></main>
+<app-footer></app-footer>

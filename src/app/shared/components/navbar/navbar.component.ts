@@ -17,7 +17,8 @@ import {
   mailOutline,
   starOutline,
   notificationsOutline,
-  checkmarkDoneOutline
+  checkmarkDoneOutline,
+  shieldCheckmarkOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -55,7 +56,8 @@ export class NavbarComponent {
       mailOutline,
       starOutline,
       notificationsOutline,
-      checkmarkDoneOutline
+      checkmarkDoneOutline,
+      shieldCheckmarkOutline
     });
   }
 

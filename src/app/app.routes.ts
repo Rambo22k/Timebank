@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { authGuard, onboardingGuard } from './core/guards/auth.guard';
+import { adminGuard, authGuard, onboardingGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -7,6 +7,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/landing/landing.page').then(m => m.LandingPage),
     title: 'TimeBank — Intercambio de Tiempo y Habilidades'
+  },
+  {
+    path: 'admin',
+    canActivate: [authGuard, adminGuard],
+    loadComponent: () => import('./features/admin/admin.page').then(m => m.AdminPage),
+    title: 'Administración — TimeBank'
   },
   {
     path: 'explore',

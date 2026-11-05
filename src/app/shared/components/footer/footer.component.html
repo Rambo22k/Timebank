@@ -38,18 +38,26 @@
         </ul>
       </div>
 
-      <!-- Account access -->
+      <!-- Account actions -->
       <div class="footer-col footer-col-auth">
-        <h4 class="footer-col-title">Únete a TimeBank</h4>
-        <p class="footer-subtext">Comparte lo que sabes y aprende de las personas de tu comunidad.</p>
+        @if (authService.isAuthenticated()) {
+          <h4 class="footer-col-title">Tu cuenta</h4>
+          <p class="footer-subtext">Continúa con tus habilidades e intercambios en TimeBank.</p>
+        } @else {
+          <h4 class="footer-col-title">Únete a TimeBank</h4>
+          <p class="footer-subtext">Comparte lo que sabes y aprende de las personas de tu comunidad.</p>
+        }
         <div class="footer-cta-stack">
-          <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-sm">
-            <ion-icon name="sparkles-outline"></ion-icon>
-            Crear una cuenta
-          </a>
-          <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">
-            Iniciar sesión
-          </a>
+          @if (authService.isAuthenticated()) {
+            <a routerLink="/exchanges/requests" class="tb-btn tb-btn-primary tb-btn-sm">Mis intercambios</a>
+            <a routerLink="/profile" class="tb-btn tb-btn-outline tb-btn-sm">Mi perfil</a>
+          } @else {
+            <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-sm">
+              <ion-icon name="sparkles-outline"></ion-icon>
+              Crear una cuenta
+            </a>
+            <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">Iniciar sesión</a>
+          }
         </div>
       </div>
     </div>
