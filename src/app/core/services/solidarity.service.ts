@@ -66,7 +66,7 @@ export class SolidarityService {
     this.loadingSignal.set(true);
     const client = this.supabase.requireClient();
     try {
-      const roleResult = await client.from('user_roles').select('role').eq('user_id', userId).maybeSingle();
+      const roleResult = await client.from('user_roles').select('role').eq('user_id', userId).eq('role', 'admin').maybeSingle();
       if (roleResult.error) throw roleResult.error;
       const isAdmin = roleResult.data?.role === 'admin';
       this.isAdminSignal.set(isAdmin);

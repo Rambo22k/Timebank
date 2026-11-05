@@ -29,10 +29,12 @@ export class AuthService {
   private currentUserSignal = signal<UserProfile | null>(null);
   private authUserSignal = signal<User | null>(null);
   private privateProfileSignal = signal<PrivateProfile | null>(null);
+  private isAdminSignal = signal(false);
   private initializedPromise: Promise<void> | null = null;
 
   readonly currentUser = this.currentUserSignal.asReadonly();
   readonly authUser = this.authUserSignal.asReadonly();
+  readonly isAdmin = this.isAdminSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.authUserSignal() !== null);
   readonly isReady = signal(false);
   readonly needsProfileCompletion = computed(() => {
@@ -211,14 +213,17 @@ export class AuthService {
   private async loadAuthenticatedUser(authUser: User): Promise<void> {
     this.authUserSignal.set(authUser);
     const client = this.supabase.requireClient();
-    const [profileResult, privateResult, accountResult] = await Promise.all([
+    const [profileResult, privateResult, accountResult, roleResult] = await Promise.all([
       client.from('profiles').select('display_name, headline, location, avatar_path, bio, country_code, reputation_average, reputation_count, offered_hours, received_hours, completed_sessions, created_at, is_verified').eq('id', authUser.id).maybeSingle(),
       client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at').eq('user_id', authUser.id).maybeSingle(),
-      client.from('credit_accounts').select('available_balance').eq('user_id', authUser.id).maybeSingle()
+      client.from('credit_accounts').select('available_balance').eq('user_id', authUser.id).maybeSingle(),
+      client.from('user_roles').select('role').eq('user_id', authUser.id).eq('role', 'admin').maybeSingle()
     ]);
     if (profileResult.error) throw new TimeBankAuthError(this.messageFor(profileResult.error));
     if (privateResult.error) throw new TimeBankAuthError(this.messageFor(privateResult.error));
     if (accountResult.error) throw new TimeBankAuthError(this.messageFor(accountResult.error));
+    if (roleResult.error) throw new TimeBankAuthError(this.messageFor(roleResult.error));
+    this.isAdminSignal.set(roleResult.data?.role === 'admin');
 
     const profile = profileResult.data;
     const privateProfile = privateResult.data as PrivateProfile | null;
@@ -254,6 +259,7 @@ export class AuthService {
 
   private clearSession(): void {
     this.authUserSignal.set(null);
+    this.isAdminSignal.set(false);
     this.currentUserSignal.set(null);
     this.privateProfileSignal.set(null);
     this.isPasswordRecovery.set(false);

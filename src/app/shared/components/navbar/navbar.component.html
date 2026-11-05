@@ -97,6 +97,9 @@
         <a routerLink="/profile" class="tb-user-mini" title="Ver mi perfil">
           <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="user-avatar-mini" />
           <span class="user-name-mini">{{ authService.currentUser()?.name?.split(' ')?.at(0) }}</span>
+          @if (authService.isAdmin()) {
+            <span class="tb-admin-badge">Admin</span>
+          }
         </a>
 
         <!-- Exit / Logout -->
@@ -129,6 +132,9 @@
             <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="drawer-avatar" />
             <div class="drawer-user-info">
               <span class="drawer-name">{{ authService.currentUser()?.name }}</span>
+              @if (authService.isAdmin()) {
+                <span class="tb-admin-badge">Admin</span>
+              }
               <div class="tb-credits-pill mobile-pill">
                 <ion-icon name="time-outline"></ion-icon>
                 <span>{{ authService.currentUser()?.timeCredits }} Créditos de tiempo</span>
