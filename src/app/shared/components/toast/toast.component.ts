@@ -10,11 +10,13 @@ import {
   closeOutline
 } from 'ionicons/icons';
 import { ToastService } from '../../../core/services/toast.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-toast',
   standalone: true,
-  imports: [CommonModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, IonIcon],
   templateUrl: './toast.component.html',
   styleUrls: ['./toast.component.scss']
 })

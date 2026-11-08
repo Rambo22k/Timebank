@@ -6,17 +6,15 @@
       <!-- Breadcrumb & Page Header -->
       <div class="page-title-row">
         <div>
-          <span class="sub-label">Gestión de Talento Personal</span>
-          <h1 class="page-title">Mis Habilidades & Conocimientos</h1>
+          <span class="sub-label">{{ "Gestión de Talento Personal" | t }}</span>
+          <h1 class="page-title">{{ "Mis Habilidades & Conocimientos" | t }}</h1>
           <p class="page-description">
-            Administra tus publicaciones activas. Puedes ofrecer habilidades para ganar tiempo o solicitar aprender lo que te apasiona.
-          </p>
+             {{ "Administra tus publicaciones activas. Puedes ofrecer habilidades para ganar tiempo o solicitar aprender lo que te apasiona." | t }} </p>
         </div>
 
         <button class="tb-btn tb-btn-primary" (click)="openCreateModal()">
           <ion-icon name="add-outline"></ion-icon>
-          Publicar Nueva Habilidad
-        </button>
+           {{ "Publicar Nueva Habilidad" | t }} </button>
       </div>
 
       <!-- Live Counter Cards -->
@@ -27,7 +25,7 @@
           </div>
           <div class="counter-info">
             <span class="counter-num">{{ offeredCount + wantedCount }}</span>
-            <span class="counter-lbl">Total Publicadas</span>
+            <span class="counter-lbl">{{ "Total Publicadas" | t }}</span>
           </div>
         </div>
 
@@ -37,7 +35,7 @@
           </div>
           <div class="counter-info">
             <span class="counter-num">{{ offeredCount }}</span>
-            <span class="counter-lbl">Habilidades que Ofrezco</span>
+            <span class="counter-lbl">{{ "Habilidades que Ofrezco" | t }}</span>
           </div>
         </div>
 
@@ -47,7 +45,7 @@
           </div>
           <div class="counter-info">
             <span class="counter-num">{{ wantedCount }}</span>
-            <span class="counter-lbl">Habilidades que Busco</span>
+            <span class="counter-lbl">{{ "Habilidades que Busco" | t }}</span>
           </div>
         </div>
       </div>

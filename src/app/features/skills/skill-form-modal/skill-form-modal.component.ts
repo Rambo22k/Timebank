@@ -8,11 +8,13 @@ import { Skill, SkillType, SkillLevel, SkillModality } from '../../../core/model
 import { SkillCategory } from '../../../core/models/category.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { SkillsService } from '../../../core/services/skills.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-skill-form-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, FormsModule, ReactiveFormsModule, IonIcon],
   templateUrl: './skill-form-modal.component.html',
   styleUrls: ['./skill-form-modal.component.scss']
 })

@@ -11,10 +11,12 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { ExchangeNavComponent } from './exchange-nav.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ChatService } from '../../core/services/chat.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-exchange-messages', standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent],
+  imports: [
+    TranslatePipe,CommonModule, DatePipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent],
   templateUrl: './messages.page.html', styleUrls: ['./messages.page.scss']
 })
 export class ExchangeMessagesPage {

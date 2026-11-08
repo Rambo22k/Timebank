@@ -9,6 +9,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 function passwordMatch(control: AbstractControl): ValidationErrors | null {
   return control.get('password')?.value === control.get('confirmPassword')?.value ? null : { passwordMismatch: true };
@@ -16,7 +17,8 @@ function passwordMatch(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-auth-update-password', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
+  imports: [
+    TranslatePipe,CommonModule, ReactiveFormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
   templateUrl: './update-password.page.html', styleUrls: ['./register/register.page.scss']
 })
 export class UpdatePasswordPage implements OnInit {

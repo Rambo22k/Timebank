@@ -10,6 +10,7 @@ export interface UserProfile {
   timezone: string;
   languages: string[];
   preferredLanguage: 'en' | 'es';
+  preferredTheme: 'system' | 'light' | 'dark';
   timeCredits: number;
   hoursGiven: number;
   hoursReceived: number;

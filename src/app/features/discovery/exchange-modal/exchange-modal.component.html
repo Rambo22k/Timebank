@@ -10,8 +10,8 @@
           <ion-icon name="swap-horizontal-outline"></ion-icon>
         </div>
         <div>
-          <span class="sub-label">Intercambio de Tiempo</span>
-          <h2 class="title">{{ skill.type === 'wanted' ? 'Ofrecer enseñar' : 'Proponer sesión' }}</h2>
+          <span class="sub-label">{{ "Intercambio de Tiempo" | t }}</span>
+          <h2 class="title">{{ (skill.type === 'wanted' ? 'Ofrecer enseñar' : 'Proponer sesión') | t }}</h2>
         </div>
       </div>
 
@@ -20,57 +20,57 @@
         <div class="skill-main">
           <span class="cat-pill">{{ skill.categoryName }}</span>
           <h4 class="skill-name">{{ skill.title }}</h4>
-          <span class="author-note">{{ skill.type === 'wanted' ? 'Quiere aprender con' : 'Impartido por' }} <strong>{{ skill.authorName }}</strong></span>
+          <span class="author-note">{{ (skill.type === 'wanted' ? 'Quiere aprender con' : 'Impartido por') | t }} <strong>{{ skill.authorName }}</strong></span>
         </div>
         <div class="time-cost-badge">
           <ion-icon name="time-outline"></ion-icon>
           <div class="cost-texts">
-            <span class="cost-num">{{ requestedHours }} {{ requestedHours === 1 ? 'crédito' : 'créditos' }}</span>
-            <span class="cost-label">{{ requestedHours }} {{ requestedHours === 1 ? 'hora' : 'horas' }} de sesión</span>
+            <span class="cost-num">{{ requestedHours }} {{ (requestedHours === 1 ? 'crédito' : 'créditos') | t }}</span>
+            <span class="cost-label">{{ requestedHours }} {{ (requestedHours === 1 ? 'hora' : 'horas') | t }} de sesión</span>
           </div>
         </div>
       </div>
 
       @if (skill.type === 'offered') {
         <div class="balance-status-row">
-          <span>Tu saldo actual:</span>
+          <span>{{ "Tu saldo actual:" | t }}</span>
           <strong class="balance-val">{{ authService.currentUser()?.timeCredits || 0 }} créditos disponibles</strong>
         </div>
       } @else {
         <div class="balance-status-row">
-          <span>Créditos:</span>
-          <strong class="balance-val">La persona los reservará al aceptar la oferta.</strong>
+          <span>{{ "Créditos:" | t }}</span>
+          <strong class="balance-val">{{ "La persona los reservará al aceptar la oferta." | t }}</strong>
         </div>
         <div class="tb-form-group">
-          <label class="tb-label" for="teaching-skill">Habilidad que ofrecerás</label>
+          <label class="tb-label" for="teaching-skill">{{ "Habilidad que ofrecerás" | t }}</label>
           <select id="teaching-skill" class="tb-select" [(ngModel)]="selectedTeachingSkillId" [disabled]="teachingSkills.length === 0">
-            <option value="" disabled>Selecciona una habilidad ofrecida</option>
+            <option value="" disabled>{{ "Selecciona una habilidad ofrecida" | t }}</option>
             @for (offeredSkill of teachingSkills; track offeredSkill.id) {
               <option [value]="offeredSkill.id">{{ offeredSkill.title }}</option>
             }
           </select>
           @if (!teachingSkills.length) {
-            <p class="tb-help-text">Primero publica una habilidad ofrecida en esta categoría para que la propuesta sea pertinente.</p>
+            <p class="tb-help-text">{{ "Primero publica una habilidad ofrecida en esta categoría para que la propuesta sea pertinente." | t }}</p>
           }
         </div>
       }
 
       <!-- Proposal Message -->
       <div class="tb-form-group">
-        <label class="tb-label" for="exchange-start">Fecha y hora propuestas</label>
+        <label class="tb-label" for="exchange-start">{{ "Fecha y hora propuestas" | t }}</label>
         <input id="exchange-start" class="tb-input" type="datetime-local" [(ngModel)]="proposedStartAt" />
       </div>
 
       <div class="tb-form-group">
-        <label class="tb-label" for="exchange-duration">Duración de la sesión</label>
+        <label class="tb-label" for="exchange-duration">{{ "Duración de la sesión" | t }}</label>
         <select id="exchange-duration" class="tb-select" [(ngModel)]="requestedHours">
-          @for (duration of durationOptions; track duration) { <option [ngValue]="duration">{{ duration }} {{ duration === 1 ? 'hora' : 'horas' }}</option> }
+          @for (duration of durationOptions; track duration) { <option [ngValue]="duration">{{ duration }} {{ (duration === 1 ? 'hora' : 'horas') | t }}</option> }
         </select>
-        <p class="tb-help-text">{{ skill.type === 'wanted' ? 'La persona que acepta la oferta debe tener el saldo disponible. Se permiten bloques de 15 minutos.' : 'La duración debe cubrirse con tu saldo actual. Se permiten bloques de 15 minutos.' }}</p>
+        <p class="tb-help-text">{{ (skill.type === 'wanted' ? 'La persona que acepta la oferta debe tener el saldo disponible. Se permiten bloques de 15 minutos.' : 'La duración debe cubrirse con tu saldo actual. Se permiten bloques de 15 minutos.') | t }}</p>
       </div>
 
       <div class="tb-form-group">
-        <label class="tb-label" for="exchange-msg">{{ skill.type === 'wanted' ? 'Mensaje para' : 'Mensaje inicial para' }} {{ skill.authorName }}</label>
+        <label class="tb-label" for="exchange-msg">{{ (skill.type === 'wanted' ? 'Mensaje para' : 'Mensaje inicial para') | t }} {{ skill.authorName }}</label>
         <textarea
           id="exchange-msg"
           class="tb-textarea"
@@ -84,11 +84,10 @@
       <!-- Actions -->
       <div class="modal-footer">
         <button class="tb-btn tb-btn-outline" (click)="onClose()">
-          Cancelar
-        </button>
+           {{ "Cancelar" | t }} </button>
         <button class="tb-btn tb-btn-accent" (click)="onSendProposal()" [disabled]="isSubmitting || !proposedMessage.trim() || (skill.type === 'wanted' && !selectedTeachingSkillId)">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
-          {{ isSubmitting ? 'Enviando...' : (skill.type === 'wanted' ? 'Enviar oferta para enseñar' : 'Enviar solicitud') }}
+          {{ (isSubmitting ? 'Enviando...' : (skill.type === 'wanted' ? 'Enviar oferta para enseñar' : 'Enviar solicitud')) | t }}
         </button>
       </div>
     </div>

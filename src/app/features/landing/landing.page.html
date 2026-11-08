@@ -3,32 +3,32 @@
 
   @if (authService.isAuthenticated()) {
     <main class="member-dashboard">
-      <section class="dashboard-welcome"><div><span class="dashboard-eyebrow">Tu espacio TimeBank</span><h1>¡Hola, {{ authService.currentUser()?.name?.split(' ')?.at(0) || 'miembro' }}!</h1><p>Este es el resumen de tus intercambios y de lo que está pasando en la comunidad.</p></div><a routerLink="/profile" class="tb-btn tb-btn-outline">Ver mi perfil</a></section>
+      <section class="dashboard-welcome"><div><span class="dashboard-eyebrow">{{ "Tu espacio TimeBank" | t }}</span><h1>¡Hola, {{ authService.currentUser()?.name?.split(' ')?.at(0) || 'miembro' }}!</h1><p>{{ "Este es el resumen de tus intercambios y de lo que está pasando en la comunidad." | t }}</p></div><a routerLink="/profile" class="tb-btn tb-btn-outline">{{ "Ver mi perfil" | t }}</a></section>
 
       <section class="dashboard-stats" aria-label="Resumen de tu cuenta">
-        <a routerLink="/wallet" class="dashboard-stat"><span>Créditos disponibles</span><strong>{{ authService.currentUser()?.timeCredits || 0 | number:'1.0-2' }}</strong><small>Consulta tu billetera <ion-icon name="arrow-forward-outline"></ion-icon></small></a>
-        <a routerLink="/wallet" class="dashboard-stat reserved"><span>Créditos reservados</span><strong>{{ exchanges.reservedBalance() | number:'1.0-2' }}</strong><small>Asignados a sesiones futuras</small></a>
-        <a routerLink="/exchanges/sessions" class="dashboard-stat"><span>Próximas sesiones</span><strong>{{ upcomingSessions.length }}</strong><small>Ver agenda <ion-icon name="arrow-forward-outline"></ion-icon></small></a>
-        <a routerLink="/exchanges/requests" class="dashboard-stat"><span>Solicitudes pendientes</span><strong>{{ pendingRequests.length }}</strong><small>{{ unreadNotifications }} notificaciones sin leer</small></a>
+        <a routerLink="/wallet" class="dashboard-stat"><span>{{ "Créditos disponibles" | t }}</span><strong>{{ (authService.currentUser()?.timeCredits || 0 | number:'1.0-2') | t }}</strong><small>{{ "Consulta tu billetera" | t }} <ion-icon name="arrow-forward-outline"></ion-icon></small></a>
+        <a routerLink="/wallet" class="dashboard-stat reserved"><span>{{ "Créditos reservados" | t }}</span><strong>{{ exchanges.reservedBalance() | number:'1.0-2' }}</strong><small>{{ "Asignados a sesiones futuras" | t }}</small></a>
+        <a routerLink="/exchanges/sessions" class="dashboard-stat"><span>{{ "Próximas sesiones" | t }}</span><strong>{{ upcomingSessions.length }}</strong><small>{{ "Ver agenda" | t }} <ion-icon name="arrow-forward-outline"></ion-icon></small></a>
+        <a routerLink="/exchanges/requests" class="dashboard-stat"><span>{{ "Solicitudes pendientes" | t }}</span><strong>{{ pendingRequests.length }}</strong><small>{{ unreadNotifications }} notificaciones sin leer</small></a>
       </section>
 
       <section class="dashboard-main-grid">
-        <article class="dashboard-panel dashboard-sessions"><header><div><span class="dashboard-eyebrow">Agenda</span><h2>Próximas sesiones</h2></div><a routerLink="/exchanges/sessions">Ver todas</a></header>
-          @for (session of upcomingSessions.slice(0, 3); track session.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon"><ion-icon name="calendar-outline"></ion-icon></span><div><strong>{{ session.skillTitle }}</strong><small>Con {{ session.partnerName }} · {{ session.startAt | date:'EEE d MMM, h:mm a' }}</small></div><span class="dashboard-state">{{ session.status === 'scheduled' ? 'Agendada' : 'Por confirmar' }}</span></div> }
+        <article class="dashboard-panel dashboard-sessions"><header><div><span class="dashboard-eyebrow">{{ "Agenda" | t }}</span><h2>{{ "Próximas sesiones" | t }}</h2></div><a routerLink="/exchanges/sessions">{{ "Ver todas" | t }}</a></header>
+          @for (session of upcomingSessions.slice(0, 3); track session.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon"><ion-icon name="calendar-outline"></ion-icon></span><div><strong>{{ session.skillTitle }}</strong><small>Con {{ session.partnerName }} · {{ session.startAt | date:'EEE d MMM, h:mm a' }}</small></div><span class="dashboard-state">{{ (session.status === 'scheduled' ? 'Agendada' : 'Por confirmar') | t }}</span></div> }
           @empty { <div class="dashboard-empty"><ion-icon name="calendar-outline"></ion-icon><p>Aún no tienes sesiones próximas.</p><a routerLink="/explore">Explorar habilidades</a></div> }
         </article>
 
-        <article class="dashboard-panel dashboard-requests"><header><div><span class="dashboard-eyebrow">Actividad</span><h2>Solicitudes pendientes</h2></div><a routerLink="/exchanges/requests">Ver solicitudes</a></header>
-          @for (request of pendingRequests.slice(0, 3); track request.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon request-icon"><ion-icon name="mail-outline"></ion-icon></span><div><strong>{{ request.skillTitle }}</strong><small>{{ request.initiatorId === authService.authUser()?.id ? 'Para ' : 'De ' }}{{ exchanges.requestCounterpart(request).name }} · {{ request.createdAt | date:'d MMM' }}</small></div><span class="dashboard-state pending">{{ request.status === 'rescheduled' ? 'Horario propuesto' : 'Pendiente' }}</span></div> }
+        <article class="dashboard-panel dashboard-requests"><header><div><span class="dashboard-eyebrow">{{ "Actividad" | t }}</span><h2>{{ "Solicitudes pendientes" | t }}</h2></div><a routerLink="/exchanges/requests">{{ "Ver solicitudes" | t }}</a></header>
+          @for (request of pendingRequests.slice(0, 3); track request.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon request-icon"><ion-icon name="mail-outline"></ion-icon></span><div><strong>{{ request.skillTitle }}</strong><small>{{ (request.initiatorId === authService.authUser()?.id ? 'Para ' : 'De ') | t }}{{ exchanges.requestCounterpart(request).name }} · {{ request.createdAt | date:'d MMM' }}</small></div><span class="dashboard-state pending">{{ (request.status === 'rescheduled' ? 'Horario propuesto' : 'Pendiente') | t }}</span></div> }
           @empty { <div class="dashboard-empty"><ion-icon name="checkmark-circle-outline"></ion-icon><p>No tienes solicitudes por responder.</p><a routerLink="/explore">Buscar algo para aprender</a></div> }
         </article>
       </section>
 
-      <section class="dashboard-panel dashboard-suggestions"><header><div><span class="dashboard-eyebrow">Para ti</span><h2>Habilidades que podrías aprender</h2><p>Priorizamos ofertas relacionadas con las habilidades que buscas.</p></div><a routerLink="/explore">Explorar catálogo</a></header>
-        <div class="suggestion-grid">@for (skill of recommendedSkills; track skill.id) { <button class="suggestion-card" type="button" (click)="onViewDetail(skill)"><span class="suggestion-category">{{ skill.categoryName }}</span><strong>{{ skill.title }}</strong><span class="suggestion-author">{{ skill.authorName }} · {{ skill.authorRating || 0 | number:'1.1-1' }} ★</span><span class="suggestion-link">Ver habilidad <ion-icon name="arrow-forward-outline"></ion-icon></span></button> } @empty { <div class="dashboard-empty"><p>Cuando publiques habilidades que buscas, te mostraremos sugerencias relacionadas.</p><a routerLink="/skills">Añadir habilidades que quiero aprender</a></div> }</div>
+      <section class="dashboard-panel dashboard-suggestions"><header><div><span class="dashboard-eyebrow">{{ "Para ti" | t }}</span><h2>{{ "Habilidades que podrías aprender" | t }}</h2><p>{{ "Priorizamos ofertas relacionadas con las habilidades que buscas." | t }}</p></div><a routerLink="/explore">{{ "Explorar catálogo" | t }}</a></header>
+        <div class="suggestion-grid">@for (skill of recommendedSkills; track skill.id) { <button class="suggestion-card" type="button" (click)="onViewDetail(skill)"><span class="suggestion-category">{{ skill.categoryName }}</span><strong>{{ skill.title }}</strong><span class="suggestion-author">{{ skill.authorName }} · {{ skill.authorRating || 0 | number:'1.1-1' }} ★</span><span class="suggestion-link">{{ "Ver habilidad" | t }} <ion-icon name="arrow-forward-outline"></ion-icon></span></button> } @empty { <div class="dashboard-empty"><p>Cuando publiques habilidades que buscas, te mostraremos sugerencias relacionadas.</p><a routerLink="/skills">Añadir habilidades que quiero aprender</a></div> }</div>
       </section>
 
-      <section class="dashboard-panel dashboard-notifications"><header><div><span class="dashboard-eyebrow">Al día</span><h2>Notificaciones recientes</h2></div><button type="button" (click)="openNotifications()">Ver actividad</button></header>
+      <section class="dashboard-panel dashboard-notifications"><header><div><span class="dashboard-eyebrow">{{ "Al día" | t }}</span><h2>{{ "Notificaciones recientes" | t }}</h2></div><button type="button" (click)="openNotifications()">{{ "Ver actividad" | t }}</button></header>
         @for (notification of notifications.notifications().slice(0, 3); track notification.id) { <button class="dashboard-notification-row" type="button" (click)="openNotification(notification)"><span class="notification-indicator" [class.unread]="!notification.readAt"></span><span><strong>{{ notification.title }}</strong><small>{{ notification.body }}</small></span><time>{{ notification.createdAt | date:'d MMM, h:mm a' }}</time></button> }
         @empty { <p class="dashboard-empty">Todavía no tienes notificaciones.</p> }
       </section>
@@ -43,32 +43,28 @@
           <div class="hero-text-content">
             <div class="hero-eyebrow">
               <span class="eyebrow-dot"></span>
-              <span class="eyebrow-text">Economía colaborativa basada en el tiempo</span>
+              <span class="eyebrow-text">{{ "Economía colaborativa basada en el tiempo" | t }}</span>
             </div>
 
             <h1 class="hero-title">
-              Tu tiempo tiene valor. <br />
-              <span class="highlight-teal">Intercámbialo</span> y
-              <span class="highlight-orange">multiplica</span> lo que sabes.
-            </h1>
+               {{ "Tu tiempo tiene valor." | t }} <br />
+              <span class="highlight-teal">{{ "Intercámbialo" | t }}</span>  {{ "y" | t }} <span class="highlight-orange">{{ "multiplica" | t }}</span>  {{ "lo que sabes." | t }} </h1>
 
             <p class="hero-description">
-              Una plataforma donde una hora de tus conocimientos equivale a una hora de lo que deseas aprender. Sin dinero, sin intermediarios: solo personas compartiendo talento real.
-            </p>
+               {{ "Una plataforma donde una hora de tus conocimientos equivale a una hora de lo que deseas aprender. Sin dinero, sin intermediarios: solo personas compartiendo talento real." | t }} </p>
 
             <!-- Interactive Live Time Converter Pill -->
             <div class="hero-converter-box">
               <div class="converter-header">
                 <span class="converter-label">
                   <ion-icon name="infinite-outline"></ion-icon>
-                  Equivalencia Universal de Tiempo
-                </span>
-                <span class="converter-rule">1h = 1 Crédito</span>
+                   {{ "Equivalencia Universal de Tiempo" | t }} </span>
+                <span class="converter-rule">{{ "1h = 1 Crédito" | t }}</span>
               </div>
 
               <div class="converter-interactive-row">
                 <div class="skill-select-chip">
-                  <span class="chip-prefix">1 hora de</span>
+                  <span class="chip-prefix">{{ "1 hora de" | t }}</span>
                   <select [value]="selectedSkillA()" (change)="setSkillA($any($event.target).value)" class="chip-select">
                     @for (s of sampleSkillsList; track s) {
                       <option [value]="s">{{ s }}</option>
@@ -81,7 +77,7 @@
                 </div>
 
                 <div class="skill-select-chip orange-tint">
-                  <span class="chip-prefix">1 hora de</span>
+                  <span class="chip-prefix">{{ "1 hora de" | t }}</span>
                   <select [value]="selectedSkillB()" (change)="setSkillB($any($event.target).value)" class="chip-select">
                     @for (s of sampleSkillsList; track s) {
                       <option [value]="s">{{ s }}</option>
@@ -92,7 +88,7 @@
 
               <div class="converter-result-bar">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span>Sin transacción monetaria. Ambos ganan experiencia y expanden su comunidad.</span>
+                <span>{{ "Sin transacción monetaria. Ambos ganan experiencia y expanden su comunidad." | t }}</span>
               </div>
             </div>
 
@@ -101,17 +97,14 @@
               @if (!authService.isAuthenticated()) {
                 <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-lg">
                   <ion-icon name="sparkles-outline"></ion-icon>
-                  Comenzar a intercambiar
-                </a>
+                   {{ "Comenzar a intercambiar" | t }} </a>
               } @else {
                 <a routerLink="/exchanges/requests" class="tb-btn tb-btn-primary tb-btn-lg">
                   <ion-icon name="mail-outline"></ion-icon>
-                  Ver mis intercambios
-                </a>
+                   {{ "Ver mis intercambios" | t }} </a>
               }
               <a routerLink="/explore" class="tb-btn tb-btn-outline tb-btn-lg">
-                Explorar habilidades
-                <ion-icon name="arrow-forward-outline"></ion-icon>
+                 {{ "Explorar habilidades" | t }} <ion-icon name="arrow-forward-outline"></ion-icon>
               </a>
             </div>
 
@@ -119,17 +112,17 @@
             <div class="hero-metrics-row">
               <div class="metric-item">
                 <span class="metric-num">100%</span>
-                <span class="metric-lbl">Sin dinero directo</span>
+                <span class="metric-lbl">{{ "Sin dinero directo" | t }}</span>
               </div>
               <div class="metric-sep">/</div>
               <div class="metric-item">
-                <span class="metric-num">1h = 1</span>
-                <span class="metric-lbl">Crédito de tiempo</span>
+                <span class="metric-num">{{ "1h = 1" | t }}</span>
+                <span class="metric-lbl">{{ "Crédito de tiempo" | t }}</span>
               </div>
               <div class="metric-sep">/</div>
               <div class="metric-item">
                 <span class="metric-num">+7</span>
-                <span class="metric-lbl">Áreas de talento</span>
+                <span class="metric-lbl">{{ "Áreas de talento" | t }}</span>
               </div>
             </div>
           </div>
@@ -146,11 +139,10 @@
     <section id="como-funciona" class="tb-section how-it-works-section">
       <div class="tb-container">
         <div class="section-header-editorial">
-          <span class="section-tag">Metodología TimeBank</span>
-          <h2 class="section-title">¿Cómo funciona el intercambio de tiempo?</h2>
+          <span class="section-tag">{{ "Metodología TimeBank" | t }}</span>
+          <h2 class="section-title">{{ "¿Cómo funciona el intercambio de tiempo?" | t }}</h2>
           <p class="section-subtitle">
-            Un ciclo colaborativo de cuatro pasos pensado para aprender, enseñar y construir lazos sin barreras financieras.
-          </p>
+             {{ "Un ciclo colaborativo de cuatro pasos pensado para aprender, enseñar y construir lazos sin barreras financieras." | t }} </p>
         </div>
 
         <div class="steps-grid">
@@ -160,10 +152,9 @@
               <span class="step-num">01</span>
               <div class="step-line"></div>
             </div>
-            <h3 class="step-title">Crea tu perfil</h3>
+            <h3 class="step-title">{{ "Crea tu perfil" | t }}</h3>
             <p class="step-desc">
-              Define tu bio, intereses y recibe tus primeros créditos de tiempo como bienvenida a la red comunitaria.
-            </p>
+               {{ "Define tu bio, intereses y recibe tus primeros créditos de tiempo como bienvenida a la red comunitaria." | t }} </p>
           </div>
 
           <!-- Step 2 -->
@@ -172,10 +163,9 @@
               <span class="step-num">02</span>
               <div class="step-line"></div>
             </div>
-            <h3 class="step-title">Publica lo que sabes o buscas</h3>
+            <h3 class="step-title">{{ "Publica lo que sabes o buscas" | t }}</h3>
             <p class="step-desc">
-              Publica habilidades que ofreces para enseñar o habilidades específicas que te gustaría aprender.
-            </p>
+               {{ "Publica habilidades que ofreces para enseñar o habilidades específicas que te gustaría aprender." | t }} </p>
           </div>
 
           <!-- Step 3 -->
@@ -184,10 +174,9 @@
               <span class="step-num">03</span>
               <div class="step-line"></div>
             </div>
-            <h3 class="step-title">Conecta con pares</h3>
+            <h3 class="step-title">{{ "Conecta con pares" | t }}</h3>
             <p class="step-desc">
-              Encuentra personas con talentos complementarios mediante el buscador inteligente y propón un intercambio.
-            </p>
+               {{ "Encuentra personas con talentos complementarios mediante el buscador inteligente y propón un intercambio." | t }} </p>
           </div>
 
           <!-- Step 4 -->
@@ -195,10 +184,9 @@
             <div class="step-badge step-badge-accent">
               <span class="step-num">04</span>
             </div>
-            <h3 class="step-title">Intercambia y acumula</h3>
+            <h3 class="step-title">{{ "Intercambia y acumula" | t }}</h3>
             <p class="step-desc">
-              Realiza la sesión de 1 hora. Recibes 1 crédito de tiempo que podrás reinvertir con cualquier otro miembro.
-            </p>
+               {{ "Realiza la sesión de 1 hora. Recibes 1 crédito de tiempo que podrás reinvertir con cualquier otro miembro." | t }} </p>
           </div>
         </div>
       </div>
@@ -209,44 +197,42 @@
       <div class="tb-container">
         <div class="time-value-box">
           <div class="value-text-side">
-            <span class="value-eyebrow">Filosofía & Principio Fundamental</span>
-            <h2 class="value-title">El tiempo humano vale lo mismo para todos</h2>
+            <span class="value-eyebrow">{{ "Filosofía & Principio Fundamental" | t }}</span>
+            <h2 class="value-title">{{ "El tiempo humano vale lo mismo para todos" | t }}</h2>
             <p class="value-lead">
-              En el mercado convencional, una hora de programación suele tasarse muy diferente a una hora de música o tutoría escolar.
-            </p>
+               {{ "En el mercado convencional, una hora de programación suele tasarse muy diferente a una hora de música o tutoría escolar." | t }} </p>
             <p class="value-body">
-              En <strong>TimeBank</strong> reivindicamos la igualdad: una hora dedicada a compartir conocimientos representa el mismo esfuerzo, atención y generosidad humana. Por eso:
-            </p>
+               {{ "En" | t }} <strong>{{ "TimeBank" | t }}</strong>  {{ "reivindicamos la igualdad: una hora dedicada a compartir conocimientos representa el mismo esfuerzo, atención y generosidad humana. Por eso:" | t }} </p>
 
             <div class="equality-formula-box">
               <div class="formula-element">
-                <span class="formula-label">Tu dedicación</span>
-                <span class="formula-val">1 Hora</span>
+                <span class="formula-label">{{ "Tu dedicación" | t }}</span>
+                <span class="formula-val">{{ "1 Hora" | t }}</span>
               </div>
               <span class="formula-operator">=</span>
               <div class="formula-element highlight">
-                <span class="formula-label">Valor universal</span>
-                <span class="formula-val">1 Crédito</span>
+                <span class="formula-label">{{ "Valor universal" | t }}</span>
+                <span class="formula-val">{{ "1 Crédito" | t }}</span>
               </div>
               <span class="formula-operator">=</span>
               <div class="formula-element">
-                <span class="formula-label">Cualquier conocimiento</span>
-                <span class="formula-val">1 Hora</span>
+                <span class="formula-label">{{ "Cualquier conocimiento" | t }}</span>
+                <span class="formula-val">{{ "1 Hora" | t }}</span>
               </div>
             </div>
 
             <div class="principles-list">
               <div class="principle-item">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span><strong>Intercambio multilateral:</strong> No necesitas pagarle a la misma persona; ayudas a uno y recibes de otro.</span>
+                <span><strong>{{ "Intercambio multilateral:" | t }}</strong>  {{ "No necesitas pagarle a la misma persona; ayudas a uno y recibes de otro." | t }}</span>
               </div>
               <div class="principle-item">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span><strong>Cero especulación monetaria:</strong> El valor no se devalúa ni depende de divisas externas.</span>
+                <span><strong>{{ "Cero especulación monetaria:" | t }}</strong>  {{ "El valor no se devalúa ni depende de divisas externas." | t }}</span>
               </div>
               <div class="principle-item">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span><strong>Inclusión total:</strong> Toda persona tiene al menos un conocimiento digno de compartir.</span>
+                <span><strong>{{ "Inclusión total:" | t }}</strong>  {{ "Toda persona tiene al menos un conocimiento digno de compartir." | t }}</span>
               </div>
             </div>
           </div>
@@ -254,45 +240,45 @@
           <!-- Multi-party Mesh visual diagram -->
           <div class="mesh-visual-side">
             <div class="mesh-card">
-              <div class="mesh-card-title">Intercambio Circular Comunitario</div>
+              <div class="mesh-card-title">{{ "Intercambio Circular Comunitario" | t }}</div>
               <div class="circular-flow-diagram">
                 <!-- User A -->
                 <div class="flow-node node-a">
-                  <span class="node-name">Elena</span>
-                  <span class="node-teach">Enseña Python</span>
+                  <span class="node-name">{{ "Elena" | t }}</span>
+                  <span class="node-teach">{{ "Enseña Python" | t }}</span>
                 </div>
 
                 <div class="flow-arrow arrow-1">
-                  <span>1 hora</span>
+                  <span>{{ "1 hora" | t }}</span>
                   <ion-icon name="arrow-forward-outline"></ion-icon>
                 </div>
 
                 <!-- User B -->
                 <div class="flow-node node-b">
-                  <span class="node-name">Carlos</span>
-                  <span class="node-teach">Enseña Guitarra</span>
+                  <span class="node-name">{{ "Carlos" | t }}</span>
+                  <span class="node-teach">{{ "Enseña Guitarra" | t }}</span>
                 </div>
 
                 <div class="flow-arrow arrow-2">
-                  <span>1 hora</span>
+                  <span>{{ "1 hora" | t }}</span>
                   <ion-icon name="arrow-forward-outline"></ion-icon>
                 </div>
 
                 <!-- User C -->
                 <div class="flow-node node-c">
-                  <span class="node-name">Sofía</span>
-                  <span class="node-teach">Enseña Figma</span>
+                  <span class="node-name">{{ "Sofía" | t }}</span>
+                  <span class="node-teach">{{ "Enseña Figma" | t }}</span>
                 </div>
 
                 <div class="flow-arrow arrow-3">
-                  <span>1 hora</span>
+                  <span>{{ "1 hora" | t }}</span>
                   <ion-icon name="arrow-forward-outline"></ion-icon>
                 </div>
               </div>
 
               <div class="mesh-card-footer">
                 <ion-icon name="infinite-outline"></ion-icon>
-                <span>El círculo se completa sin dinero en efectivo: todos aprenden, todos enseñan.</span>
+                <span>{{ "El círculo se completa sin dinero en efectivo: todos aprenden, todos enseñan." | t }}</span>
               </div>
             </div>
           </div>
@@ -305,12 +291,11 @@
       <div class="tb-container">
         <div class="section-header-split">
           <div>
-            <span class="section-tag">Talentos de la comunidad</span>
-            <h2 class="section-title">Explora por categorías de conocimiento</h2>
+            <span class="section-tag">{{ "Talentos de la comunidad" | t }}</span>
+            <h2 class="section-title">{{ "Explora por categorías de conocimiento" | t }}</h2>
           </div>
           <a routerLink="/explore" class="tb-btn tb-btn-outline">
-            Ver todas las habilidades
-            <ion-icon name="arrow-forward-outline"></ion-icon>
+             {{ "Ver todas las habilidades" | t }} <ion-icon name="arrow-forward-outline"></ion-icon>
           </a>
         </div>
 
@@ -336,8 +321,8 @@
         <!-- Featured Skills Showcase -->
         <div class="featured-showcase-wrap">
           <div class="featured-header">
-            <span class="featured-eyebrow">Habilidades en tendencia</span>
-            <h3 class="featured-title">Publicaciones destacadas listas para intercambiar</h3>
+            <span class="featured-eyebrow">{{ "Habilidades en tendencia" | t }}</span>
+            <h3 class="featured-title">{{ "Publicaciones destacadas listas para intercambiar" | t }}</h3>
           </div>
 
           <div class="featured-skills-grid">
@@ -359,16 +344,14 @@
         <div class="manifesto-box">
           <div class="manifesto-badge">
             <ion-icon name="heart-outline"></ion-icon>
-            <span>Manifiesto TimeBank</span>
+            <span>{{ "Manifiesto TimeBank" | t }}</span>
           </div>
           <h2 class="manifesto-title">
-            "Creemos que el conocimiento acumulado en una comunidad no debería depender del poder adquisitivo para fluir."
-          </h2>
+             {{ "\"Creemos que el conocimiento acumulado en una comunidad no debería depender del poder adquisitivo para fluir.\"" | t }} </h2>
           <p class="manifesto-body">
-            Cada persona domina algo que otra anhela aprender. Cuando eliminamos las barreras financieras y usamos el tiempo compartido como puente, fortalecemos el tejido social, cultivamos la empatía y abrimos caminos a oportunidades genuinas.
-          </p>
+             {{ "Cada persona domina algo que otra anhela aprender. Cuando eliminamos las barreras financieras y usamos el tiempo compartido como puente, fortalecemos el tejido social, cultivamos la empatía y abrimos caminos a oportunidades genuinas." | t }} </p>
           <div class="manifesto-author-pill">
-            <span>Iniciativa comunitaria TimeBank &bull; Enfoque Humano y Colaborativo</span>
+            <span>{{ "Iniciativa comunitaria TimeBank • Enfoque Humano y Colaborativo" | t }}</span>
           </div>
         </div>
       </div>
@@ -378,11 +361,10 @@
     <section id="faq" class="tb-section faq-section">
       <div class="tb-container">
         <div class="section-header-editorial">
-          <span class="section-tag">Claridad y Confianza</span>
-          <h2 class="section-title">Preguntas Frecuentes</h2>
+          <span class="section-tag">{{ "Claridad y Confianza" | t }}</span>
+          <h2 class="section-title">{{ "Preguntas Frecuentes" | t }}</h2>
           <p class="section-subtitle">
-            Todo lo que necesitas saber sobre el funcionamiento del banco de tiempo.
-          </p>
+             {{ "Todo lo que necesitas saber sobre el funcionamiento del banco de tiempo." | t }} </p>
         </div>
 
         <div class="faq-accordion-list">
@@ -409,26 +391,22 @@
         <div class="final-cta-card">
           <div class="cta-decorative-arc"></div>
           <div class="cta-inner-content">
-            <span class="cta-pill">Empieza hoy mismo</span>
-            <h2 class="cta-title">¿Listo para convertir tu tiempo en nuevas habilidades?</h2>
+            <span class="cta-pill">{{ "Empieza hoy mismo" | t }}</span>
+            <h2 class="cta-title">{{ "¿Listo para convertir tu tiempo en nuevas habilidades?" | t }}</h2>
             <p class="cta-description">
-              Crea tu perfil en segundos, publica lo que sabes y comienza a descubrir a personas con conocimientos complementarios.
-            </p>
+               {{ "Crea tu perfil en segundos, publica lo que sabes y comienza a descubrir a personas con conocimientos complementarios." | t }} </p>
             <div class="cta-buttons-wrap">
               @if (!authService.isAuthenticated()) {
                 <a routerLink="/auth/register" class="tb-btn tb-btn-accent tb-btn-lg">
                   <ion-icon name="sparkles-outline"></ion-icon>
-                  Crear cuenta con 5 créditos de regalo
-                </a>
+                   {{ "Crear cuenta con 5 créditos de regalo" | t }} </a>
               } @else {
                 <a routerLink="/exchanges/requests" class="tb-btn tb-btn-accent tb-btn-lg">
                   <ion-icon name="mail-outline"></ion-icon>
-                  Ir a mis intercambios
-                </a>
+                   {{ "Ir a mis intercambios" | t }} </a>
               }
               <a routerLink="/explore" class="tb-btn tb-btn-outline tb-btn-lg white-outline">
-                Explorar catálogo de talentos
-              </a>
+                 {{ "Explorar catálogo de talentos" | t }} </a>
             </div>
           </div>
         </div>

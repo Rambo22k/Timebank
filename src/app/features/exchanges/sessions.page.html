@@ -1,10 +1,10 @@
 <app-navbar></app-navbar>
 <main class="activity-page"><div class="tb-container">
-  <div class="activity-heading"><div><span class="eyebrow">Tu actividad · Intercambios</span><h1>Mis sesiones</h1><p>Consulta tus próximas sesiones y confirma cuándo ambas personas hayan completado el intercambio.</p></div></div>
+  <div class="activity-heading"><div><span class="eyebrow">{{ "Tu actividad · Intercambios" | t }}</span><h1>{{ "Mis sesiones" | t }}</h1><p>{{ "Consulta tus próximas sesiones y confirma cuándo ambas personas hayan completado el intercambio." | t }}</p></div></div>
   <app-exchange-nav></app-exchange-nav>
-  <div class="stat-grid"><div class="stat-card"><span>Próximas sesiones</span><strong>{{ upcoming.length }}</strong></div><div class="stat-card"><span>Horas por compartir</span><strong>{{ upcomingHours }} h</strong></div><div class="stat-card"><span>Intercambios completados</span><strong>{{ completedCount }}</strong></div></div>
+  <div class="stat-grid"><div class="stat-card"><span>{{ "Próximas sesiones" | t }}</span><strong>{{ upcoming.length }}</strong></div><div class="stat-card"><span>{{ "Horas por compartir" | t }}</span><strong>{{ upcomingHours }} h</strong></div><div class="stat-card"><span>{{ "Intercambios completados" | t }}</span><strong>{{ completedCount }}</strong></div></div>
   <div class="activity-layout"><section>
-    <div class="section-title" style="margin-top:0"><h2>Próximas y por confirmar</h2></div><div class="activity-list">
+    <div class="section-title" style="margin-top:0"><h2>{{ "Próximas y por confirmar" | t }}</h2></div><div class="activity-list">
       @for (session of upcoming; track session.id) {
         @let partner = exchanges.partnerFor(session);
         <article class="activity-card">
@@ -13,11 +13,11 @@
               <img [src]="partner.avatar" [alt]="partner.name">
               <div>
                 <strong>Sesión con {{ partner.name }}</strong>
-                <small>{{ session.status === 'scheduled' ? 'Agendada' : 'Esperando confirmación mutua' }}</small>
+                <small>{{ (session.status === 'scheduled' ? 'Agendada' : 'Esperando confirmación mutua') | t }}</small>
               </div>
             </div>
             <span class="status" [class.good]="session.status === 'awaiting_confirmation'">
-              {{ session.status === 'scheduled' ? 'Agendada' : 'Por confirmar' }}
+              {{ (session.status === 'scheduled' ? 'Agendada' : 'Por confirmar') | t }}
             </span>
           </div>
           <h3 class="item-title">{{ session.skillTitle }}</h3>
@@ -31,29 +31,25 @@
           </div>
           <div class="card-actions">
             <a class="tb-btn tb-btn-secondary tb-btn-sm" [href]="session.meetingUrl" target="_blank" rel="noopener noreferrer">
-              <ion-icon name="calendar-outline"></ion-icon>Entrar a la sesión
-            </a>
+              <ion-icon name="calendar-outline"></ion-icon>{{ "Entrar a la sesión" | t }} </a>
             @if (exchanges.canConfirmSession(session)) {
               <button class="tb-btn tb-btn-primary tb-btn-sm" [disabled]="exchanges.isSessionActionPending(session.id)" (click)="exchanges.confirmSession(session.id)">
-                <ion-icon name="checkmark-circle-outline"></ion-icon>Confirmar que se realizó
-              </button>
+                <ion-icon name="checkmark-circle-outline"></ion-icon>{{ "Confirmar que se realizó" | t }} </button>
             }
             @if (exchanges.canCancelSession(session)) {
               <button class="tb-btn tb-btn-danger tb-btn-sm" [disabled]="exchanges.isSessionActionPending(session.id)" (click)="exchanges.cancelSession(session.id)">
-                <ion-icon name="close-circle-outline"></ion-icon>Cancelar
-              </button>
+                <ion-icon name="close-circle-outline"></ion-icon>{{ "Cancelar" | t }} </button>
             }
             <button class="tb-btn tb-btn-outline tb-btn-sm" [disabled]="exchanges.isSessionActionPending(session.id)" (click)="exchanges.openDispute(session.id)">
-              <ion-icon name="warning-outline"></ion-icon>Reportar un problema
-            </button>
+              <ion-icon name="warning-outline"></ion-icon>{{ "Reportar un problema" | t }} </button>
           </div>
         </article>
       }
-      @empty { <div class="empty-note">{{ exchanges.isLoadingRequests() ? 'Cargando tus sesiones…' : 'No tienes sesiones próximas. Cuando acepten una propuesta, aparecerá aquí.' }}</div> }
+      @empty { <div class="empty-note">{{ (exchanges.isLoadingRequests() ? 'Cargando tus sesiones…' : 'No tienes sesiones próximas. Cuando acepten una propuesta, aparecerá aquí.') | t }}</div> }
     </div>
-    <div class="section-title"><h2>Historial</h2></div><div class="activity-list">
-      @for (session of history; track session.id) { @let partner = exchanges.partnerFor(session); <article class="activity-card"><div class="card-top"><div class="person"><img [src]="partner.avatar" [alt]="partner.name"><div><strong>{{ partner.name }}</strong><small>{{ session.skillTitle }}</small></div></div><span class="status good" [class.muted]="session.status!=='completed'">{{ session.status==='completed' ? 'Completada' : session.status==='disputed' ? 'En revisión' : 'Cancelada' }}</span></div><div class="meta-row" style="margin-top:14px"><span><ion-icon name="calendar-outline"></ion-icon>{{ session.startAt | date:'d MMM y' }}</span><span><ion-icon name="time-outline"></ion-icon>{{ session.hours }} h</span></div>@if(session.status==='completed'&&!session.reviewSubmitted){<div class="card-actions"><a class="tb-btn tb-btn-secondary tb-btn-sm" routerLink="/exchanges/reviews"><ion-icon name="star-outline"></ion-icon>Dejar una reseña</a></div>}</article> }
-      @empty { <div class="empty-note">{{ exchanges.isLoadingRequests() ? 'Cargando el historial…' : 'Tu historial aparecerá aquí al completar sesiones.' }}</div> }
+    <div class="section-title"><h2>{{ "Historial" | t }}</h2></div><div class="activity-list">
+      @for (session of history; track session.id) { @let partner = exchanges.partnerFor(session); <article class="activity-card"><div class="card-top"><div class="person"><img [src]="partner.avatar" [alt]="partner.name"><div><strong>{{ partner.name }}</strong><small>{{ session.skillTitle }}</small></div></div><span class="status good" [class.muted]="session.status!=='completed'">{{ (session.status==='completed' ? 'Completada' : session.status==='disputed' ? 'En revisión' : 'Cancelada') | t }}</span></div><div class="meta-row" style="margin-top:14px"><span><ion-icon name="calendar-outline"></ion-icon>{{ session.startAt | date:'d MMM y' }}</span><span><ion-icon name="time-outline"></ion-icon>{{ session.hours }} h</span></div>@if(session.status==='completed'&&!session.reviewSubmitted){<div class="card-actions"><a class="tb-btn tb-btn-secondary tb-btn-sm" routerLink="/exchanges/reviews"><ion-icon name="star-outline"></ion-icon>{{ "Dejar una reseña" | t }}</a></div>}</article> }
+      @empty { <div class="empty-note">{{ (exchanges.isLoadingRequests() ? 'Cargando el historial…' : 'Tu historial aparecerá aquí al completar sesiones.') | t }}</div> }
     </div>
-  </section><aside class="side-card"><h3>Confirmación en dos pasos</h3><p>Los créditos se liquidan cuando las dos personas confirman que la sesión se realizó. Si hay un problema, abre una disputa para que se revise.</p><a routerLink="/wallet" class="tb-btn">Ver mi billetera</a></aside></div>
+  </section><aside class="side-card"><h3>{{ "Confirmación en dos pasos" | t }}</h3><p>{{ "Los créditos se liquidan cuando las dos personas confirman que la sesión se realizó. Si hay un problema, abre una disputa para que se revise." | t }}</p><a routerLink="/wallet" class="tb-btn">{{ "Ver mi billetera" | t }}</a></aside></div>
 </div></main><app-footer></app-footer>

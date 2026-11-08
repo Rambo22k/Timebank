@@ -8,55 +8,53 @@
           <span class="footer-brand-title">Time<span class="accent-orange">Bank</span></span>
         </div>
         <p class="footer-desc">
-          Plataforma colaborativa donde las habilidades y conocimientos se intercambian usando el tiempo como única moneda de valor.
-        </p>
+           {{ "Plataforma colaborativa donde las habilidades y conocimientos se intercambian usando el tiempo como única moneda de valor." | t }} </p>
         <div class="footer-rule-pill">
           <ion-icon name="time-outline"></ion-icon>
-          <span><strong>1 hora de ayuda</strong> = <strong>1 crédito de tiempo</strong></span>
+          <span><strong>{{ "1 hora de ayuda" | t }}</strong> = <strong>{{ "1 crédito de tiempo" | t }}</strong></span>
         </div>
       </div>
 
       <!-- Quick Exploration Links -->
       <div class="footer-col">
-        <h4 class="footer-col-title">Plataforma</h4>
+        <h4 class="footer-col-title">{{ "Plataforma" | t }}</h4>
         <ul class="footer-links">
-          <li><a routerLink="/">Inicio & Landing</a></li>
-          <li><a routerLink="/explore">Explorar Habilidades</a></li>
-          <li><a routerLink="/skills">Gestión de Habilidades</a></li>
-          <li><a routerLink="/profile">Perfiles de Usuario</a></li>
+          <li><a routerLink="/">{{ "Inicio & Landing" | t }}</a></li>
+          <li><a routerLink="/explore">{{ "Explorar Habilidades" | t }}</a></li>
+          <li><a routerLink="/skills">{{ "Gestión de Habilidades" | t }}</a></li>
+          <li><a routerLink="/profile">{{ "Perfiles de Usuario" | t }}</a></li>
         </ul>
       </div>
 
       <!-- Identity & Philosophy -->
       <div class="footer-col">
-        <h4 class="footer-col-title">Comunidad</h4>
+        <h4 class="footer-col-title">{{ "Comunidad" | t }}</h4>
         <ul class="footer-links">
-          <li><a routerLink="/" fragment="como-funciona">¿Cómo funciona?</a></li>
-          <li><a routerLink="/" fragment="valor-tiempo">El valor del tiempo</a></li>
-          <li><a routerLink="/" fragment="categorias">Categorías destacadas</a></li>
-          <li><a routerLink="/" fragment="faq">Preguntas frecuentes</a></li>
+          <li><a routerLink="/" fragment="como-funciona">{{ "¿Cómo funciona?" | t }}</a></li>
+          <li><a routerLink="/" fragment="valor-tiempo">{{ "El valor del tiempo" | t }}</a></li>
+          <li><a routerLink="/" fragment="categorias">{{ "Categorías destacadas" | t }}</a></li>
+          <li><a routerLink="/" fragment="faq">{{ "Preguntas frecuentes" | t }}</a></li>
         </ul>
       </div>
 
       <!-- Account actions -->
       <div class="footer-col footer-col-auth">
         @if (authService.isAuthenticated()) {
-          <h4 class="footer-col-title">Tu cuenta</h4>
-          <p class="footer-subtext">Continúa con tus habilidades e intercambios en TimeBank.</p>
+          <h4 class="footer-col-title">{{ "Tu cuenta" | t }}</h4>
+          <p class="footer-subtext">{{ "Continúa con tus habilidades e intercambios en TimeBank." | t }}</p>
         } @else {
-          <h4 class="footer-col-title">Únete a TimeBank</h4>
-          <p class="footer-subtext">Comparte lo que sabes y aprende de las personas de tu comunidad.</p>
+          <h4 class="footer-col-title">{{ "Únete a TimeBank" | t }}</h4>
+          <p class="footer-subtext">{{ "Comparte lo que sabes y aprende de las personas de tu comunidad." | t }}</p>
         }
         <div class="footer-cta-stack">
           @if (authService.isAuthenticated()) {
-            <a routerLink="/exchanges/requests" class="tb-btn tb-btn-primary tb-btn-sm">Mis intercambios</a>
-            <a routerLink="/profile" class="tb-btn tb-btn-outline tb-btn-sm">Mi perfil</a>
+            <a routerLink="/exchanges/requests" class="tb-btn tb-btn-primary tb-btn-sm">{{ "Mis intercambios" | t }}</a>
+            <a routerLink="/profile" class="tb-btn tb-btn-outline tb-btn-sm">{{ "Mi perfil" | t }}</a>
           } @else {
             <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-sm">
               <ion-icon name="sparkles-outline"></ion-icon>
-              Crear una cuenta
-            </a>
-            <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">Iniciar sesión</a>
+               {{ "Crear una cuenta" | t }} </a>
+            <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">{{ "Iniciar sesión" | t }}</a>
           }
         </div>
       </div>
@@ -65,7 +63,7 @@
     <!-- Bottom Attribution Row -->
     <div class="footer-bottom">
       <div class="footer-credits">
-        <span>&copy; {{ currentYear }} TimeBank. Diseñado y desarrollado por <strong>Enyel Reyes</strong>.</span>
+        <span>&copy; {{ currentYear }} TimeBank. Diseñado y desarrollado por <strong>{{ "Enyel Reyes" | t }}</strong>.</span>
       </div>
     </div>
   </div>

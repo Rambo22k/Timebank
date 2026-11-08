@@ -9,35 +9,33 @@
           <div class="brand-side-content">
             <div class="brand-pill">
               <ion-icon name="gift-outline"></ion-icon>
-              <span>Bienvenida a TimeBank</span>
+              <span>{{ "Bienvenida a TimeBank" | t }}</span>
             </div>
 
             <h2 class="brand-heading">
-              Únete a una comunidad donde tu tiempo vale oro.
-            </h2>
+               {{ "Únete a una comunidad donde tu tiempo vale oro." | t }} </h2>
 
             <p class="brand-sub">
-              Crea tu cuenta para ofrecer habilidades, aprender de otras personas e intercambiar tiempo.
-            </p>
+               {{ "Crea tu cuenta para ofrecer habilidades, aprender de otras personas e intercambiar tiempo." | t }} </p>
 
             <div class="perks-checklist">
               <div class="perk-item">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span>Acceso inmediato a la red de talentos</span>
+                <span>{{ "Acceso inmediato a la red de talentos" | t }}</span>
               </div>
               <div class="perk-item">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span>Publicación ilimitada de habilidades ofrecidas y deseadas</span>
+                <span>{{ "Publicación ilimitada de habilidades ofrecidas y deseadas" | t }}</span>
               </div>
               <div class="perk-item">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                <span>1 hora de ayuda = 1 crédito universal</span>
+                <span>{{ "1 hora de ayuda = 1 crédito universal" | t }}</span>
               </div>
             </div>
 
             <div class="auth-security-badge">
               <ion-icon name="shield-checkmark-outline"></ion-icon>
-              <span>Cuenta protegida con confirmación de correo</span>
+              <span>{{ "Cuenta protegida con confirmación de correo" | t }}</span>
             </div>
           </div>
         </div>
@@ -45,17 +43,16 @@
         <!-- Right Side: Registration Form -->
         <div class="auth-form-side">
           <div class="auth-form-header">
-            <h1 class="auth-title">Crear Cuenta</h1>
+            <h1 class="auth-title">{{ "Crear Cuenta" | t }}</h1>
             <p class="auth-subtitle">
-              ¿Ya eres miembro?
-              <a routerLink="/auth/login" class="link-bold">Inicia sesión aquí</a>
+               {{ "¿Ya eres miembro?" | t }} <a routerLink="/auth/login" class="link-bold">{{ "Inicia sesión aquí" | t }}</a>
             </p>
           </div>
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
             <!-- Full Name -->
             <div class="tb-form-group">
-              <label class="tb-label" for="reg-name">Nombre y Apellido *</label>
+              <label class="tb-label" for="reg-name">{{ "Nombre y Apellido *" | t }}</label>
               <div class="input-with-icon">
                 <ion-icon name="person-outline"></ion-icon>
                 <input
@@ -68,13 +65,13 @@
                 />
               </div>
               @if (form.get('name')?.invalid && form.get('name')?.touched) {
-                <span class="tb-error-text">Introduce un nombre válido de al menos 3 caracteres.</span>
+                <span class="tb-error-text">{{ "Introduce un nombre válido de al menos 3 caracteres." | t }}</span>
               }
             </div>
 
             <!-- Email -->
             <div class="tb-form-group">
-              <label class="tb-label" for="reg-email">Correo Electrónico *</label>
+              <label class="tb-label" for="reg-email">{{ "Correo Electrónico *" | t }}</label>
               <div class="input-with-icon">
                 <ion-icon name="mail-outline"></ion-icon>
                 <input
@@ -87,30 +84,30 @@
                 />
               </div>
               @if (form.get('email')?.invalid && form.get('email')?.touched) {
-                <span class="tb-error-text">Introduce un correo electrónico con formato válido.</span>
+                <span class="tb-error-text">{{ "Introduce un correo electrónico con formato válido." | t }}</span>
               }
             </div>
 
             <div class="tb-form-group">
-              <label class="tb-label" for="reg-country">País de residencia *</label>
+              <label class="tb-label" for="reg-country">{{ "País de residencia *" | t }}</label>
               <select id="reg-country" class="tb-select" formControlName="countryCode">
                 @for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }
               </select>
             </div>
 
             <div class="tb-form-group">
-              <label class="tb-label" for="reg-birth-date">Fecha de nacimiento *</label>
+              <label class="tb-label" for="reg-birth-date">{{ "Fecha de nacimiento *" | t }}</label>
               <input id="reg-birth-date" type="date" class="tb-input" [max]="maxBirthDate" [class.is-invalid]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched" formControlName="birthDate" />
               @if (form.get('birthDate')?.hasError('minimumAge')) {
-                <span class="tb-error-text">Debes tener al menos 18 años para registrarte.</span>
+                <span class="tb-error-text">{{ "Debes tener al menos 18 años para registrarte." | t }}</span>
               } @else if (form.get('birthDate')?.invalid && form.get('birthDate')?.touched) {
-                <span class="tb-error-text">Introduce tu fecha de nacimiento.</span>
+                <span class="tb-error-text">{{ "Introduce tu fecha de nacimiento." | t }}</span>
               }
             </div>
 
             <!-- Password -->
             <div class="tb-form-group">
-              <label class="tb-label" for="reg-pass">Contraseña *</label>
+              <label class="tb-label" for="reg-pass">{{ "Contraseña *" | t }}</label>
               <div class="input-with-icon">
                 <ion-icon name="lock-closed-outline"></ion-icon>
                 <input
@@ -131,13 +128,13 @@
                 </button>
               </div>
               @if (form.get('password')?.invalid && form.get('password')?.touched) {
-                <span class="tb-error-text">La contraseña debe tener al menos 6 caracteres.</span>
+                <span class="tb-error-text">{{ "La contraseña debe tener al menos 6 caracteres." | t }}</span>
               }
             </div>
 
             <!-- Confirm Password -->
             <div class="tb-form-group">
-              <label class="tb-label" for="reg-pass-confirm">Confirmar Contraseña *</label>
+              <label class="tb-label" for="reg-pass-confirm">{{ "Confirmar Contraseña *" | t }}</label>
               <div class="input-with-icon">
                 <ion-icon name="lock-closed-outline"></ion-icon>
                 <input
@@ -158,7 +155,7 @@
                 </button>
               </div>
               @if (form.errors?.['passwordMismatch'] && form.get('confirmPassword')?.touched) {
-                <span class="tb-error-text">Las contraseñas no coinciden.</span>
+                <span class="tb-error-text">{{ "Las contraseñas no coinciden." | t }}</span>
               }
             </div>
 
@@ -166,31 +163,31 @@
             <div class="terms-row">
               <label class="checkbox-label">
                 <input type="checkbox" formControlName="agreeTerms" />
-                <span>Acepto los términos y condiciones de TimeBank *</span>
+                <span>{{ "Acepto los términos y condiciones de TimeBank *" | t }}</span>
               </label>
               @if (form.get('agreeTerms')?.invalid && form.get('agreeTerms')?.touched) {
-                <span class="tb-error-text">Debes aceptar los términos para continuar.</span>
+                <span class="tb-error-text">{{ "Debes aceptar los términos para continuar." | t }}</span>
               }
               <label class="checkbox-label">
                 <input type="checkbox" formControlName="agreePrivacy" />
-                <span>He leído y acepto la política de privacidad *</span>
+                <span>{{ "He leído y acepto la política de privacidad *" | t }}</span>
               </label>
               @if (form.get('agreePrivacy')?.invalid && form.get('agreePrivacy')?.touched) {
-                <span class="tb-error-text">Debes aceptar la política de privacidad para continuar.</span>
+                <span class="tb-error-text">{{ "Debes aceptar la política de privacidad para continuar." | t }}</span>
               }
             </div>
 
             <!-- Submit Button -->
             <button type="submit" class="tb-btn tb-btn-accent tb-btn-lg full-btn" [disabled]="isLoading">
               <ion-icon [name]="isLoading ? 'time-outline' : 'sparkles-outline'"></ion-icon>
-              {{ isLoading ? 'Creando cuenta...' : 'Crear mi cuenta' }}
+              {{ (isLoading ? 'Creando cuenta...' : 'Crear mi cuenta') | t }}
             </button>
           </form>
 
-          <div class="form-divider"><span>o regístrate con</span></div>
+          <div class="form-divider"><span>{{ "o regístrate con" | t }}</span></div>
           <button type="button" class="tb-btn tb-btn-outline tb-btn-lg full-btn google-btn" [disabled]="isGoogleLoading" (click)="signInWithGoogle()">
-            <span class="google-mark" aria-hidden="true">G</span>
-            {{ isGoogleLoading ? 'Conectando con Google…' : 'Continuar con Google' }}
+            <span class="google-mark" aria-hidden="true">{{ "G" | t }}</span>
+            {{ (isGoogleLoading ? 'Conectando con Google…' : 'Continuar con Google') | t }}
           </button>
         </div>
       </div>

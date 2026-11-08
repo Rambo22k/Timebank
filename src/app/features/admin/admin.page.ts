@@ -8,10 +8,12 @@ import { alertCircleOutline, checkmarkCircleOutline, peopleOutline, timeOutline,
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { AdminCategoryRow, AdminService, AdminUserRow } from '../../core/services/admin.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-admin', standalone: true,
-  imports: [CommonModule, DatePipe, DecimalPipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
+  imports: [
+    TranslatePipe,CommonModule, DatePipe, DecimalPipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
   templateUrl: './admin.page.html', styleUrls: ['./admin.page.scss']
 })
 export class AdminPage {

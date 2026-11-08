@@ -5,11 +5,10 @@
     <div class="tb-container">
       <!-- Search & Discovery Header -->
       <div class="discovery-header">
-        <span class="sub-label">Mercado de Talentos & Habilidades</span>
-        <h1 class="page-title">Descubre y Conecta</h1>
+        <span class="sub-label">{{ "Mercado de Talentos & Habilidades" | t }}</span>
+        <h1 class="page-title">{{ "Descubre y Conecta" | t }}</h1>
         <p class="page-sub">
-          Explora lo que los miembros de la comunidad ofrecen o desean aprender. Recuerda: 1 hora de intercambio = 1 crédito universal.
-        </p>
+           {{ "Explora lo que los miembros de la comunidad ofrecen o desean aprender. Recuerda: 1 hora de intercambio = 1 crédito universal." | t }} </p>
 
         <!-- Big Search Bar -->
         <div class="big-search-box">
@@ -30,15 +29,14 @@
         @if (authService.authUser()) {
           <a class="tb-btn tb-btn-outline tb-btn-sm members-shortcut" routerLink="/members">
             <ion-icon name="people-outline"></ion-icon>
-            Buscar miembros y contactos
-          </a>
+             {{ "Buscar miembros y contactos" | t }} </a>
         }
       </div>
 
       @if (authService.authUser() && recommendedMatches().length) {
         <section class="match-recommendations" aria-labelledby="matches-title">
           <div class="matches-heading">
-            <div><span class="sub-label">Recomendaciones para ti</span><h2 id="matches-title">Coincidencias de habilidades</h2><p>Personas que ofrecen algo que buscas o buscan algo que tú ofreces.</p></div>
+            <div><span class="sub-label">{{ "Recomendaciones para ti" | t }}</span><h2 id="matches-title">{{ "Coincidencias de habilidades" | t }}</h2><p>{{ "Personas que ofrecen algo que buscas o buscan algo que tú ofreces." | t }}</p></div>
             <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
           </div>
           <div class="matches-grid">
@@ -46,7 +44,7 @@
               <a class="match-card" [routerLink]="['/profile', match.userId]">
                 <img [src]="match.avatar" [alt]="match.name" />
                 <div class="match-copy"><strong>{{ match.name }}</strong>
-                  @if (match.reciprocal) { <span class="match-badge">Intercambio recíproco</span> }
+                  @if (match.reciprocal) { <span class="match-badge">{{ "Intercambio recíproco" | t }}</span> }
                   @if (match.learnTitles.length) { <small>Te enseña: {{ match.learnTitles.join(', ') }}</small> }
                   @if (match.teachTitles.length) { <small>Le enseñas: {{ match.teachTitles.join(', ') }}</small> }
                 </div>
@@ -59,7 +57,7 @@
 
       <!-- Categories Filter Carousel/Pill-Bar -->
       <div class="categories-bar-wrap">
-        <span class="filter-group-lbl">Filtrar por categoría:</span>
+        <span class="filter-group-lbl">{{ "Filtrar por categoría:" | t }}</span>
         <div class="categories-scroll-row">
           <button
             type="button"
@@ -67,8 +65,7 @@
             [class.active]="selectedCategoryId() === 'all'"
             (click)="setCategory('all')"
           >
-            Todas las categorías
-          </button>
+             {{ "Todas las categorías" | t }} </button>
           @for (cat of categories; track cat.id) {
             <button
               type="button"
@@ -86,7 +83,7 @@
       <div class="filters-secondary-toolbar">
         <!-- Type Pill Selector -->
         <div class="filter-subgroup">
-          <span class="toolbar-label">Tipo:</span>
+          <span class="toolbar-label">{{ "Tipo:" | t }}</span>
           <div class="btn-group-segmented">
             <button
               type="button"
@@ -94,8 +91,7 @@
               [class.active]="selectedType() === 'all'"
               (click)="setType('all')"
             >
-              Todos
-            </button>
+               {{ "Todos" | t }} </button>
             <button
               type="button"
               class="seg-btn"
@@ -103,8 +99,7 @@
               (click)="setType('offered')"
             >
               <ion-icon name="sparkles-outline"></ion-icon>
-              Ofrecidas
-            </button>
+               {{ "Ofrecidas" | t }} </button>
             <button
               type="button"
               class="seg-btn"
@@ -112,53 +107,52 @@
               (click)="setType('wanted')"
             >
               <ion-icon name="swap-horizontal-outline"></ion-icon>
-              Buscadas
-            </button>
+               {{ "Buscadas" | t }} </button>
           </div>
         </div>
 
         <!-- Modality Selector -->
         <div class="filter-subgroup">
-          <span class="toolbar-label">Modalidad:</span>
+          <span class="toolbar-label">{{ "Modalidad:" | t }}</span>
           <select
             class="tb-select filter-select"
             [value]="selectedModality()"
             (change)="setModality($any($event.target).value)"
           >
-            <option value="all">Todas las modalidades</option>
-            <option value="online">Online / Remoto</option>
-            <option value="presencial">Presencial</option>
-            <option value="híbrido">Híbrido</option>
+            <option value="all">{{ "Todas las modalidades" | t }}</option>
+            <option value="online">{{ "Online / Remoto" | t }}</option>
+            <option value="presencial">{{ "Presencial" | t }}</option>
+            <option value="híbrido">{{ "Híbrido" | t }}</option>
           </select>
         </div>
 
         <div class="filter-subgroup">
-          <label class="toolbar-label" for="discovery-country">País:</label>
+          <label class="toolbar-label" for="discovery-country">{{ "País:" | t }}</label>
           <select id="discovery-country" class="tb-select filter-select" [value]="selectedCountryCode()" (change)="setCountry($any($event.target).value)">
-            <option value="all">Todos los países</option>
+            <option value="all">{{ "Todos los países" | t }}</option>
             @for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }
           </select>
         </div>
 
         <div class="filter-subgroup">
-          <label class="toolbar-label" for="discovery-language">Idioma:</label>
+          <label class="toolbar-label" for="discovery-language">{{ "Idioma:" | t }}</label>
           <select id="discovery-language" class="tb-select filter-select" [value]="selectedLanguageCode()" (change)="setSpokenLanguage($any($event.target).value)">
-            <option value="all">Todos los idiomas</option>
+            <option value="all">{{ "Todos los idiomas" | t }}</option>
             @for (language of spokenLanguages; track language.code) { <option [value]="language.code">{{ language.name }}</option> }
           </select>
         </div>
 
         <!-- Sort By -->
         <div class="filter-subgroup">
-          <span class="toolbar-label">Ordenar:</span>
+          <span class="toolbar-label">{{ "Ordenar:" | t }}</span>
           <select
             class="tb-select filter-select"
             [value]="sortBy()"
             (change)="setSort($any($event.target).value)"
           >
-            <option value="recent">Más recientes</option>
-            <option value="rating">Mejor calificación</option>
-            <option value="alphabetical">Alfabético (A-Z)</option>
+            <option value="recent">{{ "Más recientes" | t }}</option>
+            <option value="rating">{{ "Mejor calificación" | t }}</option>
+            <option value="alphabetical">{{ "Alfabético (A-Z)" | t }}</option>
           </select>
         </div>
 
@@ -166,21 +160,18 @@
         @if (hasActiveFilters) {
           <button class="tb-btn tb-btn-ghost tb-btn-sm reset-filters-btn" (click)="resetFilters()">
             <ion-icon name="refresh-outline"></ion-icon>
-            Limpiar filtros
-          </button>
+             {{ "Limpiar filtros" | t }} </button>
         }
       </div>
 
       <!-- Live Results Counter -->
       <div class="results-meta-bar">
         <span class="results-count">
-          Mostrando <strong>{{ filteredSkills.length }}</strong> habilidades disponibles
-        </span>
+           {{ "Mostrando" | t }} <strong>{{ filteredSkills.length }}</strong>  {{ "habilidades disponibles" | t }} </span>
 
         @if (hasActiveFilters) {
           <span class="active-filters-hint">
-            Filtros activos aplicados sobre la lista.
-          </span>
+             {{ "Filtros activos aplicados sobre la lista." | t }} </span>
         }
       </div>
 

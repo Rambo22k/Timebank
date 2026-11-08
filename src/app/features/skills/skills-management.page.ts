@@ -24,11 +24,13 @@ import { ConfirmationModalComponent } from '../../shared/components/confirmation
 import { SkillsService } from '../../core/services/skills.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Skill, SkillType } from '../../core/models/skill.model';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-skills-management',
   standalone: true,
   imports: [
+    TranslatePipe,
     CommonModule,
     RouterModule,
     IonIcon,

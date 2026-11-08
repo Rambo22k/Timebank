@@ -11,6 +11,8 @@ export interface RegisterCredentials {
   birthDate: string;
   countryCode: string;
   timezone: string;
+  preferredLanguage: 'en' | 'es';
+  preferredTheme: 'system' | 'light' | 'dark';
 }
 
 interface PrivateProfile {
@@ -18,6 +20,7 @@ interface PrivateProfile {
   accepted_terms_at: string | null;
   accepted_privacy_at: string | null;
   preferred_language: 'en' | 'es';
+  preferred_theme: 'system' | 'light' | 'dark';
 }
 
 export class TimeBankAuthError extends Error {
@@ -107,6 +110,8 @@ export class AuthService {
           birth_date: credentials.birthDate,
           country_code: credentials.countryCode.toUpperCase(),
           timezone: credentials.timezone,
+          preferred_language: credentials.preferredLanguage,
+          preferred_theme: credentials.preferredTheme,
           accepted_terms_at: acceptedAt,
           accepted_privacy_at: acceptedAt
         }
@@ -173,6 +178,18 @@ export class AuthService {
     if (user) await this.loadAuthenticatedUser(user);
   }
 
+  async updateThemePreference(theme: 'system' | 'light' | 'dark'): Promise<void> {
+    const { error } = await this.supabase.requireClient().rpc('update_my_theme_preference', { p_preferred_theme: theme });
+    if (error) throw new TimeBankAuthError(this.messageFor(error));
+    await this.reloadAuthenticatedUser();
+  }
+
+  async updateLanguagePreference(language: 'en' | 'es'): Promise<void> {
+    const { error } = await this.supabase.requireClient().rpc('update_my_language_preference', { p_preferred_language: language });
+    if (error) throw new TimeBankAuthError(this.messageFor(error));
+    await this.reloadAuthenticatedUser();
+  }
+
   async updateCurrentUserProfile(updates: Partial<UserProfile>, notify = true, avatarFile?: File): Promise<void> {
     const current = this.currentUserSignal();
     const userId = this.authUserSignal()?.id;
@@ -221,7 +238,7 @@ export class AuthService {
     const client = this.supabase.requireClient();
     const [profileResult, privateResult, accountResult, roleResult, languagesResult] = await Promise.all([
       client.from('profiles').select('display_name, headline, location, avatar_path, bio, country_code, timezone, reputation_average, reputation_count, offered_hours, received_hours, completed_sessions, created_at, is_verified').eq('id', authUser.id).maybeSingle(),
-      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at, preferred_language').eq('user_id', authUser.id).maybeSingle(),
+      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at, preferred_language, preferred_theme').eq('user_id', authUser.id).maybeSingle(),
       client.from('credit_accounts').select('available_balance').eq('user_id', authUser.id).maybeSingle(),
       client.from('user_roles').select('role').eq('user_id', authUser.id).eq('role', 'admin').maybeSingle(),
       client.from('profile_languages').select('language_code').eq('user_id', authUser.id)
@@ -257,6 +274,7 @@ export class AuthService {
       timezone: profile?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC',
       languages: (languagesResult.data ?? []).map(row => row.language_code as string),
       preferredLanguage,
+      preferredTheme: privateProfile?.preferred_theme ?? 'system',
       timeCredits: Number(accountResult.data?.available_balance ?? 0),
       hoursGiven: Number(profile?.offered_hours ?? 0),
       hoursReceived: Number(profile?.received_hours ?? 0),

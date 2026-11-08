@@ -7,7 +7,8 @@ import { searchOutline, layersOutline, sparklesOutline, refreshOutline } from 'i
 @Component({
   selector: 'app-empty-state',
   standalone: true,
-  imports: [CommonModule, IonIcon],
+  imports: [
+    CommonModule, IonIcon],
   templateUrl: './empty-state.component.html',
   styleUrls: ['./empty-state.component.scss']
 })

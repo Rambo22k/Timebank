@@ -9,6 +9,7 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 function adultValidator(control: AbstractControl): ValidationErrors | null {
   if (!control.value) return null;
@@ -19,7 +20,8 @@ function adultValidator(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-auth-complete-profile', standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
+  imports: [
+    TranslatePipe,CommonModule, ReactiveFormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
   templateUrl: './complete-profile.page.html', styleUrls: ['./register/register.page.scss']
 })
 export class CompleteProfilePage {

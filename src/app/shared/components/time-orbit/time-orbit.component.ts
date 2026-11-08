@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import { timeOutline, swapHorizontalOutline, codeSlashOutline, musicalNotesOutline, globeOutline, colorPaletteOutline } from 'ionicons/icons';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-time-orbit',
   standalone: true,
-  imports: [CommonModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, IonIcon],
   templateUrl: './time-orbit.component.html',
   styleUrls: ['./time-orbit.component.scss']
 })

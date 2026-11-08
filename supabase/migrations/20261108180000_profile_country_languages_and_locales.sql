@@ -27,12 +27,13 @@ begin
       select 1 from pg_catalog.pg_timezone_names z where z.name = new.raw_user_meta_data->>'timezone'
     ) then new.raw_user_meta_data->>'timezone' else 'UTC' end
   );
-  insert into public.profile_private(user_id, birth_date, accepted_terms_at, accepted_privacy_at)
+  insert into public.profile_private(user_id, birth_date, accepted_terms_at, accepted_privacy_at, preferred_language)
   values (
     new.id,
     nullif(new.raw_user_meta_data->>'birth_date', '')::date,
     nullif(new.raw_user_meta_data->>'accepted_terms_at', '')::timestamptz,
-    nullif(new.raw_user_meta_data->>'accepted_privacy_at', '')::timestamptz
+    nullif(new.raw_user_meta_data->>'accepted_privacy_at', '')::timestamptz,
+    case when new.raw_user_meta_data->>'preferred_language' in ('es', 'en') then new.raw_user_meta_data->>'preferred_language' else 'es' end
   );
   insert into public.user_roles(user_id, role) values (new.id, 'user');
   insert into public.credit_accounts(account_type, user_id) values ('user', new.id) returning id into v_account;

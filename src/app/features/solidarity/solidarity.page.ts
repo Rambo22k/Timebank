@@ -10,10 +10,12 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { ExchangeNavComponent } from '../exchanges/exchange-nav.component';
 import { SolidarityService } from '../../core/services/solidarity.service';
 import { SolidarityRequestStatus } from '../../core/models/solidarity.model';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-solidarity', standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent],
+  imports: [
+    TranslatePipe,CommonModule, DatePipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent],
   templateUrl: './solidarity.page.html', styleUrls: ['./solidarity.page.scss']
 })
 export class SolidarityPage {

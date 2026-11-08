@@ -9,24 +9,22 @@
           <div class="brand-side-content">
             <div class="brand-pill">
               <ion-icon name="time-outline"></ion-icon>
-              <span>Acceso a la Red</span>
+              <span>{{ "Acceso a la Red" | t }}</span>
             </div>
             <h2 class="brand-heading">
-              Vuelve a conectar con tus horas de aprendizaje.
-            </h2>
+               {{ "Vuelve a conectar con tus horas de aprendizaje." | t }} </h2>
             <p class="brand-sub">
-              Ingresa para revisar tu saldo de créditos de tiempo, responder a propuestas de intercambio y gestionar tus conocimientos.
-            </p>
+               {{ "Ingresa para revisar tu saldo de créditos de tiempo, responder a propuestas de intercambio y gestionar tus conocimientos." | t }} </p>
 
             <!-- Equality badge -->
             <div class="quote-tile">
-              <span class="quote-rule">1 hora de ayuda = 1 crédito de tiempo</span>
-              <span class="quote-text">«Lo que sabes puede cambiar la hora de alguien».</span>
+              <span class="quote-rule">{{ "1 hora de ayuda = 1 crédito de tiempo" | t }}</span>
+              <span class="quote-text">{{ "«Lo que sabes puede cambiar la hora de alguien»." | t }}</span>
             </div>
 
             <div class="auth-security-badge">
               <ion-icon name="shield-checkmark-outline"></ion-icon>
-              <span>Acceso seguro con Supabase Auth</span>
+              <span>{{ "Acceso seguro con Supabase Auth" | t }}</span>
             </div>
           </div>
         </div>
@@ -34,25 +32,24 @@
         <!-- Login form -->
         <div class="auth-form-side">
           <div class="auth-form-header">
-            <h1 class="auth-title">Iniciar Sesión</h1>
+            <h1 class="auth-title">{{ "Iniciar Sesión" | t }}</h1>
             <p class="auth-subtitle">
-              ¿No tienes cuenta aún?
-              <a routerLink="/auth/register" class="link-bold">Crear una cuenta gratis</a>
+               {{ "¿No tienes cuenta aún?" | t }} <a routerLink="/auth/register" class="link-bold">{{ "Crear una cuenta gratis" | t }}</a>
             </p>
           </div>
 
           @if (emailConfirmationNotice) {
             <div class="auth-notice" role="status">
-              <strong>Confirma tu correo</strong>
+              <strong>{{ "Confirma tu correo" | t }}</strong>
               <span>Enviamos un enlace a {{ emailConfirmationNotice }}. Ábrelo para activar tu cuenta.</span>
-              <button type="button" class="tb-btn tb-btn-ghost tb-btn-sm" [disabled]="isResendingConfirmation" (click)="resendConfirmation()">{{ isResendingConfirmation ? 'Reenviando…' : 'Reenviar confirmación' }}</button>
+              <button type="button" class="tb-btn tb-btn-ghost tb-btn-sm" [disabled]="isResendingConfirmation" (click)="resendConfirmation()">{{ (isResendingConfirmation ? 'Reenviando…' : 'Reenviar confirmación') | t }}</button>
             </div>
           }
 
           <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
             <!-- Email -->
             <div class="tb-form-group">
-              <label class="tb-label" for="login-email">Correo Electrónico</label>
+              <label class="tb-label" for="login-email">{{ "Correo Electrónico" | t }}</label>
               <div class="input-with-icon">
                 <ion-icon name="mail-outline"></ion-icon>
                 <input
@@ -65,15 +62,15 @@
                 />
               </div>
               @if (form.get('email')?.invalid && form.get('email')?.touched) {
-                <span class="tb-error-text">Introduce un correo electrónico válido.</span>
+                <span class="tb-error-text">{{ "Introduce un correo electrónico válido." | t }}</span>
               }
             </div>
 
             <!-- Password -->
             <div class="tb-form-group">
               <div class="label-row-split">
-                <label class="tb-label" for="login-pass">Contraseña</label>
-                <a routerLink="/auth/forgot-password" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                <label class="tb-label" for="login-pass">{{ "Contraseña" | t }}</label>
+                <a routerLink="/auth/forgot-password" class="forgot-link">{{ "¿Olvidaste tu contraseña?" | t }}</a>
               </div>
               <div class="input-with-icon">
                 <ion-icon name="lock-closed-outline"></ion-icon>
@@ -95,21 +92,21 @@
                 </button>
               </div>
               @if (form.get('password')?.invalid && form.get('password')?.touched) {
-                <span class="tb-error-text">La contraseña debe tener mínimo 6 caracteres.</span>
+                <span class="tb-error-text">{{ "La contraseña debe tener mínimo 6 caracteres." | t }}</span>
               }
             </div>
 
             <!-- Submit Button -->
             <button type="submit" class="tb-btn tb-btn-primary tb-btn-lg full-btn" [disabled]="isLoading">
               <ion-icon [name]="isLoading ? 'time-outline' : 'log-in-outline'"></ion-icon>
-              {{ isLoading ? 'Iniciando sesión...' : 'Entrar a TimeBank' }}
+              {{ (isLoading ? 'Iniciando sesión...' : 'Entrar a TimeBank') | t }}
             </button>
           </form>
 
-          <div class="form-divider"><span>o continúa con</span></div>
+          <div class="form-divider"><span>{{ "o continúa con" | t }}</span></div>
           <button type="button" class="tb-btn tb-btn-outline tb-btn-lg full-btn google-btn" [disabled]="isGoogleLoading" (click)="signInWithGoogle()">
-            <span class="google-mark" aria-hidden="true">G</span>
-            {{ isGoogleLoading ? 'Conectando con Google…' : 'Continuar con Google' }}
+            <span class="google-mark" aria-hidden="true">{{ "G" | t }}</span>
+            {{ (isGoogleLoading ? 'Conectando con Google…' : 'Continuar con Google') | t }}
           </button>
         </div>
       </div>

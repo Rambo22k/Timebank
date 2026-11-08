@@ -8,8 +8,10 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { ExchangeNavComponent } from './exchange-nav.component';
 import { ExchangeService } from '../../core/services/exchange.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
-@Component({ selector: 'app-time-wallet', standalone: true, imports: [CommonModule, DatePipe, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './wallet.page.html', styleUrls: ['./exchanges.page.scss'] })
+@Component({ selector: 'app-time-wallet', standalone: true, imports: [
+    TranslatePipe,CommonModule, DatePipe, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './wallet.page.html', styleUrls: ['./exchanges.page.scss'] })
 export class WalletPage {
   exchanges = inject(ExchangeService);
 

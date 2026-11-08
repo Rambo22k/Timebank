@@ -8,8 +8,10 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { ExchangeNavComponent } from './exchange-nav.component';
 import { ExchangeService } from '../../core/services/exchange.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
-@Component({ selector: 'app-exchange-reviews', standalone: true, imports: [CommonModule, DatePipe, FormsModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './reviews.page.html', styleUrls: ['./exchanges.page.scss'] })
+@Component({ selector: 'app-exchange-reviews', standalone: true, imports: [
+    TranslatePipe,CommonModule, DatePipe, FormsModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './reviews.page.html', styleUrls: ['./exchanges.page.scss'] })
 export class ExchangeReviewsPage {
   exchanges = inject(ExchangeService);
 

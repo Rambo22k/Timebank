@@ -26,7 +26,9 @@ import { SkillsService } from '../../core/services/skills.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Skill, SkillType } from '../../core/models/skill.model';
 import { SkillCategory } from '../../core/models/category.model';
-import { COUNTRY_OPTIONS, LANGUAGE_OPTIONS } from '../../core/data/localization-options';
+import { countryOptionsFor, languageOptionsFor } from '../../core/data/localization-options';
+import { LocalizationService } from '../../core/services/localization.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface MemberSkillMatch {
   userId: string;
@@ -41,6 +43,7 @@ interface MemberSkillMatch {
   selector: 'app-discovery',
   standalone: true,
   imports: [
+    TranslatePipe,
     CommonModule,
     RouterModule,
     FormsModule,
@@ -58,6 +61,7 @@ interface MemberSkillMatch {
 export class DiscoveryPage implements OnInit {
   skillsService = inject(SkillsService);
   authService = inject(AuthService);
+  localization = inject(LocalizationService);
   private route = inject(ActivatedRoute);
 
   searchQuery = signal<string>('');
@@ -67,8 +71,8 @@ export class DiscoveryPage implements OnInit {
   sortBy = signal<'recent' | 'rating' | 'alphabetical'>('recent');
   selectedCountryCode = signal('all');
   selectedLanguageCode = signal('all');
-  readonly countries = COUNTRY_OPTIONS;
-  readonly spokenLanguages = LANGUAGE_OPTIONS;
+  get countries() { return countryOptionsFor(this.localization.language()); }
+  get spokenLanguages() { return languageOptionsFor(this.localization.language()); }
 
   selectedSkillForDetail: Skill | null = null;
   isDetailModalOpen = false;

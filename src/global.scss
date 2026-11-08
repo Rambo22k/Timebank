@@ -402,6 +402,208 @@ ion-content {
   --color: var(--tb-text-primary);
 }
 
+/* Dark theme surfaces. Keep brand artwork and colored status badges intact. */
+:root[data-theme='dark'] body {
+  background: var(--tb-bg);
+  color: var(--tb-text-primary);
+}
+
+:root[data-theme='dark'] .tb-navbar-wrapper,
+:root[data-theme='dark'] .tb-footer,
+:root[data-theme='dark'] .mobile-drawer-content,
+:root[data-theme='dark'] .tb-notification-panel,
+:root[data-theme='dark'] .auth-form-side,
+:root[data-theme='dark'] .edit-card,
+:root[data-theme='dark'] .tb-card,
+:root[data-theme='dark'] .dashboard-panel,
+:root[data-theme='dark'] .dashboard-stat,
+:root[data-theme='dark'] .suggestion-card,
+:root[data-theme='dark'] .match-card,
+:root[data-theme='dark'] .member-card,
+:root[data-theme='dark'] .skill-card,
+:root[data-theme='dark'] .request-card,
+:root[data-theme='dark'] .session-card,
+:root[data-theme='dark'] .review-card,
+:root[data-theme='dark'] .wallet-card,
+:root[data-theme='dark'] .solidarity-card,
+:root[data-theme='dark'] .admin-card,
+:root[data-theme='dark'] .conversation-list,
+:root[data-theme='dark'] .conversation-item,
+:root[data-theme='dark'] .message-composer,
+:root[data-theme='dark'] .modal-content,
+:root[data-theme='dark'] .profile-hero-card,
+:root[data-theme='dark'] .timebank-metrics-bar,
+:root[data-theme='dark'] .admin-panel,
+:root[data-theme='dark'] .stats-grid article,
+:root[data-theme='dark'] .user-row,
+:root[data-theme='dark'] .case-card,
+:root[data-theme='dark'] .category-form,
+:root[data-theme='dark'] .adjust-form,
+:root[data-theme='dark'] .user-picker button,
+:root[data-theme='dark'] .search-box,
+:root[data-theme='dark'] .admin-tabs button,
+:root[data-theme='dark'] .activity-card,
+:root[data-theme='dark'] .stat-card,
+:root[data-theme='dark'] .transaction,
+:root[data-theme='dark'] .empty-note,
+:root[data-theme='dark'] .chat-shell,
+:root[data-theme='dark'] .chat-panel,
+:root[data-theme='dark'] .conversation-list,
+:root[data-theme='dark'] .conversation-item,
+:root[data-theme='dark'] .chat-header,
+:root[data-theme='dark'] .composer,
+:root[data-theme='dark'] .message-list,
+:root[data-theme='dark'] .message-bubble,
+:root[data-theme='dark'] .safety-dialog,
+:root[data-theme='dark'] .solidarity-card,
+:root[data-theme='dark'] .request-card,
+:root[data-theme='dark'] .history-section,
+:root[data-theme='dark'] .donation-history,
+:root[data-theme='dark'] .session-card,
+:root[data-theme='dark'] .review-card,
+:root[data-theme='dark'] .wallet-card,
+:root[data-theme='dark'] .skill-detail-card,
+:root[data-theme='dark'] .skill-form-card,
+:root[data-theme='dark'] .member-profile-card,
+:root[data-theme='dark'] .schedule-card,
+:root[data-theme='dark'] .conversation-item,
+:root[data-theme='dark'] .exchange-modal-card,
+:root[data-theme='dark'] .tb-select,
+:root[data-theme='dark'] .tb-input,
+:root[data-theme='dark'] .tb-textarea {
+  background-color: var(--tb-surface) !important;
+  color: var(--tb-text-primary);
+  border-color: var(--tb-border);
+}
+
+:root[data-theme='dark'] .member-dashboard,
+:root[data-theme='dark'] .landing-page-root,
+:root[data-theme='dark'] .admin-page,
+:root[data-theme='dark'] .solidarity-page,
+:root[data-theme='dark'] .messages-page,
+:root[data-theme='dark'] .discovery-main,
+:root[data-theme='dark'] .profile-main-content,
+:root[data-theme='dark'] .exchange-page,
+:root[data-theme='dark'] .wallet-page,
+:root[data-theme='dark'] .skills-management-page,
+:root[data-theme='dark'] .members-page,
+:root[data-theme='dark'] .auth-page-root,
+:root[data-theme='dark'] .auth-main-wrapper,
+:root[data-theme='dark'] .auth-card-shell,
+:root[data-theme='dark'] .profile-page-root,
+:root[data-theme='dark'] .discovery-root,
+:root[data-theme='dark'] .skills-management-root,
+:root[data-theme='dark'] .exchange-page-root,
+:root[data-theme='dark'] .wallet-page-root,
+:root[data-theme='dark'] .solidarity-page-root,
+:root[data-theme='dark'] .members-page-root {
+  background-color: var(--tb-bg) !important;
+}
+
+:root[data-theme='dark'] [class*='card'],
+:root[data-theme='dark'] [class*='panel'],
+:root[data-theme='dark'] [class*='box'],
+:root[data-theme='dark'] [class*='shell'] {
+  border-color: var(--tb-border);
+}
+
+:root[data-theme='dark'] [class*='card']:not(.fund-summary),
+:root[data-theme='dark'] [class*='panel']:not(.tb-mobile-drawer),
+:root[data-theme='dark'] [class*='box'] {
+  background-color: var(--tb-surface) !important;
+}
+
+:root[data-theme='dark'] .admin-tabs button.active,
+:root[data-theme='dark'] .user-picker button.selected,
+:root[data-theme='dark'] .conversation-item.selected,
+:root[data-theme='dark'] .message-bubble.mine {
+  background-color: #203b39 !important;
+  color: var(--tb-text-primary);
+}
+
+:root[data-theme='dark'] .tb-hero-section {
+  background: linear-gradient(180deg, #111b1e 0%, #0d1417 100%);
+}
+
+:root[data-theme='dark'] .time-value-section {
+  background: #111a1d;
+}
+
+:root[data-theme='dark'] .verified-check,
+:root[data-theme='dark'] .tb-admin-badge,
+:root[data-theme='dark'] .role-pill,
+:root[data-theme='dark'] .status-pill {
+  background: #193a36;
+  border-color: #315b55;
+  color: #8cddd0;
+}
+
+:root[data-theme='dark'] .request-status.pending,
+:root[data-theme='dark'] .dashboard-state.pending,
+:root[data-theme='dark'] .match-badge {
+  background: #3d311e;
+  color: #ffd58f;
+}
+
+:root[data-theme='dark'] .request-status.approved,
+:root[data-theme='dark'] .dashboard-state:not(.pending) {
+  background: #19382d;
+  color: #91e4b7;
+}
+
+:root[data-theme='dark'] .request-status.rejected {
+  background: #402529;
+  color: #ffaaaa;
+}
+
+:root[data-theme='dark'] .request-status.cancelled {
+  background: #293639;
+  color: #c2cfcc;
+}
+
+:root[data-theme='dark'] .category-form,
+:root[data-theme='dark'] .adjust-form,
+:root[data-theme='dark'] .message-list,
+:root[data-theme='dark'] .conversation-item,
+:root[data-theme='dark'] .message-bubble,
+:root[data-theme='dark'] .composer,
+:root[data-theme='dark'] .request-status,
+:root[data-theme='dark'] .metric-row,
+:root[data-theme='dark'] .transaction-list article,
+:root[data-theme='dark'] .settings-list .setting-row {
+  border-color: var(--tb-border);
+}
+
+:root[data-theme='dark'] .tb-notification-item:hover,
+:root[data-theme='dark'] .conversation-item:hover,
+:root[data-theme='dark'] .tb-btn-outline:hover,
+:root[data-theme='dark'] .tb-btn-ghost:hover {
+  background-color: var(--tb-bg-alt);
+}
+
+:root[data-theme='dark'] .tb-mobile-drawer {
+  background-color: rgba(3, 8, 10, .68) !important;
+}
+
+:root[data-theme='dark'] .tb-notification-item.unread {
+  background-color: rgba(88, 200, 188, .1);
+}
+
+:root[data-theme='dark'] .tb-input.is-invalid,
+:root[data-theme='dark'] .tb-textarea.is-invalid {
+  background-color: #302326;
+}
+
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] select,
+:root[data-theme='dark'] textarea {
+  color-scheme: dark;
+}
+
+:root[data-theme='dark'] ::selection {
+  background: rgba(88, 200, 188, .3);
+}
+
 .member-dashboard{min-height:calc(100vh - 150px);padding:44px 0 72px;background:#f7f9f6}.member-dashboard>*{width:min(100% - 40px,1180px);margin-left:auto;margin-right:auto}.dashboard-welcome{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:28px}.dashboard-eyebrow{color:var(--tb-teal-dark);font-size:.75rem;font-weight:750;letter-spacing:.07em;text-transform:uppercase}.dashboard-welcome h1{margin:8px 0;color:var(--tb-text-primary);font-family:'Space Grotesk',sans-serif;font-size:2.25rem;letter-spacing:-.03em}.dashboard-welcome p,.dashboard-panel header p{margin:0;color:var(--tb-text-secondary);line-height:1.55}.dashboard-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}.dashboard-stat{display:flex;min-height:144px;flex-direction:column;gap:9px;padding:19px;border:1px solid var(--tb-border);border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(24,51,47,.045);text-decoration:none;transition:transform .18s ease,border-color .18s ease}.dashboard-stat:hover{transform:translateY(-2px);border-color:#9bc8bd}.dashboard-stat>span{color:var(--tb-text-secondary);font-size:.82rem;font-weight:600}.dashboard-stat strong{color:var(--tb-teal-dark);font-family:'Space Grotesk',sans-serif;font-size:2rem;line-height:1}.dashboard-stat.reserved strong{color:#b97612}.dashboard-stat small{display:flex;align-items:center;gap:4px;margin-top:auto;color:var(--tb-text-secondary);font-size:.74rem}.dashboard-stat small ion-icon{color:var(--tb-teal)}.dashboard-main-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.dashboard-panel{min-width:0;padding:22px;border:1px solid var(--tb-border);border-radius:15px;background:#fff;box-shadow:0 6px 20px rgba(24,51,47,.04)}.dashboard-panel>header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px}.dashboard-panel h2{margin:5px 0;color:var(--tb-text-primary);font-size:1.22rem}.dashboard-panel header>a,.dashboard-panel header>button{flex:0 0 auto;padding:5px 0;border:0;background:transparent;color:var(--tb-teal);font:inherit;font-size:.8rem;font-weight:700;text-decoration:none;cursor:pointer}.dashboard-list-row{display:flex;align-items:center;gap:11px;padding:13px 0;border-top:1px solid #edf1ee}.dashboard-list-icon{display:grid;flex:0 0 36px;place-items:center;width:36px;height:36px;border-radius:11px;background:#e9f5f2;color:var(--tb-teal);font-size:1.1rem}.dashboard-list-icon.request-icon{background:#fff2df;color:#be7a16}.dashboard-list-row>div{display:grid;min-width:0;flex:1;gap:4px}.dashboard-list-row>div strong{overflow:hidden;color:var(--tb-text-primary);font-size:.86rem;text-overflow:ellipsis;white-space:nowrap}.dashboard-list-row>div small{color:var(--tb-text-secondary);font-size:.74rem}.dashboard-state{flex:0 0 auto;padding:5px 8px;border-radius:999px;background:#eaf4ed;color:#32704f;font-size:.68rem;font-weight:700}.dashboard-state.pending{background:#fff2dc;color:#946113}.dashboard-empty{display:flex;min-height:116px;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px;text-align:center;color:var(--tb-text-secondary)}.dashboard-empty>ion-icon{color:var(--tb-teal);font-size:1.4rem}.dashboard-empty p{margin:0;font-size:.84rem}.dashboard-empty>a{color:var(--tb-teal);font-size:.8rem;font-weight:700}.dashboard-suggestions,.dashboard-notifications{margin-bottom:18px}.suggestion-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.suggestion-card{display:flex;min-height:150px;flex-direction:column;align-items:flex-start;gap:9px;padding:15px;border:1px solid var(--tb-border);border-radius:12px;background:#fff;text-align:left;cursor:pointer;transition:border-color .18s ease,transform .18s ease}.suggestion-card:hover{transform:translateY(-2px);border-color:var(--tb-teal)}.suggestion-category{color:var(--tb-teal);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}.suggestion-card>strong{color:var(--tb-text-primary);font-size:.93rem;line-height:1.35}.suggestion-author{color:var(--tb-text-secondary);font-size:.75rem}.suggestion-link{display:flex;align-items:center;gap:4px;margin-top:auto;color:var(--tb-teal);font-size:.77rem;font-weight:700}.dashboard-notification-row{display:flex;width:100%;align-items:center;gap:11px;padding:12px 0;border:0;border-top:1px solid #edf1ee;background:transparent;text-align:left;cursor:pointer}.dashboard-notification-row>span:nth-child(2){display:grid;flex:1;gap:4px}.dashboard-notification-row strong{color:var(--tb-text-primary);font-size:.84rem}.dashboard-notification-row small{color:var(--tb-text-secondary);font-size:.75rem}.dashboard-notification-row time{flex:0 0 auto;color:var(--tb-text-secondary);font-size:.7rem}.notification-indicator{width:8px;height:8px;border-radius:50%;background:#d8dfda}.notification-indicator.unread{background:var(--tb-orange)}
 @media(max-width:900px){.dashboard-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.suggestion-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.member-dashboard{padding:30px 0 48px}.member-dashboard>*{width:min(100% - 28px,1180px)}.dashboard-welcome{align-items:flex-start;flex-direction:column}.dashboard-welcome h1{font-size:1.8rem}.dashboard-stats,.dashboard-main-grid{grid-template-columns:1fr}.dashboard-stat{min-height:120px}.dashboard-panel{padding:17px}.dashboard-panel>header{flex-direction:column}.dashboard-list-row{align-items:flex-start;flex-wrap:wrap}.dashboard-list-row>div{min-width:calc(100% - 55px)}.dashboard-state{margin-left:47px}.suggestion-grid{grid-template-columns:1fr}.suggestion-card{min-height:125px}.dashboard-notification-row{align-items:flex-start}.dashboard-notification-row time{max-width:68px;text-align:right}}

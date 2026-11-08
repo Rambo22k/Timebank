@@ -36,6 +36,7 @@ import { ExchangeService } from '../../core/services/exchange.service';
 import { NotificationsService } from '../../core/services/notifications.service';
 import { AppNotification } from '../../core/models/notification.model';
 import { Skill } from '../../core/models/skill.model';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 interface FaqItem {
   question: string;
@@ -47,6 +48,7 @@ interface FaqItem {
   selector: 'app-landing',
   standalone: true,
   imports: [
+    TranslatePipe,
     CommonModule,
     RouterModule,
     IonIcon,

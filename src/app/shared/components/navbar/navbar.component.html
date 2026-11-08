@@ -11,43 +11,48 @@
     <!-- Desktop Navigation Links -->
     <nav class="tb-nav-links" aria-label="Navegación principal">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="tb-nav-link">
-        Inicio
-      </a>
+         {{ "Inicio" | t }} </a>
       <a routerLink="/explore" routerLinkActive="active" class="tb-nav-link">
         <ion-icon name="search-outline"></ion-icon>
-        Explorar
-      </a>
+         {{ "Explorar" | t }} </a>
       @if (authService.isAuthenticated()) {
         <a routerLink="/skills" routerLinkActive="active" class="tb-nav-link">
           <ion-icon name="layers-outline"></ion-icon>
-          Mis Habilidades
-        </a>
+           {{ "Mis Habilidades" | t }} </a>
         <a routerLink="/exchanges/requests" routerLinkActive="active" class="tb-nav-link">
           <ion-icon name="mail-outline"></ion-icon>
-          Intercambios
-        </a>
+           {{ "Intercambios" | t }} </a>
         <a routerLink="/wallet" routerLinkActive="active" class="tb-nav-link">
           <ion-icon name="wallet-outline"></ion-icon>
-          Billetera
-        </a>
+           {{ "Billetera" | t }} </a>
         @if (authService.isAdmin()) {
           <a routerLink="/admin" routerLinkActive="active" class="tb-nav-link admin-nav-link">
             <ion-icon name="shield-checkmark-outline"></ion-icon>
-            Administración
-          </a>
+             {{ "Administración" | t }} </a>
         }
       }
     </nav>
 
     <!-- Desktop User Actions -->
     <div class="tb-nav-actions">
+      <div class="tb-appearance-controls" [attr.aria-label]="isEnglish ? 'Display preferences' : 'Preferencias de pantalla'">
+        <div class="tb-language-toggle" role="group" [attr.aria-label]="isEnglish ? 'Application language' : 'Idioma de la aplicación'">
+          <button type="button" [class.active]="localization.language() === 'es'" (click)="changeLanguage('es')" [attr.aria-label]="'Español' | t">ES</button>
+          <button type="button" [class.active]="localization.language() === 'en'" (click)="changeLanguage('en')" [attr.aria-label]="'English' | t">EN</button>
+        </div>
+        <button class="tb-theme-toggle" type="button" (click)="toggleTheme()"
+          [attr.aria-label]="theme.isDark() ? (isEnglish ? 'Switch to light mode' : 'Cambiar a modo claro') : (isEnglish ? 'Switch to dark mode' : 'Cambiar a modo oscuro')"
+          [attr.title]="theme.isDark() ? (isEnglish ? 'Light mode' : 'Modo claro') : (isEnglish ? 'Dark mode' : 'Modo oscuro')">
+          <ion-icon [name]="theme.isDark() ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+        </button>
+      </div>
       @if (authService.isAuthenticated()) {
         <!-- Time Credits Live Pill -->
         <div class="tb-credits-pill" title="Tus créditos de tiempo acumulados (1h = 1 crédito)">
           <div class="credits-pulse"></div>
           <ion-icon name="time-outline"></ion-icon>
           <span class="credits-num">{{ authService.currentUser()?.timeCredits }}</span>
-          <span class="credits-unit">créditos</span>
+          <span class="credits-unit">{{ "créditos" | t }}</span>
         </div>
 
         <div class="tb-notification-area">
@@ -62,30 +67,30 @@
             <section class="tb-notification-panel" [attr.aria-label]="isEnglish ? 'Recent notifications' : 'Notificaciones recientes'">
               <header class="tb-notification-header">
                 <div>
-                  <strong>{{ isEnglish ? 'Notifications' : 'Notificaciones' }}</strong>
-                  <span>{{ notifications.unreadCount() }} {{ isEnglish ? 'unread' : 'sin leer' }}</span>
+                  <strong>{{ (isEnglish ? 'Notifications' : 'Notificaciones') | t }}</strong>
+                  <span>{{ notifications.unreadCount() }} {{ (isEnglish ? 'unread' : 'sin leer') | t }}</span>
                 </div>
                 @if (notifications.unreadCount() > 0) {
                   <button type="button" class="tb-mark-all" (click)="notifications.markAllRead()">
                     <ion-icon name="checkmark-done-outline"></ion-icon>
-                    {{ isEnglish ? 'Mark all read' : 'Marcar leídas' }}
+                    {{ (isEnglish ? 'Mark all read' : 'Marcar leídas') | t }}
                   </button>
                 }
               </header>
               <div class="tb-notification-list">
                 @if (notifications.isLoading() && notifications.notifications().length === 0) {
-                  <p class="tb-notification-empty">{{ isEnglish ? 'Loading notifications…' : 'Cargando notificaciones…' }}</p>
+                  <p class="tb-notification-empty">{{ (isEnglish ? 'Loading notifications…' : 'Cargando notificaciones…') | t }}</p>
                 } @else if (notifications.notifications().length === 0) {
-                  <p class="tb-notification-empty">{{ isEnglish ? 'You have no notifications yet.' : 'Todavía no tienes notificaciones.' }}</p>
+                  <p class="tb-notification-empty">{{ (isEnglish ? 'You have no notifications yet.' : 'Todavía no tienes notificaciones.') | t }}</p>
                 } @else {
                   @for (notification of notifications.notifications(); track notification.id) {
                     <button type="button" class="tb-notification-item" [class.unread]="!notification.readAt"
                       (click)="openNotification(notification)">
                       <span class="tb-notification-dot"></span>
                       <span class="tb-notification-copy">
-                        <strong>{{ notification.title }}</strong>
-                        <span>{{ notification.body }}</span>
-                        <time>{{ notification.createdAt | date:'short':undefined:(isEnglish ? 'en' : 'es') }}</time>
+                        <strong>{{ notification.title | t }}</strong>
+                        <span>{{ notification.body | t }}</span>
+                        <time>{{ (notification.createdAt | date:'short':undefined:(isEnglish ? 'en' : 'es')) | t }}</time>
                       </span>
                     </button>
                   }
@@ -96,25 +101,23 @@
         </div>
 
         <!-- User Quick Avatar -->
-        <a routerLink="/profile" class="tb-user-mini" title="Ver mi perfil">
+        <a routerLink="/profile" class="tb-user-mini" [title]="'Ver mi perfil' | t">
           <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.name" class="user-avatar-mini" />
           <span class="user-name-wrap"><span class="user-name-mini">{{ authService.currentUser()?.name?.split(' ')?.at(0) }}</span>
-            @if (authService.isAdmin()) { <span class="tb-admin-badge">Admin</span> }
+            @if (authService.isAdmin()) { <span class="tb-admin-badge">{{ "Admin" | t }}</span> }
           </span>
         </a>
 
         <!-- Exit / Logout -->
-        <button class="tb-btn tb-btn-ghost tb-btn-sm" (click)="onLogout()" title="Cerrar sesión">
+        <button class="tb-btn tb-btn-ghost tb-btn-sm" (click)="onLogout()" [title]="'Cerrar sesión' | t">
           <ion-icon name="log-out-outline"></ion-icon>
         </button>
       } @else {
         <a routerLink="/auth/login" class="tb-btn tb-btn-outline tb-btn-sm">
-          Iniciar sesión
-        </a>
+           {{ "Iniciar sesión" | t }} </a>
         <a routerLink="/auth/register" class="tb-btn tb-btn-primary tb-btn-sm">
           <ion-icon name="sparkles-outline"></ion-icon>
-          Registrarse
-        </a>
+           {{ "Registrarse" | t }} </a>
       }
 
       <!-- Mobile Hamburger Toggle -->
@@ -134,7 +137,7 @@
             <div class="drawer-user-info">
               <span class="drawer-name">{{ authService.currentUser()?.name }}</span>
               @if (authService.isAdmin()) {
-                <span class="tb-admin-badge">Admin</span>
+                <span class="tb-admin-badge">{{ "Admin" | t }}</span>
               }
               <div class="tb-credits-pill mobile-pill">
                 <ion-icon name="time-outline"></ion-icon>
@@ -145,57 +148,56 @@
         }
 
         <nav class="mobile-nav-list">
+          <div class="mobile-appearance-controls">
+            <div class="tb-language-toggle" role="group" [attr.aria-label]="isEnglish ? 'Application language' : 'Idioma de la aplicación'">
+              <button type="button" [class.active]="localization.language() === 'es'" (click)="changeLanguage('es')">ES</button>
+              <button type="button" [class.active]="localization.language() === 'en'" (click)="changeLanguage('en')">EN</button>
+            </div>
+            <button class="tb-theme-toggle" type="button" (click)="toggleTheme()"
+              [attr.aria-label]="theme.isDark() ? (isEnglish ? 'Switch to light mode' : 'Cambiar a modo claro') : (isEnglish ? 'Switch to dark mode' : 'Cambiar a modo oscuro')">
+              <ion-icon [name]="theme.isDark() ? 'sunny-outline' : 'moon-outline'"></ion-icon>
+              {{ (theme.isDark() ? (isEnglish ? 'Light mode' : 'Modo claro') : (isEnglish ? 'Dark mode' : 'Modo oscuro')) | t }}
+            </button>
+          </div>
           <a routerLink="/" (click)="closeMobileMenu()" class="mobile-link">
-            Inicio
-          </a>
+             {{ "Inicio" | t }} </a>
           <a routerLink="/explore" (click)="closeMobileMenu()" class="mobile-link">
             <ion-icon name="search-outline"></ion-icon>
-            Explorar Habilidades
-          </a>
+             {{ "Explorar Habilidades" | t }} </a>
           @if (authService.isAuthenticated()) {
             <a routerLink="/skills" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="layers-outline"></ion-icon>
-              Mis Habilidades
-            </a>
+               {{ "Mis Habilidades" | t }} </a>
             <a routerLink="/exchanges/requests" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="mail-outline"></ion-icon>
-              Intercambios y solicitudes
-            </a>
+               {{ "Intercambios y solicitudes" | t }} </a>
             <a routerLink="/exchanges/sessions" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="calendar-outline"></ion-icon>
-              Mis sesiones
-            </a>
+               {{ "Mis sesiones" | t }} </a>
             <a routerLink="/wallet" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="wallet-outline"></ion-icon>
-              Billetera e historial
-            </a>
+               {{ "Billetera e historial" | t }} </a>
             <a routerLink="/exchanges/reviews" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="star-outline"></ion-icon>
-              Reseñas
-            </a>
+               {{ "Reseñas" | t }} </a>
             <a routerLink="/profile" (click)="closeMobileMenu()" class="mobile-link">
               <ion-icon name="person-circle-outline"></ion-icon>
-              Mi Perfil
-            </a>
+               {{ "Mi Perfil" | t }} </a>
             @if (authService.isAdmin()) {
               <a routerLink="/admin" (click)="closeMobileMenu()" class="mobile-link">
                 <ion-icon name="shield-checkmark-outline"></ion-icon>
-                Administración
-              </a>
+                 {{ "Administración" | t }} </a>
             }
             <div class="mobile-divider"></div>
             <button class="tb-btn tb-btn-danger tb-btn-sm" (click)="onLogout()">
               <ion-icon name="log-out-outline"></ion-icon>
-              Cerrar sesión
-            </button>
+               {{ "Cerrar sesión" | t }} </button>
           } @else {
             <div class="mobile-auth-actions">
               <a routerLink="/auth/login" (click)="closeMobileMenu()" class="tb-btn tb-btn-outline">
-                Iniciar sesión
-              </a>
+                 {{ "Iniciar sesión" | t }} </a>
               <a routerLink="/auth/register" (click)="closeMobileMenu()" class="tb-btn tb-btn-primary">
-                Registrarse gratis
-              </a>
+                 {{ "Registrarse gratis" | t }} </a>
             </div>
           }
         </nav>

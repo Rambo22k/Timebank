@@ -7,7 +7,8 @@ import { alertCircleOutline, closeOutline, trashOutline } from 'ionicons/icons';
 @Component({
   selector: 'app-confirmation-modal',
   standalone: true,
-  imports: [CommonModule, IonIcon],
+  imports: [
+    CommonModule, IonIcon],
   templateUrl: './confirmation-modal.component.html',
   styleUrls: ['./confirmation-modal.component.scss']
 })

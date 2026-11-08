@@ -6,15 +6,15 @@
       </button>
 
       <div class="modal-header">
-        <span class="sub-label">Configuración Personal</span>
-        <h2 class="title">Editar Perfil de Usuario</h2>
-        <p class="subtitle">Personaliza tu presentación ante la comunidad de TimeBank.</p>
+        <span class="sub-label">{{ "Configuración Personal" | t }}</span>
+        <h2 class="title">{{ "Editar Perfil de Usuario" | t }}</h2>
+        <p class="subtitle">{{ "Personaliza tu presentación ante la comunidad de TimeBank." | t }}</p>
       </div>
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <!-- Avatar Selector Section -->
         <div class="avatar-selection-section">
-          <label class="tb-label">Foto de perfil</label>
+          <label class="tb-label">{{ "Foto de perfil" | t }}</label>
           <div class="avatars-row">
             @for (av of avatarOptions; track av) {
               <button
@@ -34,8 +34,7 @@
           </div>
           <label class="tb-btn tb-btn-outline avatar-upload-btn">
             <ion-icon name="camera-outline"></ion-icon>
-            Subir foto
-            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarFileSelected($event)" />
+             {{ "Subir foto" | t }} <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onAvatarFileSelected($event)" />
           </label>
           @if (selectedAvatarFile) {
             <span class="avatar-file-name">{{ selectedAvatarFile.name }}</span>
@@ -47,7 +46,7 @@
 
         <!-- Name -->
         <div class="tb-form-group">
-          <label class="tb-label" for="user-name">Nombre completo *</label>
+          <label class="tb-label" for="user-name">{{ "Nombre completo *" | t }}</label>
           <input
             id="user-name"
             type="text"
@@ -59,7 +58,7 @@
 
         <!-- Headline -->
         <div class="tb-form-group">
-          <label class="tb-label" for="user-headline">Titular profesional o interés principal *</label>
+          <label class="tb-label" for="user-headline">{{ "Titular profesional o interés principal *" | t }}</label>
           <input
             id="user-headline"
             type="text"
@@ -72,7 +71,7 @@
 
         <!-- Location -->
         <div class="tb-form-group">
-          <label class="tb-label" for="user-loc">Ubicación *</label>
+          <label class="tb-label" for="user-loc">{{ "Ubicación *" | t }}</label>
           <input
             id="user-loc"
             type="text"
@@ -84,28 +83,28 @@
 
         <div class="profile-settings-grid">
           <div class="tb-form-group">
-            <label class="tb-label" for="user-country">País *</label>
+            <label class="tb-label" for="user-country">{{ "País *" | t }}</label>
             <select id="user-country" class="tb-select" formControlName="countryCode">
-              <option value="" disabled>Selecciona el país</option>
+              <option value="" disabled>{{ "Selecciona el país" | t }}</option>
               @for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }
             </select>
-            @if (form.get('countryCode')?.invalid && form.get('countryCode')?.touched) { <span class="tb-error-text">Selecciona tu país de residencia.</span> }
+            @if (form.get('countryCode')?.invalid && form.get('countryCode')?.touched) { <span class="tb-error-text">{{ "Selecciona tu país de residencia." | t }}</span> }
           </div>
           <div class="tb-form-group">
-            <label class="tb-label" for="user-timezone">Zona horaria *</label>
+            <label class="tb-label" for="user-timezone">{{ "Zona horaria *" | t }}</label>
             <input id="user-timezone" class="tb-input" formControlName="timezone" placeholder="America/Santo_Domingo" />
-            @if (form.get('timezone')?.invalid && form.get('timezone')?.touched) { <span class="tb-error-text">Indica una zona horaria válida, por ejemplo America/Santo_Domingo.</span> }
+            @if (form.get('timezone')?.invalid && form.get('timezone')?.touched) { <span class="tb-error-text">{{ "Indica una zona horaria válida, por ejemplo America/Santo_Domingo." | t }}</span> }
           </div>
           <div class="tb-form-group">
-            <label class="tb-label" for="user-language">Idioma preferido para notificaciones</label>
+            <label class="tb-label" for="user-language">{{ "Idioma de la aplicación" | t }}</label>
             <select id="user-language" class="tb-select" formControlName="preferredLanguage">
-              <option value="es">Español</option><option value="en">English</option>
+              <option value="es">{{ "Español" | t }}</option><option value="en">{{ "English" | t }}</option>
             </select>
           </div>
         </div>
 
         <div class="tb-form-group language-preferences">
-          <span class="tb-label">Idiomas que hablas (máximo 12)</span>
+          <span class="tb-label">{{ "Idiomas que hablas (máximo 12)" | t }}</span>
           <div class="language-checkbox-grid">
             @for (language of languages; track language.code) {
               <label><input type="checkbox" [checked]="(form.get('languages')?.value || []).includes(language.code)" (change)="toggleLanguage(language.code, $any($event.target).checked)" />{{ language.name }}</label>
@@ -115,7 +114,7 @@
 
         <!-- Bio -->
         <div class="tb-form-group">
-            <label class="tb-label" for="user-bio">Biografía / Acerca de mí</label>
+            <label class="tb-label" for="user-bio">{{ "Biografía / Acerca de mí" | t }}</label>
           <textarea
             id="user-bio"
             class="tb-textarea"
@@ -128,11 +127,10 @@
         <!-- Actions -->
         <div class="modal-footer">
           <button type="button" class="tb-btn tb-btn-outline" [disabled]="isSaving" (click)="onClose()">
-            Cancelar
-          </button>
+             {{ "Cancelar" | t }} </button>
           <button type="submit" class="tb-btn tb-btn-primary" [disabled]="isSaving">
             <ion-icon [name]="isSaving ? 'time-outline' : 'checkmark-outline'"></ion-icon>
-            {{ isSaving ? 'Guardando…' : 'Guardar Cambios' }}
+            {{ (isSaving ? 'Guardando…' : 'Guardar Cambios') | t }}
           </button>
         </div>
       </form>

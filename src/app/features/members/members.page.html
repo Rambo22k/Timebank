@@ -2,19 +2,19 @@
   <app-navbar></app-navbar>
   <main class="members-main tb-container">
     <header class="members-heading">
-      <span class="eyebrow">Comunidad TimeBank</span>
-      <h1>Personas para aprender y colaborar</h1>
-      <p>Encuentra miembros por nombre, habilidad o ubicación y agrégalos a tus contactos.</p>
+      <span class="eyebrow">{{ "Comunidad TimeBank" | t }}</span>
+      <h1>{{ "Personas para aprender y colaborar" | t }}</h1>
+      <p>{{ "Encuentra miembros por nombre, habilidad o ubicación y agrégalos a tus contactos." | t }}</p>
       <label class="member-search"><ion-icon name="search-outline"></ion-icon><input type="search" [ngModel]="query" (ngModelChange)="searchChanged($event)" placeholder="Buscar por persona, habilidad o ubicación" aria-label="Buscar miembros"></label>
     </header>
 
     <nav class="member-tabs" aria-label="Secciones de comunidad">
-      <button [class.active]="activeTab === 'discover'" (click)="activeTab = 'discover'">Descubrir</button>
-      <button [class.active]="activeTab === 'requests'" (click)="activeTab = 'requests'">Solicitudes <span>{{ community.incomingRequests().length }}</span></button>
-      <button [class.active]="activeTab === 'contacts'" (click)="activeTab = 'contacts'">Mis contactos <span>{{ community.acceptedContacts().length }}</span></button>
+      <button [class.active]="activeTab === 'discover'" (click)="activeTab = 'discover'">{{ "Descubrir" | t }}</button>
+      <button [class.active]="activeTab === 'requests'" (click)="activeTab = 'requests'">{{ "Solicitudes" | t }} <span>{{ community.incomingRequests().length }}</span></button>
+      <button [class.active]="activeTab === 'contacts'" (click)="activeTab = 'contacts'">{{ "Mis contactos" | t }} <span>{{ community.acceptedContacts().length }}</span></button>
     </nav>
 
-    @if (community.loading()) { <p class="loading-state">Cargando miembros…</p> }
+    @if (community.loading()) { <p class="loading-state">{{ "Cargando miembros…" | t }}</p> }
 
     @if (activeTab === 'discover') {
       <section class="member-grid" aria-label="Miembros">
@@ -22,19 +22,19 @@
           <article class="member-card">
             <a class="member-avatar-link" [routerLink]="['/profile', member.id]"><img [src]="member.avatar_url" [alt]="member.display_name"></a>
             <div class="member-info">
-              <a class="member-name" [routerLink]="['/profile', member.id]">{{ member.display_name }} @if (member.is_verified) { <ion-icon name="checkmark-circle-outline" aria-label="Verificado"></ion-icon> }</a>
+              <a class="member-name" [routerLink]="['/profile', member.id]">{{ member.display_name }} @if (member.is_verified) { <ion-icon name="checkmark-circle-outline" [attr.aria-label]="'Verificado' | t"></ion-icon> }</a>
               <p>{{ member.headline }}</p>
               <span class="member-location"><ion-icon name="location-outline"></ion-icon>{{ member.location }}</span>
               @if (member.reputation_average > 0) { <small>★ {{ member.reputation_average | number:'1.1-1' }} · {{ member.reputation_count }} reseñas</small> }
             </div>
             <div class="member-actions">
-              <a class="tb-btn tb-btn-outline tb-btn-sm" [routerLink]="['/profile', member.id]">Ver perfil</a>
+              <a class="tb-btn tb-btn-outline tb-btn-sm" [routerLink]="['/profile', member.id]">{{ "Ver perfil" | t }}</a>
               @if (isIncoming(member)) {
-                <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="act(member)"><ion-icon name="checkmark-outline"></ion-icon>Aceptar</button>
+                <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="act(member)"><ion-icon name="checkmark-outline"></ion-icon>{{ "Aceptar" | t }}</button>
                 <button class="icon-action" aria-label="Rechazar solicitud" title="Rechazar solicitud" (click)="community.respond(community.relationship(member.id)!.id, false)"><ion-icon name="close-circle-outline"></ion-icon></button>
-              } @else if (isSent(member)) { <span class="relation-state">Solicitud enviada</span> }
-              @else if (isContact(member)) { <span class="relation-state connected"><ion-icon name="people-outline"></ion-icon>En contactos</span> }
-              @else { <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="act(member)"><ion-icon name="person-add-outline"></ion-icon>Conectar</button> }
+              } @else if (isSent(member)) { <span class="relation-state">{{ "Solicitud enviada" | t }}</span> }
+              @else if (isContact(member)) { <span class="relation-state connected"><ion-icon name="people-outline"></ion-icon>{{ "En contactos" | t }}</span> }
+              @else { <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="act(member)"><ion-icon name="person-add-outline"></ion-icon>{{ "Conectar" | t }}</button> }
             </div>
           </article>
         } @empty { @if (!community.loading()) { <p class="empty-members">No hay miembros que coincidan con la búsqueda.</p> } }
@@ -45,7 +45,7 @@
       <section class="member-grid">
         @for (request of requests(); track request.id) {
           @if (memberFor(request); as member) {
-            <article class="member-card compact"><img class="member-avatar" [src]="member.avatar_url" [alt]="member.display_name"><div class="member-info"><a class="member-name" [routerLink]="['/profile', member.id]">{{ member.display_name }}</a><p>Quiere agregarte a sus contactos</p></div><div class="member-actions"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="community.respond(request.id, true)">Aceptar</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="community.respond(request.id, false)">Rechazar</button></div></article>
+            <article class="member-card compact"><img class="member-avatar" [src]="member.avatar_url" [alt]="member.display_name"><div class="member-info"><a class="member-name" [routerLink]="['/profile', member.id]">{{ member.display_name }}</a><p>{{ "Quiere agregarte a sus contactos" | t }}</p></div><div class="member-actions"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="community.respond(request.id, true)">{{ "Aceptar" | t }}</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="community.respond(request.id, false)">{{ "Rechazar" | t }}</button></div></article>
           }
         } @empty { <p class="empty-members">No tienes solicitudes pendientes.</p> }
       </section>
@@ -55,7 +55,7 @@
       <section class="member-grid">
         @for (contact of contacts(); track contact.id) {
           @if (memberFor(contact); as member) {
-            <article class="member-card compact"><img class="member-avatar" [src]="member.avatar_url" [alt]="member.display_name"><div class="member-info"><a class="member-name" [routerLink]="['/profile', member.id]">{{ member.display_name }} @if (member.is_verified) { <ion-icon name="checkmark-circle-outline" aria-label="Verificado"></ion-icon> }</a><p>{{ member.headline }}</p></div><div class="member-actions"><a class="tb-btn tb-btn-outline tb-btn-sm" [routerLink]="['/profile', member.id]">Ver perfil</a><button class="tb-btn tb-btn-ghost tb-btn-sm" (click)="community.remove(contact.id)">Quitar</button></div></article>
+            <article class="member-card compact"><img class="member-avatar" [src]="member.avatar_url" [alt]="member.display_name"><div class="member-info"><a class="member-name" [routerLink]="['/profile', member.id]">{{ member.display_name }} @if (member.is_verified) { <ion-icon name="checkmark-circle-outline" [attr.aria-label]="'Verificado' | t"></ion-icon> }</a><p>{{ member.headline }}</p></div><div class="member-actions"><a class="tb-btn tb-btn-outline tb-btn-sm" [routerLink]="['/profile', member.id]">{{ "Ver perfil" | t }}</a><button class="tb-btn tb-btn-ghost tb-btn-sm" (click)="community.remove(contact.id)">{{ "Quitar" | t }}</button></div></article>
           }
         } @empty { <p class="empty-members">Aún no tienes contactos. Busca miembros para conectar.</p> }
       </section>

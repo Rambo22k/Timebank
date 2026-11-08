@@ -5,7 +5,9 @@ import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import { closeOutline, checkmarkOutline, cameraOutline, timeOutline } from 'ionicons/icons';
 import { UserProfile } from '../../../core/models/user.model';
-import { COUNTRY_OPTIONS, LANGUAGE_OPTIONS } from '../../../core/data/localization-options';
+import { countryOptionsFor, languageOptionsFor } from '../../../core/data/localization-options';
+import { LocalizationService } from '../../../core/services/localization.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export interface ProfileEditSubmission {
   updates: Partial<UserProfile>;
@@ -25,12 +27,14 @@ function timeZoneValidator(control: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-edit-profile-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, FormsModule, ReactiveFormsModule, IonIcon],
   templateUrl: './edit-profile-modal.component.html',
   styleUrls: ['./edit-profile-modal.component.scss']
 })
 export class EditProfileModalComponent implements OnChanges, OnDestroy {
   private fb = inject(FormBuilder);
+  private localization = inject(LocalizationService);
 
   @Input() isOpen = false;
   @Input() user: UserProfile | null = null;
@@ -44,8 +48,8 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
   selectedAvatarFile: File | null = null;
   fileError = '';
   private avatarPreviewUrl: string | null = null;
-  readonly countries = COUNTRY_OPTIONS;
-  readonly languages = LANGUAGE_OPTIONS;
+  get countries() { return countryOptionsFor(this.localization.language()); }
+  get languages() { return languageOptionsFor(this.localization.language()); }
 
   avatarOptions = [
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',

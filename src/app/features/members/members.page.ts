@@ -9,11 +9,13 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { ContactsService, MemberSummary, UserContact } from '../../core/services/contacts.service';
 import { AuthService } from '../../core/services/auth.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-members-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
+  imports: [
+    TranslatePipe,CommonModule, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
   templateUrl: './members.page.html',
   styleUrls: ['./members.page.scss']
 })

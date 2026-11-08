@@ -14,11 +14,13 @@ import {
   checkmarkCircleOutline
 } from 'ionicons/icons';
 import { Skill } from '../../../core/models/skill.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-skill-card',
   standalone: true,
-  imports: [CommonModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, IonIcon],
   templateUrl: './skill-card.component.html',
   styleUrls: ['./skill-card.component.scss']
 })

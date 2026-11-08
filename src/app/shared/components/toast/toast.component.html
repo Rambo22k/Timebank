@@ -5,9 +5,9 @@
         <ion-icon [name]="getIconName(toast.type)"></ion-icon>
       </div>
       <div class="toast-content">
-        <span class="toast-msg">{{ toast.message }}</span>
+        <span class="toast-msg">{{ toast.message | t }}</span>
       </div>
-      <button class="toast-close" (click)="toastService.dismiss(toast.id)" aria-label="Cerrar notificación">
+      <button class="toast-close" (click)="toastService.dismiss(toast.id)" [attr.aria-label]="'Cerrar notificación' | t">
         <ion-icon name="close-outline"></ion-icon>
       </button>
     </div>

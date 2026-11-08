@@ -15,11 +15,13 @@ import { Skill } from '../../../core/models/skill.model';
 import { AuthService } from '../../../core/services/auth.service';
 import { ExchangeService } from '../../../core/services/exchange.service';
 import { SkillsService } from '../../../core/services/skills.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-exchange-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, FormsModule, IonIcon],
   templateUrl: './exchange-modal.component.html',
   styleUrls: ['./exchange-modal.component.scss']
 })

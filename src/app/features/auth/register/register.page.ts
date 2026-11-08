@@ -20,7 +20,10 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { COUNTRY_OPTIONS } from '../../../core/data/localization-options';
+import { countryOptionsFor } from '../../../core/data/localization-options';
+import { LocalizationService } from '../../../core/services/localization.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -45,6 +48,7 @@ function adultValidator(control: AbstractControl): ValidationErrors | null {
   selector: 'app-register',
   standalone: true,
   imports: [
+    TranslatePipe,
     CommonModule,
     RouterModule,
     FormsModule,
@@ -61,6 +65,8 @@ export class RegisterPage {
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private router = inject(Router);
+  private localization = inject(LocalizationService);
+  private theme = inject(ThemeService);
 
   form: FormGroup;
   showPassword = false;
@@ -68,7 +74,7 @@ export class RegisterPage {
   isLoading = false;
   isGoogleLoading = false;
   readonly maxBirthDate = this.latestAdultBirthDate();
-  readonly countries = COUNTRY_OPTIONS;
+  get countries() { return countryOptionsFor(this.localization.language()); }
 
   constructor() {
     addIcons({
@@ -116,7 +122,11 @@ export class RegisterPage {
 
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-      const result = await this.authService.register({ name, email, password, birthDate, countryCode, timezone });
+      const result = await this.authService.register({
+        name, email, password, birthDate, countryCode, timezone,
+        preferredLanguage: this.localization.language(),
+        preferredTheme: this.theme.preference()
+      });
       if (result.emailConfirmationRequired) {
         await this.router.navigate(['/auth/login'], { queryParams: { emailConfirmation: email.trim() } });
       } else if (this.authService.needsProfileCompletion()) {

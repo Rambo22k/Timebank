@@ -8,11 +8,13 @@ import {
   timeOutline,
   sparklesOutline
 } from 'ionicons/icons';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, RouterModule, IonIcon],
+  imports: [
+    TranslatePipe,CommonModule, RouterModule, IonIcon],
   templateUrl: './footer.component.html',
   styleUrls: ['./footer.component.scss']
 })

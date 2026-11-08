@@ -7,12 +7,23 @@ export const COUNTRY_OPTIONS: CountryOption[] = COUNTRY_CODES
   .map(code => ({ code, name: COUNTRY_NAMES.of(code) ?? code }))
   .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
+export function countryOptionsFor(language: 'es' | 'en'): CountryOption[] {
+  const names = new Intl.DisplayNames([language === 'en' ? 'en' : 'es'], { type: 'region' });
+  return COUNTRY_CODES.map(code => ({ code, name: names.of(code) ?? code })).sort((a, b) => a.name.localeCompare(b.name, language));
+}
+
 const LANGUAGE_CODES = `af am ar az be bg bn bs ca ceb co cs cy da de el en eo es et eu fa fi fil fj fr fy ga gd gl gu ha he hi hr ht hu hy id ig is it ja jv ka kk km kn ko ku ky la lb lo lt lv mg mi mk ml mn mr ms mt my ne nl no ny om or pa pl ps pt ro ru rw sd si sk sl sn so sq sr su sv sw ta te th tk tl tr tt ug uk ur uz vi wo xh yi yo zh zu`.split(' ');
 const LANGUAGE_NAMES = new Intl.DisplayNames(['es'], { type: 'language' });
 export const LANGUAGE_OPTIONS: LanguageOption[] = LANGUAGE_CODES
   .map(code => ({ code, name: LANGUAGE_NAMES.of(code) ?? code }))
   .sort((a, b) => a.name.localeCompare(b.name, 'es'));
 
-export function languageLabel(code: string): string {
-  return LANGUAGE_OPTIONS.find(language => language.code === code)?.name ?? code;
+export function languageOptionsFor(language: 'es' | 'en'): LanguageOption[] {
+  const names = new Intl.DisplayNames([language === 'en' ? 'en' : 'es'], { type: 'language' });
+  return LANGUAGE_CODES.map(code => ({ code, name: names.of(code) ?? code })).sort((a, b) => a.name.localeCompare(b.name, language));
+}
+
+export function languageLabel(code: string, language: 'es' | 'en' = 'es'): string {
+  const names = new Intl.DisplayNames([language === 'en' ? 'en' : 'es'], { type: 'language' });
+  return names.of(code) ?? LANGUAGE_OPTIONS.find(item => item.code === code)?.name ?? code;
 }

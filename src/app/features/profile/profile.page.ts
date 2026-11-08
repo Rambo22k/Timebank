@@ -42,11 +42,14 @@ import { SupabaseService } from '../../core/services/supabase.service';
 import { ContactsService } from '../../core/services/contacts.service';
 import { AvailabilityService } from '../../core/services/availability.service';
 import { COUNTRY_OPTIONS, languageLabel } from '../../core/data/localization-options';
+import { LocalizationService } from '../../core/services/localization.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
+    TranslatePipe,
     CommonModule,
     FormsModule,
     RouterModule,
@@ -66,6 +69,7 @@ import { COUNTRY_OPTIONS, languageLabel } from '../../core/data/localization-opt
 })
 export class ProfilePage {
   authService = inject(AuthService);
+  localization = inject(LocalizationService);
   skillsService = inject(SkillsService);
   private toastService = inject(ToastService);
   verification = inject(IdentityVerificationService);
@@ -186,6 +190,7 @@ export class ProfilePage {
         timezone: data.timezone ?? 'UTC',
         languages: (languageRows ?? []).map(row => row.language_code),
         preferredLanguage: 'es',
+        preferredTheme: 'system',
         timeCredits: 0,
         hoursGiven: Number(data.offered_hours ?? 0),
         hoursReceived: Number(data.received_hours ?? 0),
@@ -252,10 +257,11 @@ export class ProfilePage {
   weekdayLabel(weekday: number): string { return this.weekdays.find(day => day.value === weekday)?.label ?? 'Día'; }
 
   countryLabel(countryCode: string): string {
-    return this.countryOptions.find(country => country.code === countryCode)?.name ?? countryCode;
+    const locale = this.localization.language() === 'en' ? 'en' : 'es';
+    return new Intl.DisplayNames([locale], { type: 'region' }).of(countryCode) ?? this.countryOptions.find(country => country.code === countryCode)?.name ?? countryCode;
   }
 
-  languageLabel(languageCode: string): string { return languageLabel(languageCode); }
+  languageLabel(languageCode: string): string { return languageLabel(languageCode, this.localization.language()); }
 
   closeEditProfile(): void {
     this.isEditProfileModalOpen = false;

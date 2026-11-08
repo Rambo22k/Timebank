@@ -19,22 +19,20 @@
               <div class="hero-actions-group">
                 <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="openEditProfile()">
                   <ion-icon name="create-outline"></ion-icon>
-                  Editar Perfil
-                </button>
+                   {{ "Editar Perfil" | t }} </button>
                 <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="openNewSkillModal()">
                   <ion-icon name="sparkles-outline"></ion-icon>
-                  Publicar Habilidad
-                </button>
+                   {{ "Publicar Habilidad" | t }} </button>
               </div>
               } @else {
                 @if (contacts.activeProfileContact()?.status === 'accepted') {
-                  <span class="verified-check contact-state"><ion-icon name="people-outline"></ion-icon>En tus contactos</span>
+                  <span class="verified-check contact-state"><ion-icon name="people-outline"></ion-icon>{{ "En tus contactos" | t }}</span>
                 } @else if (contacts.activeProfileContact()?.status === 'pending' && contacts.activeProfileContact()?.recipient_id === authService.authUser()?.id) {
-                  <div class="hero-actions-group"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="connectToProfile()">Aceptar contacto</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="contacts.respond(contacts.activeProfileContact()!.id, false)">Rechazar</button></div>
+                  <div class="hero-actions-group"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="connectToProfile()">{{ "Aceptar contacto" | t }}</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="contacts.respond(contacts.activeProfileContact()!.id, false)">{{ "Rechazar" | t }}</button></div>
                 } @else if (contacts.activeProfileContact()?.status === 'pending') {
-                  <span class="relation-state">Solicitud enviada</span>
+                  <span class="relation-state">{{ "Solicitud enviada" | t }}</span>
                 } @else {
-                  <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="connectToProfile()"><ion-icon name="person-add-outline"></ion-icon>Agregar a contactos</button>
+                  <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="connectToProfile()"><ion-icon name="person-add-outline"></ion-icon>{{ "Agregar a contactos" | t }}</button>
                 }
               }
             </div>
@@ -46,7 +44,7 @@
                 @if (user.isVerified) {
                   <span class="verified-check" role="img" aria-label="Identidad verificada" title="Identidad verificada">
                     <ion-icon name="checkmark-circle-outline"></ion-icon>
-                    <span>Verificado</span>
+                    <span>{{ "Verificado" | t }}</span>
                   </span>
                 }
                 @if (user.rating) {
@@ -108,11 +106,11 @@
             <div class="metric-block highlight-credit">
               <div class="metric-top">
                 <ion-icon name="time-outline"></ion-icon>
-                <span class="metric-lbl">Saldo Disponible</span>
+                <span class="metric-lbl">{{ "Saldo Disponible" | t }}</span>
               </div>
               <div class="metric-value-box">
                 <span class="value-huge">{{ user.timeCredits }}</span>
-                <span class="value-unit">Créditos de tiempo</span>
+                <span class="value-unit">{{ "Créditos de tiempo" | t }}</span>
               </div>
               <span class="metric-subtext">Equivalente a {{ user.timeCredits }} horas de aprendizaje</span>
             </div>
@@ -120,23 +118,23 @@
 
             <!-- Hours Shared -->
             <div class="metric-block">
-              <span class="metric-lbl">Horas Compartidas</span>
+              <span class="metric-lbl">{{ "Horas Compartidas" | t }}</span>
               <span class="metric-num">{{ user.hoursGiven }}h</span>
-              <span class="metric-subtext">Enseñando a la comunidad</span>
+              <span class="metric-subtext">{{ "Enseñando a la comunidad" | t }}</span>
             </div>
 
             <!-- Hours Received -->
             <div class="metric-block">
-              <span class="metric-lbl">Horas Recibidas</span>
+              <span class="metric-lbl">{{ "Horas Recibidas" | t }}</span>
               <span class="metric-num">{{ user.hoursReceived }}h</span>
-              <span class="metric-subtext">Aprendiendo de otros</span>
+              <span class="metric-subtext">{{ "Aprendiendo de otros" | t }}</span>
             </div>
 
             <!-- Completed Exchanges -->
             <div class="metric-block">
-              <span class="metric-lbl">Intercambios Realizados</span>
+              <span class="metric-lbl">{{ "Intercambios Realizados" | t }}</span>
               <span class="metric-num">{{ user.completedExchanges }}</span>
-              <span class="metric-subtext">Sesiones bilaterales exitosas</span>
+              <span class="metric-subtext">{{ "Sesiones bilaterales exitosas" | t }}</span>
             </div>
           </div>
         </div>
@@ -145,24 +143,24 @@
         <section class="verification-card" aria-labelledby="verification-title">
           <div class="verification-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></div>
           <div class="verification-copy">
-            <span class="eyebrow">Confianza en la comunidad</span>
-            <h2 id="verification-title">Verificación de identidad</h2>
+            <span class="eyebrow">{{ "Confianza en la comunidad" | t }}</span>
+            <h2 id="verification-title">{{ "Verificación de identidad" | t }}</h2>
             @if (verification.loading()) {
-              <p>Consultando el estado de tu solicitud…</p>
+              <p>{{ "Consultando el estado de tu solicitud…" | t }}</p>
             } @else if (verification.record()?.status === 'approved') {
-              <p>Tu identidad está verificada. Tu perfil muestra la insignia de confianza.</p>
+              <p>{{ "Tu identidad está verificada. Tu perfil muestra la insignia de confianza." | t }}</p>
             } @else if (verification.record()?.status === 'pending') {
-              <p>Documento recibido el {{ verification.record()?.submitted_at | date:'mediumDate' }}. Está pendiente de revisión. Puedes reemplazarlo si subiste un archivo incorrecto.</p>
+              <p>Documento recibido el {{ (verification.record()?.submitted_at | date:'mediumDate') | t }}. Está pendiente de revisión. Puedes reemplazarlo si subiste un archivo incorrecto.</p>
             } @else if (verification.record()?.status === 'rejected') {
               <p>La solicitud anterior fue rechazada. {{ verification.record()?.review_note || 'Puedes enviar un documento legible para una nueva revisión.' }}</p>
             } @else {
-              <p>Envía un documento de identidad para que el equipo pueda revisar tu solicitud. El archivo se guarda de forma privada y solo lo pueden consultar tú y el equipo administrador.</p>
+              <p>{{ "Envía un documento de identidad para que el equipo pueda revisar tu solicitud. El archivo se guarda de forma privada y solo lo pueden consultar tú y el equipo administrador." | t }}</p>
             }
           </div>
           @if (verification.record()?.status !== 'approved') {
             <label class="tb-btn tb-btn-outline tb-btn-sm verification-upload" [class.is-disabled]="verification.uploading()">
               <ion-icon [name]="verification.uploading() ? 'time-outline' : 'cloud-upload-outline'"></ion-icon>
-              {{ verification.uploading() ? 'Enviando…' : (verification.record()?.status === 'pending' ? 'Reemplazar documento' : 'Seleccionar documento') }}
+              {{ (verification.uploading() ? 'Enviando…' : (verification.record()?.status === 'pending' ? 'Reemplazar documento' : 'Seleccionar documento')) | t }}
               <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" [disabled]="verification.uploading()" (change)="onVerificationFileSelected($event)" aria-label="Seleccionar documento de identidad">
             </label>
           }
@@ -173,28 +171,27 @@
           <div class="availability-heading">
             <div class="availability-icon"><ion-icon name="calendar-outline"></ion-icon></div>
             <div>
-              <span class="eyebrow">Horarios para coordinar sesiones</span>
-              <h2 id="availability-title">Disponibilidad semanal</h2>
-              <p>Las horas se muestran en la zona horaria indicada para cada franja.</p>
+              <span class="eyebrow">{{ "Horarios para coordinar sesiones" | t }}</span>
+              <h2 id="availability-title">{{ "Disponibilidad semanal" | t }}</h2>
+              <p>{{ "Las horas se muestran en la zona horaria indicada para cada franja." | t }}</p>
             </div>
           </div>
           @if (isOwnProfile) {
             <form class="availability-form" (ngSubmit)="addAvailabilitySlot()">
-              <label>Día
-                <select name="availabilityWeekday" [(ngModel)]="newAvailabilityWeekday">
+              <label>{{ "Día" | t }} <select name="availabilityWeekday" [(ngModel)]="newAvailabilityWeekday">
                   @for (day of weekdays; track day.value) { <option [ngValue]="day.value">{{ day.label }}</option> }
                 </select>
               </label>
-              <label>Desde<input name="availabilityStart" type="time" [(ngModel)]="newAvailabilityStart" required></label>
-              <label>Hasta<input name="availabilityEnd" type="time" [(ngModel)]="newAvailabilityEnd" required></label>
-              <label class="timezone-field">Zona horaria<input name="availabilityTimezone" [(ngModel)]="availabilityTimezone" required maxlength="100" placeholder="America/Santo_Domingo"></label>
+              <label>{{ "Desde" | t }}<input name="availabilityStart" type="time" [(ngModel)]="newAvailabilityStart" required></label>
+              <label>{{ "Hasta" | t }}<input name="availabilityEnd" type="time" [(ngModel)]="newAvailabilityEnd" required></label>
+              <label class="timezone-field">{{ "Zona horaria" | t }}<input name="availabilityTimezone" [(ngModel)]="availabilityTimezone" required maxlength="100" placeholder="America/Santo_Domingo"></label>
               <button class="tb-btn tb-btn-primary tb-btn-sm" type="submit" [disabled]="availability.saving()">
-                {{ availability.saving() ? 'Guardando…' : 'Agregar horario' }}
+                {{ (availability.saving() ? 'Guardando…' : 'Agregar horario') | t }}
               </button>
             </form>
           }
           @if (availability.loading()) {
-            <p class="availability-state">Cargando horarios…</p>
+            <p class="availability-state">{{ "Cargando horarios…" | t }}</p>
           } @else if (availability.slots().length) {
             <div class="availability-list">
               @for (slot of availability.slots(); track slot.id) {
@@ -202,12 +199,12 @@
                   <strong>{{ weekdayLabel(slot.weekday) }}</strong>
                   <span>{{ slot.start_time.slice(0, 5) }}–{{ slot.end_time.slice(0, 5) }}</span>
                   <small>{{ slot.timezone }}</small>
-                  @if (isOwnProfile) { <button type="button" class="availability-remove" [disabled]="availability.saving()" (click)="availability.removeSlot(slot.id)" [attr.aria-label]="'Eliminar disponibilidad de ' + weekdayLabel(slot.weekday)">Quitar</button> }
+                  @if (isOwnProfile) { <button type="button" class="availability-remove" [disabled]="availability.saving()" (click)="availability.removeSlot(slot.id)" [attr.aria-label]="'Eliminar disponibilidad de ' + weekdayLabel(slot.weekday)">{{ "Quitar" | t }}</button> }
                 </article>
               }
             </div>
           } @else {
-            <p class="availability-state">{{ isOwnProfile ? 'Todavía no agregaste horarios. Publica algunas franjas para que sea más fácil coordinar.' : 'Este miembro aún no publicó su disponibilidad semanal.' }}</p>
+            <p class="availability-state">{{ (isOwnProfile ? 'Todavía no agregaste horarios. Publica algunas franjas para que sea más fácil coordinar.' : 'Este miembro aún no publicó su disponibilidad semanal.') | t }}</p>
           }
         </section>
 
@@ -223,7 +220,7 @@
                 (click)="setActiveTab('offered')"
               >
                 <ion-icon name="sparkles-outline"></ion-icon>
-                <span>Habilidades que Ofrezco</span>
+                <span>{{ "Habilidades que Ofrezco" | t }}</span>
                 <span class="tab-count">{{ offeredSkills.length }}</span>
               </button>
 
@@ -234,7 +231,7 @@
                 (click)="setActiveTab('wanted')"
               >
                 <ion-icon name="swap-horizontal-outline"></ion-icon>
-                <span>Habilidades que Busco</span>
+                <span>{{ "Habilidades que Busco" | t }}</span>
                 <span class="tab-count orange">{{ wantedSkills.length }}</span>
               </button>
             </div>
@@ -242,8 +239,7 @@
             <!-- Add Skill Action -->
             @if (isOwnProfile) { <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="openNewSkillModal()">
               <ion-icon name="sparkles-outline"></ion-icon>
-              Añadir otra habilidad
-            </button> }
+               {{ "Añadir otra habilidad" | t }} </button> }
           </div>
 
           <!-- Skills Grid Display -->
@@ -298,8 +294,8 @@
           }
         </div>
       }
-      @if (profileLoading()) { <div class="tb-container"><p class="profile-load-state">Cargando perfil…</p></div> }
-      @if (!profileLoading() && profileUnavailable()) { <div class="tb-container"><section class="profile-load-state"><h1>Perfil no disponible</h1><p>Este miembro no existe o su perfil no está disponible.</p><a class="tb-btn tb-btn-primary" routerLink="/explore">Volver a explorar</a></section></div> }
+      @if (profileLoading()) { <div class="tb-container"><p class="profile-load-state">{{ "Cargando perfil…" | t }}</p></div> }
+      @if (!profileLoading() && profileUnavailable()) { <div class="tb-container"><section class="profile-load-state"><h1>{{ "Perfil no disponible" | t }}</h1><p>{{ "Este miembro no existe o su perfil no está disponible." | t }}</p><a class="tb-btn tb-btn-primary" routerLink="/explore">{{ "Volver a explorar" | t }}</a></section></div> }
     </div>
   </main>
 
