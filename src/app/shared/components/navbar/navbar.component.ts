@@ -41,6 +41,8 @@ export class NavbarComponent {
   mobileMenuOpen = signal(false);
   notificationPanelOpen = signal(false);
 
+  get isEnglish(): boolean { return this.authService.currentUser()?.preferredLanguage === 'en'; }
+
   constructor() {
     addIcons({
       menuOutline,
@@ -83,8 +85,11 @@ export class NavbarComponent {
     const sessionId = notification.data['session_id'];
     const conversationId = notification.data['conversation_id'];
     const solidarityRequestId = notification.data['solidarity_request_id'];
+    const contactId = notification.data['contact_id'];
     if (conversationId) {
       await this.router.navigate(['/exchanges/messages'], { queryParams: { conversation: conversationId } });
+    } else if (contactId) {
+      await this.router.navigate(['/members'], { queryParams: { tab: 'requests', contact: contactId } });
     } else if (solidarityRequestId || notification.type === 'solidarity_update') {
       await this.router.navigate(['/solidarity'], { queryParams: solidarityRequestId ? { request: solidarityRequestId } : undefined });
     } else if (sessionId || notification.type === 'session_completed' || notification.type === 'review_received') {

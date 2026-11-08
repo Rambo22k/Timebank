@@ -6,6 +6,10 @@ export interface UserProfile {
   bio: string;
   avatar: string;
   location: string;
+  countryCode: string;
+  timezone: string;
+  languages: string[];
+  preferredLanguage: 'en' | 'es';
   timeCredits: number;
   hoursGiven: number;
   hoursReceived: number;

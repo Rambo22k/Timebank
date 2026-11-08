@@ -41,6 +41,7 @@ import { IdentityVerificationService } from '../../core/services/identity-verifi
 import { SupabaseService } from '../../core/services/supabase.service';
 import { ContactsService } from '../../core/services/contacts.service';
 import { AvailabilityService } from '../../core/services/availability.service';
+import { COUNTRY_OPTIONS, languageLabel } from '../../core/data/localization-options';
 
 @Component({
   selector: 'app-profile',
@@ -103,6 +104,7 @@ export class ProfilePage {
   newAvailabilityStart = '09:00';
   newAvailabilityEnd = '12:00';
   availabilityTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  private readonly countryOptions = COUNTRY_OPTIONS;
 
   constructor() {
     addIcons({
@@ -161,11 +163,14 @@ export class ProfilePage {
     this.profileLoading.set(true);
     try {
       const { data, error } = await client.from('profiles')
-        .select('id,display_name,headline,location,country_code,avatar_path,bio,reputation_average,reputation_count,offered_hours,received_hours,completed_sessions,created_at,is_verified')
+        .select('id,display_name,headline,location,country_code,timezone,avatar_path,bio,reputation_average,reputation_count,offered_hours,received_hours,completed_sessions,created_at,is_verified')
         .eq('id', profileId)
         .maybeSingle();
       if (error) throw error;
       if (!data) { this.profileUnavailable.set(true); return; }
+      const { data: languageRows, error: languageError } = await client.from('profile_languages')
+        .select('language_code').eq('user_id', profileId);
+      if (languageError) throw languageError;
       const avatar = data.avatar_path
         ? (/^https?:\/\//i.test(data.avatar_path) ? data.avatar_path : client.storage.from('profile-avatars').getPublicUrl(data.avatar_path).data.publicUrl)
         : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80';
@@ -177,6 +182,10 @@ export class ProfilePage {
         bio: data.bio ?? '',
         avatar,
         location: data.location ?? data.country_code ?? 'En línea',
+        countryCode: String(data.country_code ?? '').trim().toUpperCase(),
+        timezone: data.timezone ?? 'UTC',
+        languages: (languageRows ?? []).map(row => row.language_code),
+        preferredLanguage: 'es',
         timeCredits: 0,
         hoursGiven: Number(data.offered_hours ?? 0),
         hoursReceived: Number(data.received_hours ?? 0),
@@ -241,6 +250,12 @@ export class ProfilePage {
   }
 
   weekdayLabel(weekday: number): string { return this.weekdays.find(day => day.value === weekday)?.label ?? 'Día'; }
+
+  countryLabel(countryCode: string): string {
+    return this.countryOptions.find(country => country.code === countryCode)?.name ?? countryCode;
+  }
+
+  languageLabel(languageCode: string): string { return languageLabel(languageCode); }
 
   closeEditProfile(): void {
     this.isEditProfileModalOpen = false;

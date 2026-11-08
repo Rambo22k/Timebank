@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import { checkmarkCircleOutline, locationOutline, peopleOutline, searchOutline, shieldCheckmarkOutline, personAddOutline, closeCircleOutline, checkmarkOutline } from 'ionicons/icons';
@@ -20,6 +20,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class MembersPage {
   community = inject(ContactsService);
   auth = inject(AuthService);
+  private route = inject(ActivatedRoute);
 
   query = '';
   activeTab: 'discover' | 'requests' | 'contacts' = 'discover';
@@ -27,6 +28,9 @@ export class MembersPage {
 
   constructor() {
     addIcons({ checkmarkCircleOutline, locationOutline, peopleOutline, searchOutline, shieldCheckmarkOutline, personAddOutline, closeCircleOutline, checkmarkOutline });
+    this.route.queryParamMap.subscribe(params => {
+      if (params.get('tab') === 'requests') this.activeTab = 'requests';
+    });
     void this.community.load();
   }
 

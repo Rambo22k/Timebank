@@ -106,27 +106,30 @@ export class NotificationsService {
   private fromRow(row: NotificationRow): AppNotification {
     let title = row.title;
     let body = row.body;
-    const translations: Record<string, [string, string]> = {
-      'New message': ['Nuevo mensaje', 'Recibiste un mensaje nuevo.'],
-      'New session request': ['Nueva solicitud de intercambio', 'Recibiste una solicitud para intercambiar una habilidad.'],
-      'New proposed session time': ['Nuevo horario propuesto', 'La otra persona propuso un nuevo horario para el intercambio.'],
-      'Request accepted': ['Solicitud aceptada', 'La solicitud fue aceptada y la sesión quedó agendada.'],
-      'Request declined': ['Solicitud rechazada', 'La otra persona no podrá realizar este intercambio.'],
-      'Request expired': ['Solicitud vencida', 'La solicitud venció antes de recibir respuesta.'],
-      'Request cancelled': ['Solicitud cancelada', 'La otra persona canceló la solicitud o sesión.'],
-      'Exchange under review': ['Intercambio en revisión', 'Se reportó un problema con este intercambio.'],
-      'Session confirmed': ['Sesión confirmada', 'La otra persona confirmó que la sesión se realizó.'],
-      'New review': ['Nueva reseña', 'Recibiste una reseña después de un intercambio.'],
-      'Welcome credits': ['Créditos de bienvenida', 'Se agregaron créditos a tu billetera.'],
-      'Exchange completed': ['Intercambio completado', 'La sesión se completó y tus créditos quedaron actualizados.'],
-      'Credits refunded': ['Créditos devueltos', 'Los créditos reservados fueron devueltos a tu billetera.'],
-      'Donation recorded': ['Donación registrada', 'Tu aporte al fondo solidario quedó registrado.'],
-      'Solidarity support received': ['Apoyo solidario recibido', 'Se agregaron créditos de apoyo a tu billetera.'],
-      'Solidarity request declined': ['Solicitud solidaria no aprobada', 'Tu solicitud no fue aprobada. Revisa la respuesta del equipo de TimeBank.'],
-      'Credit balance updated': ['Actualización de créditos', 'Se actualizó el saldo de tu billetera.']
+    const translations: Record<string, { es: [string, string]; en: [string, string] }> = {
+      'New message': { es: ['Nuevo mensaje', 'Recibiste un mensaje nuevo.'], en: ['New message', 'You received a new message.'] },
+      'New session request': { es: ['Nueva solicitud de intercambio', 'Recibiste una solicitud para intercambiar una habilidad.'], en: ['New session request', 'You received a request to exchange a skill.'] },
+      'Teaching offer received': { es: ['Te ofrecen enseñar', 'Un miembro te ofreció una sesión para aprender una habilidad que buscas.'], en: ['Teaching offer received', 'A member offered to teach a skill you want to learn.'] },
+      'New contact request': { es: ['Nueva solicitud de contacto', 'Alguien quiere conectar contigo.'], en: ['New contact request', 'Someone wants to connect with you.'] },
+      'Contact request accepted': { es: ['Solicitud de contacto aceptada', 'Ahora forman parte de los contactos de TimeBank.'], en: ['Contact request accepted', 'You are now connected on TimeBank.'] },
+      'New proposed session time': { es: ['Nuevo horario propuesto', 'La otra persona propuso un nuevo horario para el intercambio.'], en: ['New time proposed', 'The other person proposed a new time for the exchange.'] },
+      'Request accepted': { es: ['Solicitud aceptada', 'La solicitud fue aceptada y la sesión quedó agendada.'], en: ['Request accepted', 'The request was accepted and the session is scheduled.'] },
+      'Request declined': { es: ['Solicitud rechazada', 'La otra persona no podrá realizar este intercambio.'], en: ['Request declined', 'The other person is unable to complete this exchange.'] },
+      'Request expired': { es: ['Solicitud vencida', 'La solicitud venció antes de recibir respuesta.'], en: ['Request expired', 'The request expired before receiving a response.'] },
+      'Request cancelled': { es: ['Solicitud cancelada', 'La otra persona canceló la solicitud o sesión.'], en: ['Request cancelled', 'The other person cancelled the request or session.'] },
+      'Exchange under review': { es: ['Intercambio en revisión', 'Se reportó un problema con este intercambio.'], en: ['Exchange under review', 'A problem was reported with this exchange.'] },
+      'Session confirmed': { es: ['Sesión confirmada', 'La otra persona confirmó que la sesión se realizó.'], en: ['Session confirmed', 'The other person confirmed the session took place.'] },
+      'New review': { es: ['Nueva reseña', 'Recibiste una reseña después de un intercambio.'], en: ['New review', 'You received a review after an exchange.'] },
+      'Welcome credits': { es: ['Créditos de bienvenida', 'Se agregaron créditos a tu billetera.'], en: ['Welcome credits', 'Credits were added to your wallet.'] },
+      'Exchange completed': { es: ['Intercambio completado', 'La sesión se completó y tus créditos quedaron actualizados.'], en: ['Exchange completed', 'The session was completed and your credits were updated.'] },
+      'Credits refunded': { es: ['Créditos devueltos', 'Los créditos reservados fueron devueltos a tu billetera.'], en: ['Credits refunded', 'Reserved credits were returned to your wallet.'] },
+      'Donation recorded': { es: ['Donación registrada', 'Tu aporte al fondo solidario quedó registrado.'], en: ['Donation recorded', 'Your contribution to the solidarity fund was recorded.'] },
+      'Solidarity support received': { es: ['Apoyo solidario recibido', 'Se agregaron créditos de apoyo a tu billetera.'], en: ['Solidarity support received', 'Support credits were added to your wallet.'] },
+      'Solidarity request declined': { es: ['Solicitud solidaria no aprobada', 'Tu solicitud no fue aprobada. Revisa la respuesta del equipo de TimeBank.'], en: ['Solidarity request declined', 'Your request was not approved. Review the TimeBank team response.'] },
+      'Credit balance updated': { es: ['Actualización de créditos', 'Se actualizó el saldo de tu billetera.'], en: ['Credit balance updated', 'Your wallet balance was updated.'] }
     };
     const translation = translations[row.title];
-    if (translation) [title, body] = translation;
+    if (translation) [title, body] = translation[this.auth.currentUser()?.preferredLanguage ?? 'es'];
     return {
       id: row.id,
       userId: row.user_id,

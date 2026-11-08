@@ -132,6 +132,22 @@
           </select>
         </div>
 
+        <div class="filter-subgroup">
+          <label class="toolbar-label" for="discovery-country">País:</label>
+          <select id="discovery-country" class="tb-select filter-select" [value]="selectedCountryCode()" (change)="setCountry($any($event.target).value)">
+            <option value="all">Todos los países</option>
+            @for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }
+          </select>
+        </div>
+
+        <div class="filter-subgroup">
+          <label class="toolbar-label" for="discovery-language">Idioma:</label>
+          <select id="discovery-language" class="tb-select filter-select" [value]="selectedLanguageCode()" (change)="setSpokenLanguage($any($event.target).value)">
+            <option value="all">Todos los idiomas</option>
+            @for (language of spokenLanguages; track language.code) { <option [value]="language.code">{{ language.name }}</option> }
+          </select>
+        </div>
+
         <!-- Sort By -->
         <div class="filter-subgroup">
           <span class="toolbar-label">Ordenar:</span>

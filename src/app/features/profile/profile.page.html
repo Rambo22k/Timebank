@@ -65,6 +65,10 @@
                   <ion-icon name="location-outline"></ion-icon>
                   {{ user.location }}
                 </span>
+                @if (user.countryCode) {
+                  <span class="meta-sep">&bull;</span>
+                  <span class="meta-item">{{ countryLabel(user.countryCode) }}</span>
+                }
                 <span class="meta-sep">&bull;</span>
                 <span class="meta-item">
                   <ion-icon name="calendar-outline"></ion-icon>
@@ -72,6 +76,12 @@
                 </span>
               </div>
             </div>
+
+            @if (user.languages.length) {
+              <div class="profile-badges-row language-badges">
+                @for (language of user.languages; track language) { <span class="badge-item">{{ languageLabel(language) }}</span> }
+              </div>
+            }
 
             <!-- Bio -->
             <div class="profile-bio-box">

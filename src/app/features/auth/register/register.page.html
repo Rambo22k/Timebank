@@ -92,6 +92,13 @@
             </div>
 
             <div class="tb-form-group">
+              <label class="tb-label" for="reg-country">País de residencia *</label>
+              <select id="reg-country" class="tb-select" formControlName="countryCode">
+                @for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }
+              </select>
+            </div>
+
+            <div class="tb-form-group">
               <label class="tb-label" for="reg-birth-date">Fecha de nacimiento *</label>
               <input id="reg-birth-date" type="date" class="tb-input" [max]="maxBirthDate" [class.is-invalid]="form.get('birthDate')?.invalid && form.get('birthDate')?.touched" formControlName="birthDate" />
               @if (form.get('birthDate')?.hasError('minimumAge')) {

@@ -9,12 +9,15 @@ export interface RegisterCredentials {
   email: string;
   password: string;
   birthDate: string;
+  countryCode: string;
+  timezone: string;
 }
 
 interface PrivateProfile {
   birth_date: string | null;
   accepted_terms_at: string | null;
   accepted_privacy_at: string | null;
+  preferred_language: 'en' | 'es';
 }
 
 export class TimeBankAuthError extends Error {
@@ -102,6 +105,8 @@ export class AuthService {
         data: {
           full_name: credentials.name.trim(),
           birth_date: credentials.birthDate,
+          country_code: credentials.countryCode.toUpperCase(),
+          timezone: credentials.timezone,
           accepted_terms_at: acceptedAt,
           accepted_privacy_at: acceptedAt
         }
@@ -174,14 +179,6 @@ export class AuthService {
     if (!current || !userId) return;
 
     const client = this.supabase.requireClient();
-    const databaseUpdates: { display_name?: string; headline?: string; location?: string; avatar_path?: string; bio?: string } = {};
-    if (updates.name !== undefined) databaseUpdates.display_name = updates.name.trim();
-    if (updates.headline !== undefined) databaseUpdates.headline = updates.headline.trim();
-    if (updates.location !== undefined) databaseUpdates.location = updates.location.trim();
-    if (updates.bio !== undefined) databaseUpdates.bio = updates.bio.trim();
-    if (updates.avatar !== undefined && updates.avatar !== current.avatar && !avatarFile) {
-      databaseUpdates.avatar_path = updates.avatar;
-    }
 
     let uploadedAvatarPath: string | null = null;
     if (avatarFile) {
@@ -197,39 +194,48 @@ export class AuthService {
         upsert: false
       });
       if (error) throw new TimeBankAuthError(this.messageFor(error));
-      databaseUpdates.avatar_path = uploadedAvatarPath;
     }
 
-    if (Object.keys(databaseUpdates).length) {
-      const { error } = await client.from('profiles').update(databaseUpdates).eq('id', userId);
-      if (error) {
-        if (uploadedAvatarPath) await client.storage.from('profile-avatars').remove([uploadedAvatarPath]);
-        throw new TimeBankAuthError(this.messageFor(error));
-      }
-      await this.reloadAuthenticatedUser();
-    } else {
-      this.currentUserSignal.set({ ...current, ...updates });
+    const avatarPath = uploadedAvatarPath ?? (updates.avatar !== undefined && updates.avatar !== current.avatar ? updates.avatar : null);
+    const { error } = await client.rpc('update_my_profile_settings', {
+      p_display_name: (updates.name ?? current.name).trim(),
+      p_headline: (updates.headline ?? current.headline).trim(),
+      p_location: (updates.location ?? current.location).trim(),
+      p_avatar_path: avatarPath,
+      p_bio: (updates.bio ?? current.bio).trim(),
+      p_country_code: (updates.countryCode ?? current.countryCode).toUpperCase(),
+      p_timezone: updates.timezone ?? current.timezone,
+      p_preferred_language: updates.preferredLanguage ?? current.preferredLanguage,
+      p_language_codes: updates.languages ?? current.languages
+    });
+    if (error) {
+      if (uploadedAvatarPath) await client.storage.from('profile-avatars').remove([uploadedAvatarPath]);
+      throw new TimeBankAuthError(this.messageFor(error));
     }
+    await this.reloadAuthenticatedUser();
     if (notify) this.toastService.success('Perfil actualizado.');
   }
 
   private async loadAuthenticatedUser(authUser: User): Promise<void> {
     this.authUserSignal.set(authUser);
     const client = this.supabase.requireClient();
-    const [profileResult, privateResult, accountResult, roleResult] = await Promise.all([
-      client.from('profiles').select('display_name, headline, location, avatar_path, bio, country_code, reputation_average, reputation_count, offered_hours, received_hours, completed_sessions, created_at, is_verified').eq('id', authUser.id).maybeSingle(),
-      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at').eq('user_id', authUser.id).maybeSingle(),
+    const [profileResult, privateResult, accountResult, roleResult, languagesResult] = await Promise.all([
+      client.from('profiles').select('display_name, headline, location, avatar_path, bio, country_code, timezone, reputation_average, reputation_count, offered_hours, received_hours, completed_sessions, created_at, is_verified').eq('id', authUser.id).maybeSingle(),
+      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at, preferred_language').eq('user_id', authUser.id).maybeSingle(),
       client.from('credit_accounts').select('available_balance').eq('user_id', authUser.id).maybeSingle(),
-      client.from('user_roles').select('role').eq('user_id', authUser.id).eq('role', 'admin').maybeSingle()
+      client.from('user_roles').select('role').eq('user_id', authUser.id).eq('role', 'admin').maybeSingle(),
+      client.from('profile_languages').select('language_code').eq('user_id', authUser.id)
     ]);
     if (profileResult.error) throw new TimeBankAuthError(this.messageFor(profileResult.error));
     if (privateResult.error) throw new TimeBankAuthError(this.messageFor(privateResult.error));
     if (accountResult.error) throw new TimeBankAuthError(this.messageFor(accountResult.error));
     if (roleResult.error) throw new TimeBankAuthError(this.messageFor(roleResult.error));
+    if (languagesResult.error) throw new TimeBankAuthError(this.messageFor(languagesResult.error));
     this.isAdminSignal.set(roleResult.data?.role === 'admin');
 
     const profile = profileResult.data;
     const privateProfile = privateResult.data as PrivateProfile | null;
+    const preferredLanguage = privateProfile?.preferred_language ?? 'es';
     this.privateProfileSignal.set(privateProfile);
     const name = profile?.display_name || String(authUser.user_metadata?.['full_name'] ?? authUser.user_metadata?.['name'] ?? authUser.email?.split('@')[0] ?? 'Miembro TimeBank');
     const avatarPath = profile?.avatar_path;
@@ -237,7 +243,7 @@ export class AuthService {
       ? /^https?:\/\//i.test(avatarPath) ? avatarPath : client.storage.from('profile-avatars').getPublicUrl(avatarPath).data.publicUrl
       : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80';
     const memberSince = profile?.created_at
-      ? new Intl.DateTimeFormat('es-DO', { month: 'long', year: 'numeric' }).format(new Date(profile.created_at))
+      ? new Intl.DateTimeFormat(preferredLanguage === 'en' ? 'en-US' : 'es-DO', { month: 'long', year: 'numeric' }).format(new Date(profile.created_at))
       : '';
     const userProfile: UserProfile = {
       id: authUser.id,
@@ -247,6 +253,10 @@ export class AuthService {
       bio: profile?.bio ?? '',
       avatar,
       location: profile?.location ?? profile?.country_code ?? 'En línea',
+      countryCode: String(profile?.country_code ?? '').trim().toUpperCase(),
+      timezone: profile?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC',
+      languages: (languagesResult.data ?? []).map(row => row.language_code as string),
+      preferredLanguage,
       timeCredits: Number(accountResult.data?.available_balance ?? 0),
       hoursGiven: Number(profile?.offered_hours ?? 0),
       hoursReceived: Number(profile?.received_hours ?? 0),

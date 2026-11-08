@@ -135,18 +135,29 @@ export class SkillsService {
       const skillRows = (skillResult.data ?? []) as SkillRow[];
       const userIds = [...new Set(skillRows.map(skill => skill.user_id))];
       let profileRows: ProfileRow[] = [];
+      let languageRows: { user_id: string; language_code: string }[] = [];
       if (userIds.length) {
-        const profileResult = await client.from('profiles')
-          .select('id, display_name, avatar_path, headline, location, country_code, reputation_average, is_verified')
-          .in('id', userIds);
-        if (profileResult.error) throw new Error('load_failed');
+        const [profileResult, languageResult] = await Promise.all([
+          client.from('profiles')
+            .select('id, display_name, avatar_path, headline, location, country_code, reputation_average, is_verified')
+            .in('id', userIds),
+          client.from('profile_languages').select('user_id, language_code').in('user_id', userIds)
+        ]);
+        if (profileResult.error || languageResult.error) throw new Error('load_failed');
         profileRows = (profileResult.data ?? []) as ProfileRow[];
+        languageRows = (languageResult.data ?? []) as typeof languageRows;
       }
 
       if (version !== this.loadVersion) return;
       const categoryById = new Map(categoryRows.map(category => [category.id, category]));
       const profileById = new Map(profileRows.map(profile => [profile.id, profile]));
-      const mappedSkills = skillRows.map(row => this.mapSkill(row, categoryById.get(row.category_id), profileById.get(row.user_id)));
+      const languagesByUser = new Map<string, string[]>();
+      for (const { user_id, language_code } of languageRows) {
+        const languages = languagesByUser.get(user_id) ?? [];
+        languages.push(language_code);
+        languagesByUser.set(user_id, languages);
+      }
+      const mappedSkills = skillRows.map(row => this.mapSkill(row, categoryById.get(row.category_id), profileById.get(row.user_id), languagesByUser.get(row.user_id) ?? []));
       const activeCounts = new Map<string, number>();
       for (const row of skillRows) {
         if (row.status === 'active') activeCounts.set(row.category_id, (activeCounts.get(row.category_id) ?? 0) + 1);
@@ -281,7 +292,7 @@ export class SkillsService {
     return result;
   }
 
-  private mapSkill(row: SkillRow, category?: CategoryRow, profile?: ProfileRow): Skill {
+  private mapSkill(row: SkillRow, category?: CategoryRow, profile?: ProfileRow, authorLanguages: string[] = []): Skill {
     const client = this.supabase.requireClient();
     const avatarPath = profile?.avatar_path;
     const authorAvatar = avatarPath
@@ -294,6 +305,8 @@ export class SkillsService {
       authorAvatar,
       authorHeadline: profile?.headline ?? 'Miembro de la comunidad TimeBank',
       authorLocation: profile?.location ?? profile?.country_code ?? undefined,
+      authorCountryCode: profile?.country_code?.trim().toUpperCase() || undefined,
+      authorLanguages,
       authorRating: Number(profile?.reputation_average ?? 0),
       authorVerified: profile?.is_verified ?? false,
       type: row.skill_type,

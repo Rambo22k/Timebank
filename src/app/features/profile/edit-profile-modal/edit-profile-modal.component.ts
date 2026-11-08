@@ -1,14 +1,25 @@
 import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import { closeOutline, checkmarkOutline, cameraOutline, timeOutline } from 'ionicons/icons';
 import { UserProfile } from '../../../core/models/user.model';
+import { COUNTRY_OPTIONS, LANGUAGE_OPTIONS } from '../../../core/data/localization-options';
 
 export interface ProfileEditSubmission {
   updates: Partial<UserProfile>;
   avatarFile: File | null;
+}
+
+function timeZoneValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) return null;
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: control.value }).format();
+    return null;
+  } catch {
+    return { invalidTimeZone: true };
+  }
 }
 
 @Component({
@@ -33,6 +44,8 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
   selectedAvatarFile: File | null = null;
   fileError = '';
   private avatarPreviewUrl: string | null = null;
+  readonly countries = COUNTRY_OPTIONS;
+  readonly languages = LANGUAGE_OPTIONS;
 
   avatarOptions = [
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
@@ -50,6 +63,10 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
       name: ['', [Validators.required, Validators.minLength(3)]],
       headline: ['', [Validators.required, Validators.maxLength(100)]],
       location: ['', [Validators.required, Validators.maxLength(120)]],
+      countryCode: ['', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]],
+      timezone: ['', [Validators.required, Validators.maxLength(100), timeZoneValidator]],
+      preferredLanguage: ['es', [Validators.required]],
+      languages: [[] as string[]],
       bio: ['', [Validators.maxLength(400)]]
     });
   }
@@ -62,9 +79,19 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
         name: this.user.name,
         headline: this.user.headline,
         location: this.user.location,
+        countryCode: this.user.countryCode,
+        timezone: this.user.timezone,
+        preferredLanguage: this.user.preferredLanguage,
+        languages: this.user.languages,
         bio: this.user.bio
       });
     }
+  }
+
+  toggleLanguage(languageCode: string, checked: boolean): void {
+    const selected = new Set(this.form.get('languages')?.value as string[] ?? []);
+    if (checked && selected.size < 12) selected.add(languageCode); else if (!checked) selected.delete(languageCode);
+    this.form.get('languages')?.setValue([...selected]);
   }
 
   selectAvatar(url: string): void {
@@ -107,6 +134,10 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
         name: this.form.value.name.trim(),
         headline: this.form.value.headline.trim(),
         location: this.form.value.location.trim(),
+        countryCode: this.form.value.countryCode,
+        timezone: this.form.value.timezone.trim(),
+        preferredLanguage: this.form.value.preferredLanguage,
+        languages: this.form.value.languages,
         bio: this.form.value.bio.trim(),
         avatar: this.selectedAvatar
       },

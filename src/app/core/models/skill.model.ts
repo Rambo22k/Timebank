@@ -9,6 +9,8 @@ export interface Skill {
   authorAvatar: string;
   authorHeadline: string;
   authorLocation?: string;
+  authorCountryCode?: string;
+  authorLanguages?: string[];
   authorRating?: number;
   authorVerified?: boolean;
   type: SkillType;

@@ -26,6 +26,7 @@ import { SkillsService } from '../../core/services/skills.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Skill, SkillType } from '../../core/models/skill.model';
 import { SkillCategory } from '../../core/models/category.model';
+import { COUNTRY_OPTIONS, LANGUAGE_OPTIONS } from '../../core/data/localization-options';
 
 interface MemberSkillMatch {
   userId: string;
@@ -64,6 +65,10 @@ export class DiscoveryPage implements OnInit {
   selectedType = signal<'all' | SkillType>('all');
   selectedModality = signal<string>('all');
   sortBy = signal<'recent' | 'rating' | 'alphabetical'>('recent');
+  selectedCountryCode = signal('all');
+  selectedLanguageCode = signal('all');
+  readonly countries = COUNTRY_OPTIONS;
+  readonly spokenLanguages = LANGUAGE_OPTIONS;
 
   selectedSkillForDetail: Skill | null = null;
   isDetailModalOpen = false;
@@ -144,7 +149,9 @@ export class DiscoveryPage implements OnInit {
       this.selectedType(),
       this.selectedModality(),
       this.sortBy()
-    ).filter(skill => skill.userId !== currentUserId);
+    ).filter(skill => skill.userId !== currentUserId
+      && (this.selectedCountryCode() === 'all' || skill.authorCountryCode === this.selectedCountryCode())
+      && (this.selectedLanguageCode() === 'all' || skill.authorLanguages?.includes(this.selectedLanguageCode())));
   }
 
   get hasActiveFilters(): boolean {
@@ -153,6 +160,8 @@ export class DiscoveryPage implements OnInit {
       this.selectedCategoryId() !== 'all' ||
       this.selectedType() !== 'all' ||
       this.selectedModality() !== 'all' ||
+      this.selectedCountryCode() !== 'all' ||
+      this.selectedLanguageCode() !== 'all' ||
       this.sortBy() !== 'recent'
     );
   }
@@ -169,6 +178,10 @@ export class DiscoveryPage implements OnInit {
     this.selectedModality.set(modality);
   }
 
+  setCountry(countryCode: string): void { this.selectedCountryCode.set(countryCode); }
+
+  setSpokenLanguage(languageCode: string): void { this.selectedLanguageCode.set(languageCode); }
+
   setSort(sort: 'recent' | 'rating' | 'alphabetical'): void {
     this.sortBy.set(sort);
   }
@@ -182,6 +195,8 @@ export class DiscoveryPage implements OnInit {
     this.selectedCategoryId.set('all');
     this.selectedType.set('all');
     this.selectedModality.set('all');
+    this.selectedCountryCode.set('all');
+    this.selectedLanguageCode.set('all');
     this.sortBy.set('recent');
   }
 

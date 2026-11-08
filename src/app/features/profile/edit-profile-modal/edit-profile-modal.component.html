@@ -82,6 +82,37 @@
           />
         </div>
 
+        <div class="profile-settings-grid">
+          <div class="tb-form-group">
+            <label class="tb-label" for="user-country">País *</label>
+            <select id="user-country" class="tb-select" formControlName="countryCode">
+              <option value="" disabled>Selecciona el país</option>
+              @for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }
+            </select>
+            @if (form.get('countryCode')?.invalid && form.get('countryCode')?.touched) { <span class="tb-error-text">Selecciona tu país de residencia.</span> }
+          </div>
+          <div class="tb-form-group">
+            <label class="tb-label" for="user-timezone">Zona horaria *</label>
+            <input id="user-timezone" class="tb-input" formControlName="timezone" placeholder="America/Santo_Domingo" />
+            @if (form.get('timezone')?.invalid && form.get('timezone')?.touched) { <span class="tb-error-text">Indica una zona horaria válida, por ejemplo America/Santo_Domingo.</span> }
+          </div>
+          <div class="tb-form-group">
+            <label class="tb-label" for="user-language">Idioma preferido para notificaciones</label>
+            <select id="user-language" class="tb-select" formControlName="preferredLanguage">
+              <option value="es">Español</option><option value="en">English</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tb-form-group language-preferences">
+          <span class="tb-label">Idiomas que hablas (máximo 12)</span>
+          <div class="language-checkbox-grid">
+            @for (language of languages; track language.code) {
+              <label><input type="checkbox" [checked]="(form.get('languages')?.value || []).includes(language.code)" (change)="toggleLanguage(language.code, $any($event.target).checked)" />{{ language.name }}</label>
+            }
+          </div>
+        </div>
+
         <!-- Bio -->
         <div class="tb-form-group">
             <label class="tb-label" for="user-bio">Biografía / Acerca de mí</label>

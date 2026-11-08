@@ -20,6 +20,7 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 import { FooterComponent } from '../../../shared/components/footer/footer.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { COUNTRY_OPTIONS } from '../../../core/data/localization-options';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
   const password = control.get('password')?.value;
@@ -67,6 +68,7 @@ export class RegisterPage {
   isLoading = false;
   isGoogleLoading = false;
   readonly maxBirthDate = this.latestAdultBirthDate();
+  readonly countries = COUNTRY_OPTIONS;
 
   constructor() {
     addIcons({
@@ -85,6 +87,7 @@ export class RegisterPage {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
+      countryCode: ['DO', [Validators.required, Validators.pattern(/^[A-Z]{2}$/)]],
       birthDate: ['', [Validators.required, adultValidator]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', [Validators.required]],
@@ -109,10 +112,11 @@ export class RegisterPage {
     }
 
     this.isLoading = true;
-    const { name, email, password, birthDate } = this.form.getRawValue();
+    const { name, email, password, birthDate, countryCode } = this.form.getRawValue();
 
     try {
-      const result = await this.authService.register({ name, email, password, birthDate });
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      const result = await this.authService.register({ name, email, password, birthDate, countryCode, timezone });
       if (result.emailConfirmationRequired) {
         await this.router.navigate(['/auth/login'], { queryParams: { emailConfirmation: email.trim() } });
       } else if (this.authService.needsProfileCompletion()) {
