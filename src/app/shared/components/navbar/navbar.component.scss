@@ -17,6 +17,8 @@
   align-items: center;
   justify-content: flex-start;
   gap: 0;
+  width: 100%;
+  max-width: 1800px;
 }
 
 .tb-brand {
@@ -62,7 +64,7 @@
   gap: clamp(10px, 1vw, 16px);
   padding-right: 12px;
 
-  @media (min-width: 1380px) {
+  @media (min-width: 1280px) {
     display: flex;
   }
 }
@@ -78,6 +80,7 @@
   position: relative;
   padding: 6px 0;
   white-space: nowrap;
+  flex: 0 0 auto;
   transition: color 0.2s ease;
 
   ion-icon {
@@ -110,12 +113,15 @@
   align-items: center;
   flex: 0 0 auto;
   gap: 8px;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
 .tb-language-controls {
   display: flex;
   align-items: center;
   gap: 6px;
+  flex: 0 0 auto;
 }
 
 .tb-language-toggle {
@@ -374,7 +380,7 @@
   cursor: pointer;
   transition: background 0.15s ease;
 
-  @media (min-width: 1380px) {
+  @media (min-width: 1280px) {
     display: none;
   }
 
@@ -402,7 +408,7 @@
   justify-content: flex-end;
   animation: fade-in 0.2s ease-out;
 
-  @media (min-width: 1380px) {
+  @media (min-width: 1280px) {
     display: none;
   }
 }
