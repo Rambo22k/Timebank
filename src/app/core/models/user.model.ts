@@ -14,4 +14,5 @@ export interface UserProfile {
   rating: number;
   reviewsCount: number;
   badges: string[];
+  isVerified: boolean;
 }

@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import {
@@ -11,14 +12,15 @@ import {
   swapHorizontalOutline,
   calendarOutline,
   ribbonOutline,
-  personOutline
+  personOutline,
+  checkmarkCircleOutline
 } from 'ionicons/icons';
 import { Skill } from '../../../core/models/skill.model';
 
 @Component({
   selector: 'app-skill-detail-modal',
   standalone: true,
-  imports: [CommonModule, IonIcon],
+  imports: [CommonModule, RouterModule, IonIcon],
   templateUrl: './skill-detail-modal.component.html',
   styleUrls: ['./skill-detail-modal.component.scss']
 })
@@ -41,7 +43,8 @@ export class SkillDetailModalComponent {
       swapHorizontalOutline,
       calendarOutline,
       ribbonOutline,
-      personOutline
+      personOutline,
+      checkmarkCircleOutline
     });
   }
 

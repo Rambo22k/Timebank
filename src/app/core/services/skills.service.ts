@@ -36,6 +36,7 @@ interface ProfileRow {
   location: string | null;
   country_code: string | null;
   reputation_average: number | null;
+  is_verified: boolean;
 }
 
 interface SkillRow {
@@ -136,7 +137,7 @@ export class SkillsService {
       let profileRows: ProfileRow[] = [];
       if (userIds.length) {
         const profileResult = await client.from('profiles')
-          .select('id, display_name, avatar_path, headline, location, country_code, reputation_average')
+          .select('id, display_name, avatar_path, headline, location, country_code, reputation_average, is_verified')
           .in('id', userIds);
         if (profileResult.error) throw new Error('load_failed');
         profileRows = (profileResult.data ?? []) as ProfileRow[];
@@ -294,6 +295,7 @@ export class SkillsService {
       authorHeadline: profile?.headline ?? 'Miembro de la comunidad TimeBank',
       authorLocation: profile?.location ?? profile?.country_code ?? undefined,
       authorRating: Number(profile?.reputation_average ?? 0),
+      authorVerified: profile?.is_verified ?? false,
       type: row.skill_type,
       title: row.title,
       categoryId: row.category_id,

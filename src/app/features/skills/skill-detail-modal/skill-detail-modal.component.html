@@ -29,7 +29,10 @@
         <img [src]="skill.authorAvatar" [alt]="skill.authorName" class="author-avatar" />
         <div class="author-info">
           <div class="author-name-row">
-            <span class="author-name">{{ skill.authorName }}</span>
+          <a class="author-name" [routerLink]="['/profile', skill.userId]" (click)="onClose()">
+            {{ skill.authorName }}
+            @if (skill.authorVerified) { <ion-icon class="author-verified" name="checkmark-circle-outline" aria-label="Identidad verificada"></ion-icon> }
+          </a>
             @if (skill.authorRating) {
               <span class="author-rating">
                 <ion-icon name="star"></ion-icon>

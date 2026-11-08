@@ -251,7 +251,8 @@ export class AuthService {
       memberSince,
       rating: Number(profile?.reputation_average ?? 0),
       reviewsCount: Number(profile?.reputation_count ?? 0),
-      badges: profile?.is_verified ? ['Miembro verificado'] : []
+      badges: profile?.is_verified ? ['Miembro verificado'] : [],
+      isVerified: profile?.is_verified ?? false
     };
     this.currentUserSignal.set(userProfile);
     this.isReady.set(true);

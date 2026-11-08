@@ -10,6 +10,7 @@ export interface Skill {
   authorHeadline: string;
   authorLocation?: string;
   authorRating?: number;
+  authorVerified?: boolean;
   type: SkillType;
   title: string;
   categoryId: string;

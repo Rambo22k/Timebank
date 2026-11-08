@@ -21,6 +21,12 @@ export const routes: Routes = [
     title: 'Explorar Habilidades — TimeBank'
   },
   {
+    path: 'members',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/members/members.page').then(m => m.MembersPage),
+    title: 'Comunidad — TimeBank'
+  },
+  {
     path: 'skills',
     canActivate: [authGuard],
     loadComponent: () =>

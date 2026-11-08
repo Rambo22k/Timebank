@@ -27,6 +27,12 @@
             </button>
           }
         </div>
+        @if (authService.authUser()) {
+          <a class="tb-btn tb-btn-outline tb-btn-sm members-shortcut" routerLink="/members">
+            <ion-icon name="people-outline"></ion-icon>
+            Buscar miembros y contactos
+          </a>
+        }
       </div>
 
       <!-- Categories Filter Carousel/Pill-Bar -->

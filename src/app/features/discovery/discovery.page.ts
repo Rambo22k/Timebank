@@ -13,7 +13,8 @@ import {
   locationOutline,
   funnelOutline,
   refreshOutline,
-  layersOutline
+  layersOutline,
+  peopleOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -71,7 +72,8 @@ export class DiscoveryPage implements OnInit {
       locationOutline,
       funnelOutline,
       refreshOutline,
-      layersOutline
+      layersOutline,
+      peopleOutline
     });
   }
 
