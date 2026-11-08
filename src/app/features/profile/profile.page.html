@@ -142,17 +142,17 @@
             } @else if (verification.record()?.status === 'approved') {
               <p>Tu identidad está verificada. Tu perfil muestra la insignia de confianza.</p>
             } @else if (verification.record()?.status === 'pending') {
-              <p>Documento recibido el {{ verification.record()?.submitted_at | date:'mediumDate' }}. Está pendiente de revisión por el equipo.</p>
+              <p>Documento recibido el {{ verification.record()?.submitted_at | date:'mediumDate' }}. Está pendiente de revisión. Puedes reemplazarlo si subiste un archivo incorrecto.</p>
             } @else if (verification.record()?.status === 'rejected') {
               <p>La solicitud anterior fue rechazada. {{ verification.record()?.review_note || 'Puedes enviar un documento legible para una nueva revisión.' }}</p>
             } @else {
               <p>Envía un documento de identidad para que el equipo pueda revisar tu solicitud. El archivo se guarda de forma privada y solo lo pueden consultar tú y el equipo administrador.</p>
             }
           </div>
-          @if (verification.record()?.status !== 'approved' && verification.record()?.status !== 'pending') {
+          @if (verification.record()?.status !== 'approved') {
             <label class="tb-btn tb-btn-outline tb-btn-sm verification-upload" [class.is-disabled]="verification.uploading()">
               <ion-icon [name]="verification.uploading() ? 'time-outline' : 'cloud-upload-outline'"></ion-icon>
-              {{ verification.uploading() ? 'Enviando…' : 'Seleccionar documento' }}
+              {{ verification.uploading() ? 'Enviando…' : (verification.record()?.status === 'pending' ? 'Reemplazar documento' : 'Seleccionar documento') }}
               <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" [disabled]="verification.uploading()" (change)="onVerificationFileSelected($event)" aria-label="Seleccionar documento de identidad">
             </label>
           }
@@ -203,6 +203,7 @@
                     [skill]="skill"
                     [isOwner]="isOwnProfile"
                     (viewDetail)="onViewSkillDetail($event)"
+                    (exchange)="onExchange($event)"
                     (edit)="isOwnProfile && onEditSkill($event)"
                     (delete)="isOwnProfile && onConfirmDeleteSkill($event)"
                   ></app-skill-card>
@@ -226,6 +227,7 @@
                     [skill]="skill"
                     [isOwner]="isOwnProfile"
                     (viewDetail)="onViewSkillDetail($event)"
+                    (exchange)="onExchange($event)"
                     (edit)="isOwnProfile && onEditSkill($event)"
                     (delete)="isOwnProfile && onConfirmDeleteSkill($event)"
                   ></app-skill-card>
@@ -256,7 +258,7 @@
     [isOpen]="isEditProfileModalOpen"
     [user]="user"
     [isSaving]="isSavingProfile"
-    (close)="closeEditProfile()"
+    (closed)="closeEditProfile()"
     (save)="onSaveProfile($event)"
   ></app-edit-profile-modal>
 
@@ -264,7 +266,7 @@
     [isOpen]="detailModalOpen"
     [skill]="selectedSkillForDetail"
     [isOwner]="isOwnProfile"
-    (close)="onCloseSkillDetail()"
+    (closed)="onCloseSkillDetail()"
     (edit)="onEditSkill($event)"
   ></app-skill-detail-modal>
 
@@ -273,7 +275,7 @@
     [skillToEdit]="skillToEdit"
     [isSubmitting]="isSavingSkill"
     [defaultType]="activeTab()"
-    (close)="onCloseSkillForm()"
+    (closed)="onCloseSkillForm()"
     (save)="onSaveSkill($event)"
   ></app-skill-form-modal>
 
@@ -285,12 +287,12 @@
     cancelText="Cancelar"
     [isDanger]="true"
     (confirm)="executeDeleteSkill()"
-    (cancel)="cancelDeleteSkill()"
+    (cancelled)="cancelDeleteSkill()"
   ></app-confirmation-modal>
 
   <app-exchange-modal
     [isOpen]="exchangeModalOpen"
     [skill]="selectedSkillForExchange"
-    (close)="onCloseExchange()"
+    (closed)="onCloseExchange()"
   ></app-exchange-modal>
 </div>

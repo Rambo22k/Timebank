@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -17,9 +17,11 @@ import {
   styleUrls: ['./footer.component.scss']
 })
 export class FooterComponent {
+  authService = inject(AuthService);
+
   currentYear = new Date().getFullYear();
 
-  constructor(public authService: AuthService) {
+  constructor() {
     addIcons({
       timeOutline,
       sparklesOutline

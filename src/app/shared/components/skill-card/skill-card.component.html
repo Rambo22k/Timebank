@@ -49,7 +49,7 @@
     <div class="card-author-info">
       <img [src]="skill.authorAvatar" [alt]="skill.authorName" class="author-img" />
       <div class="author-texts">
-        <span class="author-name">{{ skill.authorName }}</span>
+        <span class="author-name">{{ skill.authorName }} @if (skill.authorVerified) { <ion-icon class="author-verified" name="checkmark-circle-outline" aria-label="Identidad verificada"></ion-icon> }</span>
         @if (skill.authorRating) {
           <div class="author-rating">
             <ion-icon name="star"></ion-icon>
@@ -68,7 +68,7 @@
         <button class="action-btn delete-btn" (click)="onDelete($event)" title="Eliminar habilidad">
           <ion-icon name="trash-outline"></ion-icon>
         </button>
-      } @else {
+      } @else if (skill.type === 'offered') {
         <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="onExchange($event)">
           <ion-icon name="swap-horizontal-outline"></ion-icon>
           Intercambiar

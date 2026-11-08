@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, inject } from '@angular/core';
 import { AppNotification, NotificationRow } from '../models/notification.model';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
@@ -6,6 +6,10 @@ import { ToastService } from './toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationsService {
+  private auth = inject(AuthService);
+  private supabase = inject(SupabaseService);
+  private toast = inject(ToastService);
+
   private readonly notificationsSignal = signal<AppNotification[]>([]);
   private readonly loadingSignal = signal(false);
   readonly notifications = this.notificationsSignal.asReadonly();
@@ -15,11 +19,7 @@ export class NotificationsService {
   private activeUserId: string | null = null;
   private loadSequence = 0;
 
-  constructor(
-    private auth: AuthService,
-    private supabase: SupabaseService,
-    private toast: ToastService
-  ) {
+  constructor() {
     effect(onCleanup => {
       const userId = this.auth.authUser()?.id ?? null;
       this.activeUserId = userId;

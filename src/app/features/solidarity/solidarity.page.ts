@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -17,13 +17,15 @@ import { SolidarityRequestStatus } from '../../core/models/solidarity.model';
   templateUrl: './solidarity.page.html', styleUrls: ['./solidarity.page.scss']
 })
 export class SolidarityPage {
+  solidarity = inject(SolidarityService);
+
   donationAmount = 1;
   donationCategoryId = '';
   requestReason = '';
   requestHours = 1;
   adminNotes: Record<string, string> = {};
 
-  constructor(public solidarity: SolidarityService) {
+  constructor() {
     addIcons({ heartOutline, giftOutline, peopleOutline, timeOutline, refreshOutline, checkmarkCircleOutline, closeCircleOutline });
   }
 

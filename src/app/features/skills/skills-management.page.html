@@ -125,7 +125,7 @@
     [skillToEdit]="skillToEdit"
     [isSubmitting]="isSavingSkill"
     [defaultType]="selectedFilter() === 'wanted' ? 'wanted' : 'offered'"
-    (close)="onCloseForm()"
+    (closed)="onCloseForm()"
     (save)="onSaveSkill($event)"
   ></app-skill-form-modal>
 
@@ -133,7 +133,7 @@
     [isOpen]="isDetailModalOpen"
     [skill]="selectedSkillForDetail"
     [isOwner]="true"
-    (close)="onCloseDetail()"
+    (closed)="onCloseDetail()"
     (edit)="onEditSkill($event)"
   ></app-skill-detail-modal>
 
@@ -145,6 +145,6 @@
     cancelText="Conservar"
     [isDanger]="true"
     (confirm)="executeDelete()"
-    (cancel)="cancelDelete()"
+    (cancelled)="cancelDelete()"
   ></app-confirmation-modal>
 </div>

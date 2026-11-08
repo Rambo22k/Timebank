@@ -1,4 +1,4 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -61,6 +61,12 @@ interface FaqItem {
   styleUrls: ['./landing.page.scss']
 })
 export class LandingPage {
+  skillsService = inject(SkillsService);
+  authService = inject(AuthService);
+  exchanges = inject(ExchangeService);
+  notifications = inject(NotificationsService);
+  private router = inject(Router);
+
   selectedSkillForDetail: Skill | null = null;
   detailModalOpen = false;
 
@@ -108,13 +114,7 @@ export class LandingPage {
     }
   ];
 
-  constructor(
-    public skillsService: SkillsService,
-    public authService: AuthService,
-    public exchanges: ExchangeService,
-    public notifications: NotificationsService,
-    private router: Router
-  ) {
+  constructor() {
     addIcons({
       sparklesOutline,
       timeOutline,

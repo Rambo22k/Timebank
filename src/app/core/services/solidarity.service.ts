@@ -1,4 +1,4 @@
-import { Injectable, effect, signal } from '@angular/core';
+import { Injectable, effect, signal, inject } from '@angular/core';
 import { SolidarityCategory, SolidarityDonation, SolidarityFundSummary, SolidarityRequest, SolidarityRequestStatus } from '../models/solidarity.model';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
@@ -26,6 +26,10 @@ interface CategoryRow { id: string; name: string; }
 
 @Injectable({ providedIn: 'root' })
 export class SolidarityService {
+  private auth = inject(AuthService);
+  private supabase = inject(SupabaseService);
+  private toast = inject(ToastService);
+
   private readonly summarySignal = signal<SolidarityFundSummary>({ availableCredits: 0, lifetimeDonatedCredits: 0, approvedRequests: 0, peopleHelped: 0 });
   private readonly balanceSignal = signal(0);
   private readonly requestsSignal = signal<SolidarityRequest[]>([]);
@@ -48,7 +52,7 @@ export class SolidarityService {
   readonly isLoading = this.loadingSignal.asReadonly();
   readonly isSaving = this.savingSignal.asReadonly();
 
-  constructor(private auth: AuthService, private supabase: SupabaseService, private toast: ToastService) {
+  constructor() {
     effect(() => {
       const userId = this.auth.authUser()?.id ?? null;
       if (userId === this.activeUserId) return;

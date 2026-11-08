@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, inject } from '@angular/core';
 import { addIcons } from 'ionicons';
 import {
   schoolOutline,
@@ -73,6 +73,10 @@ const CATEGORY_COLORS = ['#087B76', '#F59A00', '#075B58', '#F59A00'];
 
 @Injectable({ providedIn: 'root' })
 export class SkillsService {
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+  private toastService = inject(ToastService);
+
   private skillsSignal = signal<Skill[]>([]);
   private categoriesSignal = signal<SkillCategory[]>([]);
   private loadingSignal = signal(false);
@@ -85,11 +89,7 @@ export class SkillsService {
   readonly offeredCount = computed(() => this.skillsSignal().filter(skill => skill.type === 'offered').length);
   readonly wantedCount = computed(() => this.skillsSignal().filter(skill => skill.type === 'wanted').length);
 
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService,
-    private toastService: ToastService
-  ) {
+  constructor() {
     addIcons({
       'school-outline': schoolOutline,
       'laptop-outline': laptopOutline,

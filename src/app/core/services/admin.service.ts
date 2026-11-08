@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { ToastService } from './toast.service';
 
@@ -17,6 +17,9 @@ export interface AdminSettingRow { key: string; value: number; description: stri
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
+  private supabase = inject(SupabaseService);
+  private toast = inject(ToastService);
+
   readonly loading = signal(false);
   readonly stats = signal<Record<string, any>>({});
   readonly users = signal<AdminUserRow[]>([]);
@@ -28,8 +31,6 @@ export class AdminService {
   readonly audit = signal<AdminAuditRow[]>([]);
   readonly settings = signal<AdminSettingRow[]>([]);
   readonly selectedUserId = signal('');
-
-  constructor(private supabase: SupabaseService, private toast: ToastService) {}
 
   async load(): Promise<void> {
     if (!this.supabase.client) return;

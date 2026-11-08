@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -23,10 +23,13 @@ import { ExchangeService } from '../../../core/services/exchange.service';
   styleUrls: ['./exchange-modal.component.scss']
 })
 export class ExchangeModalComponent {
+  authService = inject(AuthService);
+  private exchangeService = inject(ExchangeService);
+
   @Input() isOpen = false;
   @Input() skill: Skill | null = null;
 
-  @Output() close = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
 
   proposedMessage = '¡Hola! Me encantaría coordinar una sesión de 1 hora para aprender de tu experiencia y compartir aprendizajes.';
   requestedHours = 1;
@@ -35,10 +38,7 @@ export class ExchangeModalComponent {
   isSubmitting = false;
   proposalError = '';
 
-  constructor(
-    public authService: AuthService,
-    private exchangeService: ExchangeService
-  ) {
+  constructor() {
     addIcons({
       closeOutline,
       timeOutline,
@@ -72,7 +72,7 @@ export class ExchangeModalComponent {
         proposedStartAt: startAt.toISOString(),
         requestedHours: this.requestedHours
       });
-      if (created) this.close.emit();
+      if (created) this.closed.emit();
       else this.proposalError = 'No se pudo enviar la solicitud. Revisa los datos e inténtalo de nuevo.';
     } finally {
       this.isSubmitting = false;
@@ -88,6 +88,6 @@ export class ExchangeModalComponent {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closed.emit();
   }
 }

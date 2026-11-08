@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -11,7 +11,9 @@ import { ExchangeService } from '../../core/services/exchange.service';
 
 @Component({ selector: 'app-time-wallet', standalone: true, imports: [CommonModule, DatePipe, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './wallet.page.html', styleUrls: ['./exchanges.page.scss'] })
 export class WalletPage {
-  constructor(public exchanges: ExchangeService) {
+  exchanges = inject(ExchangeService);
+
+  constructor() {
     addIcons({ timeOutline, trendingUpOutline, trendingDownOutline, giftOutline, calendarOutline, arrowForwardOutline });
     void this.exchanges.loadWalletActivity();
   }

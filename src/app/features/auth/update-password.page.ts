@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
@@ -20,10 +20,15 @@ function passwordMatch(control: AbstractControl): ValidationErrors | null {
   templateUrl: './update-password.page.html', styleUrls: ['./register/register.page.scss']
 })
 export class UpdatePasswordPage implements OnInit {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private toast = inject(ToastService);
+
   isReady = false;
   isSaving = false;
   form: FormGroup;
-  constructor(private fb: FormBuilder, private auth: AuthService, private router: Router, private toast: ToastService) {
+  constructor() {
     addIcons({ checkmarkCircleOutline, lockClosedOutline, timeOutline });
     this.form = this.fb.group({ password: ['', [Validators.required, Validators.minLength(8)]], confirmPassword: ['', Validators.required] }, { validators: passwordMatch });
   }

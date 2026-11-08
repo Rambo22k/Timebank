@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -11,11 +11,13 @@ import { ExchangeService } from '../../core/services/exchange.service';
 
 @Component({ selector: 'app-exchange-reviews', standalone: true, imports: [CommonModule, DatePipe, FormsModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './reviews.page.html', styleUrls: ['./exchanges.page.scss'] })
 export class ExchangeReviewsPage {
+  exchanges = inject(ExchangeService);
+
   ratings: Record<string, number> = {};
   comments: Record<string, string> = {};
   submitting = new Set<string>();
   readonly stars = [1, 2, 3, 4, 5];
-  constructor(public exchanges: ExchangeService) {
+  constructor() {
     addIcons({ starOutline, star, chatbubbleEllipsesOutline, checkmarkCircleOutline });
     void this.exchanges.loadRequests();
     void this.exchanges.loadReviews();

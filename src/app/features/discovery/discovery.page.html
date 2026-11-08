@@ -176,13 +176,13 @@
   <app-skill-detail-modal
     [isOpen]="isDetailModalOpen"
     [skill]="selectedSkillForDetail"
-    (close)="onCloseDetail()"
+    (closed)="onCloseDetail()"
     (exchange)="onExchange($event)"
   ></app-skill-detail-modal>
 
   <app-exchange-modal
     [isOpen]="isExchangeModalOpen"
     [skill]="selectedSkillForExchange"
-    (close)="onCloseExchange()"
+    (closed)="onCloseExchange()"
   ></app-exchange-modal>
 </div>

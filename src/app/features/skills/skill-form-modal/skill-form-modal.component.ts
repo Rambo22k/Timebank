@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, effect } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -17,12 +17,16 @@ import { SkillsService } from '../../../core/services/skills.service';
   styleUrls: ['./skill-form-modal.component.scss']
 })
 export class SkillFormModalComponent implements OnChanges {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private skillsService = inject(SkillsService);
+
   @Input() isOpen = false;
   @Input() skillToEdit: Skill | null = null;
   @Input() defaultType: SkillType = 'offered';
   @Input() isSubmitting = false;
 
-  @Output() close = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
   @Output() save = new EventEmitter<Omit<Skill, 'id' | 'createdAt'>>();
 
   form: FormGroup;
@@ -31,7 +35,7 @@ export class SkillFormModalComponent implements OnChanges {
   levels: SkillLevel[] = ['Cualquiera', 'Principiante', 'Intermedio', 'Avanzado', 'Experto'];
   modalities: SkillModality[] = ['Online', 'Presencial', 'Híbrido'];
 
-  constructor(private fb: FormBuilder, private authService: AuthService, private skillsService: SkillsService) {
+  constructor() {
     addIcons({ closeOutline, checkmarkOutline, sparklesOutline, swapHorizontalOutline });
 
     this.form = this.fb.group({
@@ -121,6 +125,6 @@ export class SkillFormModalComponent implements OnChanges {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closed.emit();
   }
 }

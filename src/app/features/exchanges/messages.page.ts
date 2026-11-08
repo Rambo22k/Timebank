@@ -18,6 +18,9 @@ import { ChatService } from '../../core/services/chat.service';
   templateUrl: './messages.page.html', styleUrls: ['./messages.page.scss']
 })
 export class ExchangeMessagesPage {
+  chat = inject(ChatService);
+  auth = inject(AuthService);
+
   private readonly destroyRef = inject(DestroyRef);
   draft = '';
   reportTarget: { type: 'user' | 'message'; id: string; label: string } | null = null;
@@ -27,11 +30,9 @@ export class ExchangeMessagesPage {
   isBlocking = false;
   isUnblocking = false;
 
-  constructor(
-    public chat: ChatService,
-    public auth: AuthService,
-    route: ActivatedRoute
-  ) {
+  constructor() {
+    const route = inject(ActivatedRoute);
+
     addIcons({ chatbubbleEllipsesOutline, sendOutline });
     route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const conversationId = params.get('conversation');
@@ -100,9 +101,9 @@ export class ExchangeMessagesPage {
   private async openFromLink(conversationId: string | null, requestId: string | null): Promise<void> {
     if (!conversationId && !requestId) return;
     if (!this.chat.conversations().length || this.chat.isLoadingConversations()) await this.chat.loadConversations();
-    const conversation = this.chat.conversations().find(item =>
-      conversationId ? item.id === conversationId : item.requestId === requestId
-    );
+    const conversation = this.chat.conversations().find(item => conversationId
+      ? item.id === conversationId || item.conversationIds.includes(conversationId)
+      : !!requestId && item.requestIds.includes(requestId));
     if (conversation) await this.chat.selectConversation(conversation.id);
   }
 }

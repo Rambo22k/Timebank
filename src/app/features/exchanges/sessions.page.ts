@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -11,7 +11,9 @@ import { ExchangeService } from '../../core/services/exchange.service';
 
 @Component({ selector: 'app-exchange-sessions', standalone: true, imports: [CommonModule, DatePipe, RouterModule, IonIcon, NavbarComponent, FooterComponent, ExchangeNavComponent], templateUrl: './sessions.page.html', styleUrls: ['./exchanges.page.scss'] })
 export class ExchangeSessionsPage {
-  constructor(public exchanges: ExchangeService) { addIcons({ calendarOutline, timeOutline, checkmarkCircleOutline, warningOutline, closeCircleOutline, starOutline }); }
+  exchanges = inject(ExchangeService);
+
+  constructor() { addIcons({ calendarOutline, timeOutline, checkmarkCircleOutline, warningOutline, closeCircleOutline, starOutline }); }
   get sessions() { return [...this.exchanges.sessionsForCurrentUser()].sort((a,b) => b.startAt.localeCompare(a.startAt)); }
   get upcoming() { return this.sessions.filter(s => s.status === 'scheduled' || s.status === 'awaiting_confirmation'); }
   get history() { return this.sessions.filter(s => s.status === 'completed' || s.status === 'cancelled' || s.status === 'disputed'); }

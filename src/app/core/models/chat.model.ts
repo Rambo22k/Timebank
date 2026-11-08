@@ -1,6 +1,9 @@
 export interface ChatConversation {
   id: string;
   requestId: string;
+  requestIds: string[];
+  conversationIds: string[];
+  messageConversationId: string;
   peerId: string;
   peerName: string;
   peerAvatar: string;

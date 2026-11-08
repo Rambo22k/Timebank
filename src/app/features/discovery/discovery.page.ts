@@ -1,4 +1,4 @@
-import { Component, signal, computed, OnInit } from '@angular/core';
+import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -46,6 +46,10 @@ import { SkillCategory } from '../../core/models/category.model';
   styleUrls: ['./discovery.page.scss']
 })
 export class DiscoveryPage implements OnInit {
+  skillsService = inject(SkillsService);
+  authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+
   searchQuery = signal<string>('');
   selectedCategoryId = signal<string>('all');
   selectedType = signal<'all' | SkillType>('all');
@@ -58,11 +62,7 @@ export class DiscoveryPage implements OnInit {
   selectedSkillForExchange: Skill | null = null;
   isExchangeModalOpen = false;
 
-  constructor(
-    public skillsService: SkillsService,
-    public authService: AuthService,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
     addIcons({
       searchOutline,
       closeCircleOutline,

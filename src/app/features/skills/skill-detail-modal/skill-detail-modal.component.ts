@@ -29,7 +29,7 @@ export class SkillDetailModalComponent {
   @Input() skill: Skill | null = null;
   @Input() isOwner = false;
 
-  @Output() close = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
   @Output() exchange = new EventEmitter<Skill>();
   @Output() edit = new EventEmitter<Skill>();
 
@@ -49,12 +49,14 @@ export class SkillDetailModalComponent {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closed.emit();
   }
 
   onExchange(): void {
     if (this.skill) {
-      this.exchange.emit(this.skill);
+      const skill = this.skill;
+      this.closed.emit();
+      this.exchange.emit(skill);
     }
   }
 

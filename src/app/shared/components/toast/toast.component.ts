@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
@@ -19,7 +19,9 @@ import { ToastService } from '../../../core/services/toast.service';
   styleUrls: ['./toast.component.scss']
 })
 export class ToastComponent {
-  constructor(public toastService: ToastService) {
+  toastService = inject(ToastService);
+
+  constructor() {
     addIcons({
       checkmarkCircleOutline,
       informationCircleOutline,

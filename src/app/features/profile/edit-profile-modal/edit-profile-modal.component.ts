@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -19,11 +19,13 @@ export interface ProfileEditSubmission {
   styleUrls: ['./edit-profile-modal.component.scss']
 })
 export class EditProfileModalComponent implements OnChanges, OnDestroy {
+  private fb = inject(FormBuilder);
+
   @Input() isOpen = false;
   @Input() user: UserProfile | null = null;
   @Input() isSaving = false;
 
-  @Output() close = new EventEmitter<void>();
+  @Output() closed = new EventEmitter<void>();
   @Output() save = new EventEmitter<ProfileEditSubmission>();
 
   form: FormGroup;
@@ -41,7 +43,7 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
     'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80'
   ];
 
-  constructor(private fb: FormBuilder) {
+  constructor() {
     addIcons({ closeOutline, checkmarkOutline, cameraOutline, timeOutline });
 
     this.form = this.fb.group({
@@ -114,7 +116,7 @@ export class EditProfileModalComponent implements OnChanges, OnDestroy {
 
   onClose(): void {
     this.clearAvatarFile();
-    this.close.emit();
+    this.closed.emit();
   }
 
   ngOnDestroy(): void {

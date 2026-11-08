@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -16,9 +16,11 @@ import { ExchangeService } from '../../core/services/exchange.service';
   templateUrl: './requests.page.html', styleUrls: ['./exchanges.page.scss']
 })
 export class ExchangeRequestsPage {
+  exchanges = inject(ExchangeService);
+
   direction: 'incoming' | 'outgoing' = 'incoming';
   rescheduleDates: Record<string, string> = {};
-  constructor(public exchanges: ExchangeService) { addIcons({ calendarOutline, timeOutline, checkmarkCircleOutline, closeCircleOutline, arrowForwardOutline, addOutline, chatbubbleEllipsesOutline }); }
+  constructor() { addIcons({ calendarOutline, timeOutline, checkmarkCircleOutline, closeCircleOutline, arrowForwardOutline, addOutline, chatbubbleEllipsesOutline }); }
   get requests() { return this.exchanges.requestsFor(this.direction); }
   setDirection(direction: 'incoming' | 'outgoing') { this.direction = direction; }
   dateFor(requestId: string): string {

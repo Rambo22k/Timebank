@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -32,16 +32,16 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./forgot-password.page.scss']
 })
 export class ForgotPasswordPage {
+  private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
+  private authService = inject(AuthService);
+
   form: FormGroup;
   isSubmitting = false;
   isSent = false;
   submittedEmail = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private toastService: ToastService,
-    private authService: AuthService
-  ) {
+  constructor() {
     addIcons({
       mailOutline,
       arrowBackOutline,

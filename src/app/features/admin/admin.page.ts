@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -15,6 +15,8 @@ import { AdminCategoryRow, AdminService, AdminUserRow } from '../../core/service
   templateUrl: './admin.page.html', styleUrls: ['./admin.page.scss']
 })
 export class AdminPage {
+  admin = inject(AdminService);
+
   activeSection = 'overview';
   search = '';
   selectedUserId = '';
@@ -25,7 +27,7 @@ export class AdminPage {
   notes: Record<string, string> = {};
   settingDrafts: Record<string, number> = {};
 
-  constructor(public admin: AdminService) {
+  constructor() {
     addIcons({ alertCircleOutline, checkmarkCircleOutline, peopleOutline, timeOutline, heartOutline, shieldCheckmarkOutline, refreshOutline, searchOutline, settingsOutline, listOutline, pricetagOutline, walletOutline, eyeOutline, closeCircleOutline });
     void this.admin.load();
   }

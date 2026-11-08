@@ -10,7 +10,8 @@ import {
   trashOutline,
   arrowForwardOutline,
   swapHorizontalOutline,
-  sparklesOutline
+  sparklesOutline,
+  checkmarkCircleOutline
 } from 'ionicons/icons';
 import { Skill } from '../../../core/models/skill.model';
 
@@ -40,7 +41,8 @@ export class SkillCardComponent {
       trashOutline,
       arrowForwardOutline,
       swapHorizontalOutline,
-      sparklesOutline
+      sparklesOutline,
+      checkmarkCircleOutline
     });
   }
 

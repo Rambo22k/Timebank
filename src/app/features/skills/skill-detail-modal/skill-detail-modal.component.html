@@ -108,10 +108,10 @@
           <button class="tb-btn tb-btn-outline" (click)="onClose()">
             Volver a la lista
           </button>
-          <button class="tb-btn tb-btn-accent" (click)="onExchange()">
+          @if (skill.type === 'offered') { <button class="tb-btn tb-btn-accent" (click)="onExchange()">
             <ion-icon name="swap-horizontal-outline"></ion-icon>
             Proponer intercambio de tiempo
-          </button>
+          </button> }
         }
       </div>
     </div>

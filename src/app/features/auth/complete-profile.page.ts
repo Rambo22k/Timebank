@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
@@ -23,11 +23,16 @@ function adultValidator(control: AbstractControl): ValidationErrors | null {
   templateUrl: './complete-profile.page.html', styleUrls: ['./register/register.page.scss']
 })
 export class CompleteProfilePage {
+  private fb = inject(FormBuilder);
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
+  private router = inject(Router);
+
   isSaving = false;
   readonly maxBirthDate = this.latestAdultBirthDate();
   form: FormGroup;
 
-  constructor(private fb: FormBuilder, private auth: AuthService, private toast: ToastService, private router: Router) {
+  constructor() {
     addIcons({ shieldCheckmarkOutline, timeOutline });
     this.form = this.fb.group({
       birthDate: ['', [Validators.required, adultValidator]],

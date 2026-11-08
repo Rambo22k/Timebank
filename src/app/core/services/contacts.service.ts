@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 import { ToastService } from './toast.service';
@@ -30,13 +30,15 @@ export interface UserContact {
 
 @Injectable({ providedIn: 'root' })
 export class ContactsService {
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
+
   readonly members = signal<MemberSummary[]>([]);
   readonly contacts = signal<UserContact[]>([]);
   readonly activeProfileContact = signal<UserContact | null>(null);
   readonly loading = signal(false);
   private activeProfileId: string | null = null;
-
-  constructor(private supabase: SupabaseService, private auth: AuthService, private toast: ToastService) {}
 
   async load(search = ''): Promise<void> {
     const userId = this.auth.authUser()?.id;

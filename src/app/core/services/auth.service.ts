@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
 import { AuthError, User } from '@supabase/supabase-js';
 import { UserProfile } from '../models/user.model';
 import { SupabaseService } from './supabase.service';
@@ -26,6 +26,9 @@ export class TimeBankAuthError extends Error {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private supabase = inject(SupabaseService);
+  private toastService = inject(ToastService);
+
   private currentUserSignal = signal<UserProfile | null>(null);
   private authUserSignal = signal<User | null>(null);
   private privateProfileSignal = signal<PrivateProfile | null>(null);
@@ -44,7 +47,7 @@ export class AuthService {
   });
   readonly isPasswordRecovery = signal(false);
 
-  constructor(private supabase: SupabaseService, private toastService: ToastService) {
+  constructor() {
     if (this.supabase.client) {
       this.supabase.client.auth.onAuthStateChange((event, session) => {
         if (event === 'SIGNED_OUT' || !session?.user) {

@@ -20,7 +20,7 @@ export class ConfirmationModalComponent {
   @Input() isDanger = false;
 
   @Output() confirm = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   constructor() {
     addIcons({ alertCircleOutline, closeOutline, trashOutline });
@@ -31,6 +31,6 @@ export class ConfirmationModalComponent {
   }
 
   onCancel(): void {
-    this.cancel.emit();
+    this.cancelled.emit();
   }
 }

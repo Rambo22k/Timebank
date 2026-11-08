@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, inject } from '@angular/core';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { ChatConversation, ChatMessage, ConversationSummaryRow, MessageRow } from '../models/chat.model';
 import { AuthService } from './auth.service';
@@ -7,6 +7,10 @@ import { ToastService } from './toast.service';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
+  private auth = inject(AuthService);
+  private supabase = inject(SupabaseService);
+  private toast = inject(ToastService);
+
   private readonly conversationsSignal = signal<ChatConversation[]>([]);
   private readonly messagesSignal = signal<ChatMessage[]>([]);
   private readonly activeConversationIdSignal = signal<string | null>(null);
@@ -31,7 +35,7 @@ export class ChatService {
   readonly isBlockedByCurrentUser = this.blockedByCurrentUserSignal.asReadonly();
   readonly isCheckingBlockStatus = this.blockStatusLoadingSignal.asReadonly();
 
-  constructor(private auth: AuthService, private supabase: SupabaseService, private toast: ToastService) {
+  constructor() {
     effect(onCleanup => {
       const userId = this.auth.authUser()?.id ?? null;
       const version = ++this.conversationLoadVersion;
@@ -54,18 +58,20 @@ export class ChatService {
       this.channel = client.channel(`chat:${userId}`)
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
           const row = payload.new as MessageRow;
-          if (!this.conversationsSignal().some(item => item.id === row.conversation_id)) return;
+          const conversation = this.conversationsSignal().find(item => item.conversationIds.includes(row.conversation_id));
+          if (!conversation) return;
           const message = this.fromRow(row);
-          const isActive = this.activeConversationIdSignal() === row.conversation_id;
-          this.conversationsSignal.update(items => items.map(item => item.id !== row.conversation_id ? item : {
+          const isActive = this.activeConversationIdSignal() === conversation.id;
+          this.conversationsSignal.update(items => items.map(item => item.id !== conversation.id ? item : {
             ...item,
             lastMessage: message.body,
             lastMessageAt: message.createdAt,
+            messageConversationId: row.conversation_id,
             unreadCount: row.sender_id === userId || isActive ? 0 : item.unreadCount + 1
           }));
           if (isActive) {
             this.messagesSignal.update(items => items.some(item => item.id === message.id) ? items : [...items, message]);
-            if (row.sender_id !== userId) void this.markConversationRead(row.conversation_id);
+            if (row.sender_id !== userId) void this.markConversationRead(conversation.id);
           }
         })
         .subscribe();
@@ -98,7 +104,7 @@ export class ChatService {
       if (conversation) await this.refreshBlockStatus(conversationId, conversation.peerId, version);
       const { data, error } = await this.supabase.requireClient().from('messages')
         .select('id,conversation_id,sender_id,body,created_at,deleted_at')
-        .eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(200);
+        .in('conversation_id', conversation?.conversationIds ?? []).order('created_at', { ascending: false }).limit(300);
       if (error) throw error;
       if (version !== this.messageLoadVersion || this.activeConversationIdSignal() !== conversationId) return;
       this.messagesSignal.set(((data ?? []) as MessageRow[]).map(row => this.fromRow(row)).reverse());
@@ -115,7 +121,8 @@ export class ChatService {
   }
 
   async sendMessage(body: string): Promise<boolean> {
-    const conversationId = this.activeConversationIdSignal();
+    const conversation = this.activeConversation();
+    const conversationId = conversation?.messageConversationId;
     const senderId = this.auth.authUser()?.id;
     const text = body.trim();
     if (!conversationId || !senderId || !text || text.length > 5000 || this.sendingSignal()) return false;
@@ -127,7 +134,7 @@ export class ChatService {
       if (error) throw error;
       const message = this.fromRow(data as MessageRow);
       this.messagesSignal.update(items => items.some(item => item.id === message.id) ? items : [...items, message]);
-      this.conversationsSignal.update(items => items.map(item => item.id !== conversationId ? item : {
+      this.conversationsSignal.update(items => items.map(item => item.id !== conversation?.id ? item : {
         ...item, lastMessage: message.body, lastMessageAt: message.createdAt
       }));
       return true;
@@ -241,18 +248,32 @@ export class ChatService {
       if (error) throw error;
       if (version !== this.conversationLoadVersion || userId !== this.auth.authUser()?.id) return;
       const rows = (data ?? []) as ConversationSummaryRow[];
-      this.conversationsSignal.set(rows.map(row => ({
-        id: row.conversation_id,
-        requestId: row.session_request_id,
-        peerId: row.peer_id,
-        peerName: row.peer_name,
-        peerAvatar: this.avatarUrl(row.peer_avatar_path),
-        skillTitle: row.skill_title,
-        requestStatus: row.request_status,
-        lastMessage: row.last_message,
-        lastMessageAt: row.last_message_at ?? '',
-        unreadCount: Number(row.unread_count)
-      })));
+      const grouped = new Map<string, ChatConversation>();
+      for (const row of rows) {
+        const existing = grouped.get(row.peer_id);
+        if (!existing) {
+          grouped.set(row.peer_id, {
+            id: row.peer_id,
+            requestId: row.session_request_id,
+            requestIds: [row.session_request_id],
+            conversationIds: [row.conversation_id],
+            messageConversationId: row.conversation_id,
+            peerId: row.peer_id,
+            peerName: row.peer_name,
+            peerAvatar: this.avatarUrl(row.peer_avatar_path),
+            skillTitle: row.skill_title,
+            requestStatus: row.request_status,
+            lastMessage: row.last_message,
+            lastMessageAt: row.last_message_at ?? '',
+            unreadCount: Number(row.unread_count)
+          });
+        } else {
+          existing.requestIds.push(row.session_request_id);
+          existing.conversationIds.push(row.conversation_id);
+          existing.unreadCount += Number(row.unread_count);
+        }
+      }
+      this.conversationsSignal.set([...grouped.values()]);
     } catch {
       if (version === this.conversationLoadVersion && userId === this.auth.authUser()?.id) {
         this.toast.danger('No se pudieron cargar tus conversaciones. Inténtalo de nuevo.');
@@ -266,12 +287,17 @@ export class ChatService {
     const userId = this.auth.authUser()?.id;
     if (!userId) return;
     const client = this.supabase.requireClient();
-    const [readResult, notificationResult] = await Promise.all([
-      client.rpc('mark_conversation_read', { p_conversation_id: conversationId }),
-      client.from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', userId)
-        .is('read_at', null).contains('data', { conversation_id: conversationId })
-    ]);
-    if (readResult.error || notificationResult.error) {
+    const conversation = this.conversationsSignal().find(item => item.id === conversationId);
+    if (!conversation) return;
+    const results = await Promise.all(conversation.conversationIds.map(async id => {
+      const [readResult, notificationResult] = await Promise.all([
+        client.rpc('mark_conversation_read', { p_conversation_id: id }),
+        client.from('notifications').update({ read_at: new Date().toISOString() }).eq('user_id', userId)
+          .is('read_at', null).contains('data', { conversation_id: id })
+      ]);
+      return readResult.error ?? notificationResult.error;
+    }));
+    if (results.some(Boolean)) {
       this.toast.warning('No se pudo actualizar el estado de lectura de la conversación.');
       return;
     }

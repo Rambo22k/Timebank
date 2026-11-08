@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -33,15 +33,15 @@ import { AppNotification } from '../../../core/models/notification.model';
   styleUrls: ['./navbar.component.scss']
 })
 export class NavbarComponent {
+  authService = inject(AuthService);
+  notifications = inject(NotificationsService);
+  private router = inject(Router);
+  private toastService = inject(ToastService);
+
   mobileMenuOpen = signal(false);
   notificationPanelOpen = signal(false);
 
-  constructor(
-    public authService: AuthService,
-    public notifications: NotificationsService,
-    private router: Router,
-    private toastService: ToastService
-  ) {
+  constructor() {
     addIcons({
       menuOutline,
       closeOutline,

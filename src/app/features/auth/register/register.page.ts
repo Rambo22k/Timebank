@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
@@ -56,6 +56,11 @@ function adultValidator(control: AbstractControl): ValidationErrors | null {
   styleUrls: ['./register.page.scss']
 })
 export class RegisterPage {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private router = inject(Router);
+
   form: FormGroup;
   showPassword = false;
   showConfirmPassword = false;
@@ -63,12 +68,7 @@ export class RegisterPage {
   isGoogleLoading = false;
   readonly maxBirthDate = this.latestAdultBirthDate();
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private toastService: ToastService,
-    private router: Router
-  ) {
+  constructor() {
     addIcons({
       personOutline,
       mailOutline,

@@ -13,7 +13,7 @@
         @for (conversation of chat.conversations(); track conversation.id) {
           <button type="button" class="conversation-item" [class.selected]="chat.activeConversationId() === conversation.id" (click)="chat.selectConversation(conversation.id)">
             <img [src]="conversation.peerAvatar" [alt]="conversation.peerName" />
-            <span class="conversation-copy"><strong>{{ conversation.peerName }}</strong><small>{{ conversation.skillTitle }}</small><span class="last-message">{{ conversation.lastMessage || 'Inicia la conversación' }}</span></span>
+            <span class="conversation-copy"><strong>{{ conversation.peerName }}</strong><span class="last-message">{{ conversation.lastMessage || 'Aún no hay mensajes' }}</span></span>
             @if (conversation.unreadCount > 0) { <span class="unread-badge">{{ conversation.unreadCount > 9 ? '9+' : conversation.unreadCount }}</span> }
           </button>
         }

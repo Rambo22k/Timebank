@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -13,7 +13,11 @@ import { ToastService } from '../../core/services/toast.service';
   styles: [`.auth-callback{min-height:100vh;display:grid;place-items:center;background:var(--tb-bg);padding:24px}.callback-card{max-width:420px;padding:40px;background:#fff;text-align:center;border:1px solid var(--tb-border);border-radius:20px;box-shadow:var(--tb-shadow-md)}.callback-card ion-icon{font-size:2rem;color:var(--tb-teal)}.callback-card h1{margin:12px 0 8px;font-size:1.5rem}.callback-card p{margin:0;color:var(--tb-text-secondary)}`]
 })
 export class AuthCallbackPage implements OnInit {
-  constructor(private auth: AuthService, private router: Router, private toast: ToastService) { addIcons({ timeOutline }); }
+  private auth = inject(AuthService);
+  private router = inject(Router);
+  private toast = inject(ToastService);
+
+  constructor() { addIcons({ timeOutline }); }
   async ngOnInit(): Promise<void> {
     try {
       await this.auth.ensureInitialized();

@@ -1,4 +1,4 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, effect, signal, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { ToastService } from './toast.service';
 import { CreditActivity, ExchangeRequest, ExchangeReview, ExchangeSession } from '../models/exchange.model';
@@ -61,6 +61,10 @@ interface ReviewRow {
 
 @Injectable({ providedIn: 'root' })
 export class ExchangeService {
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
+  private supabase = inject(SupabaseService);
+
   private requestsSignal = signal<ExchangeRequest[]>([]);
   private requestsLoadingSignal = signal(false);
   private requestsLoadVersion = 0;
@@ -86,7 +90,7 @@ export class ExchangeService {
   readonly isLoadingReviews = this.reviewsLoadingSignal.asReadonly();
   readonly balance = computed(() => this.auth.currentUser()?.timeCredits ?? 0);
 
-  constructor(private auth: AuthService, private toast: ToastService, private supabase: SupabaseService) {
+  constructor() {
     effect(() => {
       const userId = this.auth.authUser()?.id ?? null;
       if (userId !== this.activeDataUserId) {

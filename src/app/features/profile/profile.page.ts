@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -61,6 +61,14 @@ import { ContactsService } from '../../core/services/contacts.service';
   styleUrls: ['./profile.page.scss']
 })
 export class ProfilePage {
+  authService = inject(AuthService);
+  skillsService = inject(SkillsService);
+  private toastService = inject(ToastService);
+  verification = inject(IdentityVerificationService);
+  private route = inject(ActivatedRoute);
+  private supabase = inject(SupabaseService);
+  contacts = inject(ContactsService);
+
   activeTab = signal<'offered' | 'wanted'>('offered');
   private readonly viewedProfileId = signal<string | null>(null);
   readonly publicProfile = signal<UserProfile | null>(null);
@@ -83,15 +91,7 @@ export class ProfilePage {
   selectedSkillForExchange: Skill | null = null;
   exchangeModalOpen = false;
 
-  constructor(
-    public authService: AuthService,
-    public skillsService: SkillsService,
-    private toastService: ToastService,
-    public verification: IdentityVerificationService,
-    private route: ActivatedRoute,
-    private supabase: SupabaseService,
-    public contacts: ContactsService
-  ) {
+  constructor() {
     addIcons({
       timeOutline,
       star,

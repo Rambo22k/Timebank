@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
@@ -44,6 +44,9 @@ import { Skill, SkillType } from '../../core/models/skill.model';
   styleUrls: ['./skills-management.page.scss']
 })
 export class SkillsManagementPage {
+  skillsService = inject(SkillsService);
+  authService = inject(AuthService);
+
   selectedFilter = signal<'all' | SkillType>('all');
   searchQuery = signal<string>('');
 
@@ -58,10 +61,7 @@ export class SkillsManagementPage {
   isDeleteModalOpen = false;
   skillToDelete: Skill | null = null;
 
-  constructor(
-    public skillsService: SkillsService,
-    public authService: AuthService
-  ) {
+  constructor() {
     addIcons({
       sparklesOutline,
       swapHorizontalOutline,

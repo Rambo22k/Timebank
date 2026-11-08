@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 import { ToastService } from './toast.service';
@@ -14,15 +14,13 @@ export interface IdentityVerificationRecord {
 
 @Injectable({ providedIn: 'root' })
 export class IdentityVerificationService {
+  private supabase = inject(SupabaseService);
+  private auth = inject(AuthService);
+  private toast = inject(ToastService);
+
   readonly record = signal<IdentityVerificationRecord | null>(null);
   readonly loading = signal(false);
   readonly uploading = signal(false);
-
-  constructor(
-    private supabase: SupabaseService,
-    private auth: AuthService,
-    private toast: ToastService
-  ) {}
 
   async load(): Promise<void> {
     const userId = this.auth.authUser()?.id;
@@ -60,8 +58,9 @@ export class IdentityVerificationService {
       this.toast.warning('Sube un JPG, PNG, WebP o PDF de hasta 10 MB.');
       return false;
     }
-    if (this.record()?.status === 'pending' || this.record()?.status === 'approved') {
-      this.toast.info('Ya tienes una solicitud pendiente o una identidad verificada.');
+    const currentRecord = this.record();
+    if (currentRecord?.status === 'approved') {
+      this.toast.info('Tu identidad ya está verificada.');
       return false;
     }
 
@@ -77,17 +76,34 @@ export class IdentityVerificationService {
       });
       if (uploadError) throw uploadError;
 
-      const { error: insertError } = await client.from('identity_verifications').insert({
-        user_id: userId,
-        document_path: documentPath,
-        status: 'pending'
-      });
-      if (insertError) {
-        await client.storage.from('identity-documents').remove([documentPath]);
-        throw insertError;
+      if (currentRecord?.status === 'pending') {
+        const { data: oldPath, error: replaceError } = await client.rpc('replace_pending_identity_document', {
+          p_verification_id: currentRecord.id,
+          p_document_path: documentPath
+        });
+        if (replaceError) {
+          await client.storage.from('identity-documents').remove([documentPath]);
+          throw replaceError;
+        }
+        if (oldPath && oldPath !== documentPath) {
+          const { error: cleanupError } = await client.storage.from('identity-documents').remove([oldPath as string]);
+          if (cleanupError) this.toast.warning('El documento se reemplazó, pero no se pudo limpiar el archivo anterior.');
+        }
+      } else {
+        const { error: insertError } = await client.from('identity_verifications').insert({
+          user_id: userId,
+          document_path: documentPath,
+          status: 'pending'
+        });
+        if (insertError) {
+          await client.storage.from('identity-documents').remove([documentPath]);
+          throw insertError;
+        }
       }
 
-      this.toast.success('Documento enviado. El equipo revisará tu solicitud.');
+      this.toast.success(currentRecord?.status === 'pending'
+        ? 'Documento reemplazado. El equipo revisará el archivo actualizado.'
+        : 'Documento enviado. El equipo revisará tu solicitud.');
       await this.load();
       return true;
     } catch (error) {

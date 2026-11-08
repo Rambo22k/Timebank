@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -35,6 +35,12 @@ import { ToastService } from '../../../core/services/toast.service';
   styleUrls: ['./login.page.scss']
 })
 export class LoginPage {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private toastService = inject(ToastService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   form: FormGroup;
   showPassword = false;
   isLoading = false;
@@ -42,13 +48,7 @@ export class LoginPage {
   isResendingConfirmation = false;
   emailConfirmationNotice = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private toastService: ToastService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
     addIcons({
       mailOutline,
       lockClosedOutline,

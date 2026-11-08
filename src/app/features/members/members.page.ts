@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -18,11 +18,14 @@ import { AuthService } from '../../core/services/auth.service';
   styleUrls: ['./members.page.scss']
 })
 export class MembersPage {
+  community = inject(ContactsService);
+  auth = inject(AuthService);
+
   query = '';
   activeTab: 'discover' | 'requests' | 'contacts' = 'discover';
   private searchTimer?: ReturnType<typeof setTimeout>;
 
-  constructor(public community: ContactsService, public auth: AuthService) {
+  constructor() {
     addIcons({ checkmarkCircleOutline, locationOutline, peopleOutline, searchOutline, shieldCheckmarkOutline, personAddOutline, closeCircleOutline, checkmarkOutline });
     void this.community.load();
   }
