@@ -1,5 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
@@ -39,12 +40,14 @@ import { Skill } from '../../core/models/skill.model';
 import { IdentityVerificationService } from '../../core/services/identity-verification.service';
 import { SupabaseService } from '../../core/services/supabase.service';
 import { ContactsService } from '../../core/services/contacts.service';
+import { AvailabilityService } from '../../core/services/availability.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     IonIcon,
     NavbarComponent,
@@ -68,6 +71,7 @@ export class ProfilePage {
   private route = inject(ActivatedRoute);
   private supabase = inject(SupabaseService);
   contacts = inject(ContactsService);
+  availability = inject(AvailabilityService);
 
   activeTab = signal<'offered' | 'wanted'>('offered');
   private readonly viewedProfileId = signal<string | null>(null);
@@ -90,6 +94,15 @@ export class ProfilePage {
 
   selectedSkillForExchange: Skill | null = null;
   exchangeModalOpen = false;
+  readonly weekdays = [
+    { value: 1, label: 'Lunes' }, { value: 2, label: 'Martes' }, { value: 3, label: 'Miércoles' },
+    { value: 4, label: 'Jueves' }, { value: 5, label: 'Viernes' }, { value: 6, label: 'Sábado' },
+    { value: 0, label: 'Domingo' }
+  ];
+  newAvailabilityWeekday = 1;
+  newAvailabilityStart = '09:00';
+  newAvailabilityEnd = '12:00';
+  availabilityTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
 
   constructor() {
     addIcons({
@@ -117,11 +130,14 @@ export class ProfilePage {
       this.publicProfile.set(null);
       this.profileUnavailable.set(false);
       if (!profileId || profileId === this.authService.authUser()?.id) {
+        const userId = this.authService.authUser()?.id;
+        if (userId) void this.availability.load(userId);
         void Promise.all([
           this.authService.reloadAuthenticatedUser(),
           this.verification.load()
         ]);
       } else {
+        void this.availability.load(profileId);
         void this.contacts.loadRelationship(profileId);
         void this.loadPublicProfile(profileId);
       }
@@ -214,6 +230,17 @@ export class ProfilePage {
       await this.contacts.sendRequest(profile.id);
     }
   }
+
+  async addAvailabilitySlot(): Promise<void> {
+    await this.availability.addSlot(
+      this.newAvailabilityWeekday,
+      this.newAvailabilityStart,
+      this.newAvailabilityEnd,
+      this.availabilityTimezone
+    );
+  }
+
+  weekdayLabel(weekday: number): string { return this.weekdays.find(day => day.value === weekday)?.label ?? 'Día'; }
 
   closeEditProfile(): void {
     this.isEditProfileModalOpen = false;

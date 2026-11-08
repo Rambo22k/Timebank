@@ -33,6 +33,7 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 - Utiliza los flujos integrados de confirmación de correo electrónico y recuperación de contraseñas de Supabase Auth. La entrega de notificaciones por correo electrónico y notificaciones push requiere integraciones del lado de la aplicación o mediante Edge Functions. El almacenamiento de tokens y las notificaciones dentro de la aplicación ya están incluidos.
 - La migración `20261108100000_member_contacts.sql` añade la búsqueda autenticada de miembros y las solicitudes de contacto. Aplícala con `supabase db push`; los perfiles consultados exponen solo campos públicos y las relaciones solo se modifican mediante RPC.
 - La migración `20261108120000_replace_pending_identity_document.sql` permite reemplazar una identificación mientras sigue pendiente, sin conceder al cliente permiso para editar la decisión ni otros campos de la revisión.
+- La migración `20261108140000_weekly_availability_workflow.sql` agrega las RPC seguras para registrar y quitar franjas semanales, valida zona horaria e impide solapamientos del mismo día.
 
 ## Módulos incluidos
 

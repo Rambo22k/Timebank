@@ -159,6 +159,48 @@
         </section>
         }
 
+        <section class="availability-card" aria-labelledby="availability-title">
+          <div class="availability-heading">
+            <div class="availability-icon"><ion-icon name="calendar-outline"></ion-icon></div>
+            <div>
+              <span class="eyebrow">Horarios para coordinar sesiones</span>
+              <h2 id="availability-title">Disponibilidad semanal</h2>
+              <p>Las horas se muestran en la zona horaria indicada para cada franja.</p>
+            </div>
+          </div>
+          @if (isOwnProfile) {
+            <form class="availability-form" (ngSubmit)="addAvailabilitySlot()">
+              <label>Día
+                <select name="availabilityWeekday" [(ngModel)]="newAvailabilityWeekday">
+                  @for (day of weekdays; track day.value) { <option [ngValue]="day.value">{{ day.label }}</option> }
+                </select>
+              </label>
+              <label>Desde<input name="availabilityStart" type="time" [(ngModel)]="newAvailabilityStart" required></label>
+              <label>Hasta<input name="availabilityEnd" type="time" [(ngModel)]="newAvailabilityEnd" required></label>
+              <label class="timezone-field">Zona horaria<input name="availabilityTimezone" [(ngModel)]="availabilityTimezone" required maxlength="100" placeholder="America/Santo_Domingo"></label>
+              <button class="tb-btn tb-btn-primary tb-btn-sm" type="submit" [disabled]="availability.saving()">
+                {{ availability.saving() ? 'Guardando…' : 'Agregar horario' }}
+              </button>
+            </form>
+          }
+          @if (availability.loading()) {
+            <p class="availability-state">Cargando horarios…</p>
+          } @else if (availability.slots().length) {
+            <div class="availability-list">
+              @for (slot of availability.slots(); track slot.id) {
+                <article class="availability-slot">
+                  <strong>{{ weekdayLabel(slot.weekday) }}</strong>
+                  <span>{{ slot.start_time.slice(0, 5) }}–{{ slot.end_time.slice(0, 5) }}</span>
+                  <small>{{ slot.timezone }}</small>
+                  @if (isOwnProfile) { <button type="button" class="availability-remove" [disabled]="availability.saving()" (click)="availability.removeSlot(slot.id)" [attr.aria-label]="'Eliminar disponibilidad de ' + weekdayLabel(slot.weekday)">Quitar</button> }
+                </article>
+              }
+            </div>
+          } @else {
+            <p class="availability-state">{{ isOwnProfile ? 'Todavía no agregaste horarios. Publica algunas franjas para que sea más fácil coordinar.' : 'Este miembro aún no publicó su disponibilidad semanal.' }}</p>
+          }
+        </section>
+
         <!-- SKILLS TABS SECTION -->
         <div class="profile-skills-section">
           <div class="skills-section-header">
@@ -267,6 +309,7 @@
     [skill]="selectedSkillForDetail"
     [isOwner]="isOwnProfile"
     (closed)="onCloseSkillDetail()"
+    (exchange)="onExchange($event)"
     (edit)="onEditSkill($event)"
   ></app-skill-detail-modal>
 
