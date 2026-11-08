@@ -7,8 +7,9 @@
     <div class="activity-list">
       @if (exchanges.isLoadingRequests()) { <div class="empty-note">Cargando solicitudes…</div> } @else {
       @for (request of requests; track request.id) {
+        @let counterpart = exchanges.requestCounterpart(request);
         <article class="activity-card">
-          <div class="card-top"><div class="person"><img [src]="direction==='incoming' ? request.requesterAvatar : request.providerAvatar" [alt]="direction==='incoming' ? request.requesterName : request.providerName"><div><strong>{{ direction==='incoming' ? request.requesterName : request.providerName }}</strong><small>{{ direction==='incoming' ? 'Quiere aprender contigo' : 'Persona que ofrece la habilidad' }}</small></div></div>
+          <div class="card-top"><div class="person"><img [src]="counterpart.avatar" [alt]="counterpart.name"><div><strong>{{ counterpart.name }}</strong><small>{{ counterpart.summary }}</small></div></div>
             <span class="status" [class.good]="request.status==='accepted'" [class.muted]="request.status==='rejected'||request.status==='cancelled'||request.status==='expired'">{{ request.status==='pending' ? 'Pendiente' : request.status==='accepted' ? 'Aceptada' : request.status==='rejected' ? 'Rechazada' : request.status==='cancelled' ? 'Cancelada' : request.status==='expired' ? 'Vencida' : request.status==='disputed' ? 'En revisión' : request.status==='completed' ? 'Completada' : 'Nuevo horario propuesto' }}</span></div>
           <h3 class="item-title">{{ request.skillTitle }}</h3><p class="item-message">“{{ request.message }}”</p>
           <div class="meta-row"><span><ion-icon name="calendar-outline"></ion-icon>{{ request.proposedStartAt | date:'EEE, d MMM · h:mm a' }}</span><span><ion-icon name="time-outline"></ion-icon>{{ request.requestedHours }} h · {{ request.requestedHours }} créditos</span></div>

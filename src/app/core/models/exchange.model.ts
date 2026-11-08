@@ -3,6 +3,7 @@ export type ExchangeSessionStatus = 'scheduled' | 'awaiting_confirmation' | 'com
 
 export interface ExchangeRequest {
   id: string;
+  initiatorId: string;
   requesterId: string;
   requesterName: string;
   requesterAvatar: string;

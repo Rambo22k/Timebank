@@ -185,7 +185,8 @@ export class LandingPage {
   }
 
   get featuredSkills(): Skill[] {
-    return this.skillsService.skills().filter(s => s.featured).slice(0, 4);
+    const userId = this.authService.authUser()?.id;
+    return this.skillsService.skills().filter(s => s.featured && s.status === 'active' && s.userId !== userId).slice(0, 4);
   }
 
   toggleFaq(index: number): void {

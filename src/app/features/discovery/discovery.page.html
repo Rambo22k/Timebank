@@ -35,6 +35,28 @@
         }
       </div>
 
+      @if (authService.authUser() && recommendedMatches().length) {
+        <section class="match-recommendations" aria-labelledby="matches-title">
+          <div class="matches-heading">
+            <div><span class="sub-label">Recomendaciones para ti</span><h2 id="matches-title">Coincidencias de habilidades</h2><p>Personas que ofrecen algo que buscas o buscan algo que tú ofreces.</p></div>
+            <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+          </div>
+          <div class="matches-grid">
+            @for (match of recommendedMatches(); track match.userId) {
+              <a class="match-card" [routerLink]="['/profile', match.userId]">
+                <img [src]="match.avatar" [alt]="match.name" />
+                <div class="match-copy"><strong>{{ match.name }}</strong>
+                  @if (match.reciprocal) { <span class="match-badge">Intercambio recíproco</span> }
+                  @if (match.learnTitles.length) { <small>Te enseña: {{ match.learnTitles.join(', ') }}</small> }
+                  @if (match.teachTitles.length) { <small>Le enseñas: {{ match.teachTitles.join(', ') }}</small> }
+                </div>
+                <ion-icon class="match-arrow" name="arrow-forward-outline" aria-hidden="true"></ion-icon>
+              </a>
+            }
+          </div>
+        </section>
+      }
+
       <!-- Categories Filter Carousel/Pill-Bar -->
       <div class="categories-bar-wrap">
         <span class="filter-group-lbl">Filtrar por categoría:</span>

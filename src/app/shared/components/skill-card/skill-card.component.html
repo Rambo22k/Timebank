@@ -68,10 +68,10 @@
         <button class="action-btn delete-btn" (click)="onDelete($event)" title="Eliminar habilidad">
           <ion-icon name="trash-outline"></ion-icon>
         </button>
-      } @else if (skill.type === 'offered') {
+      } @else {
         <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="onExchange($event)">
           <ion-icon name="swap-horizontal-outline"></ion-icon>
-          Intercambiar
+          {{ skill.type === 'offered' ? 'Intercambiar' : 'Ofrecer enseñanza' }}
         </button>
       }
     </div>

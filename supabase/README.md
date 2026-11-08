@@ -34,6 +34,7 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 - La migración `20261108100000_member_contacts.sql` añade la búsqueda autenticada de miembros y las solicitudes de contacto. Aplícala con `supabase db push`; los perfiles consultados exponen solo campos públicos y las relaciones solo se modifican mediante RPC.
 - La migración `20261108120000_replace_pending_identity_document.sql` permite reemplazar una identificación mientras sigue pendiente, sin conceder al cliente permiso para editar la decisión ni otros campos de la revisión.
 - La migración `20261108140000_weekly_availability_workflow.sql` agrega las RPC seguras para registrar y quitar franjas semanales, valida zona horaria e impide solapamientos del mismo día.
+- La migración `20261108160000_teaching_offers_and_request_origins.sql` permite ofrecer una habilidad a una persona que la busca y registra quién inició cada intercambio para que ambas direcciones compartan la misma reserva de créditos y sesiones.
 
 ## Módulos incluidos
 

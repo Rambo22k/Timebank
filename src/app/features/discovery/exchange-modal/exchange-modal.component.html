@@ -11,7 +11,7 @@
         </div>
         <div>
           <span class="sub-label">Intercambio de Tiempo</span>
-          <h2 class="title">Proponer Sesión</h2>
+          <h2 class="title">{{ skill.type === 'wanted' ? 'Ofrecer enseñar' : 'Proponer sesión' }}</h2>
         </div>
       </div>
 
@@ -20,7 +20,7 @@
         <div class="skill-main">
           <span class="cat-pill">{{ skill.categoryName }}</span>
           <h4 class="skill-name">{{ skill.title }}</h4>
-          <span class="author-note">Impartido por <strong>{{ skill.authorName }}</strong></span>
+          <span class="author-note">{{ skill.type === 'wanted' ? 'Quiere aprender con' : 'Impartido por' }} <strong>{{ skill.authorName }}</strong></span>
         </div>
         <div class="time-cost-badge">
           <ion-icon name="time-outline"></ion-icon>
@@ -31,11 +31,29 @@
         </div>
       </div>
 
-      <!-- User Balance Check -->
-      <div class="balance-status-row">
-        <span>Tu saldo actual:</span>
-        <strong class="balance-val">{{ authService.currentUser()?.timeCredits || 0 }} créditos disponibles</strong>
-      </div>
+      @if (skill.type === 'offered') {
+        <div class="balance-status-row">
+          <span>Tu saldo actual:</span>
+          <strong class="balance-val">{{ authService.currentUser()?.timeCredits || 0 }} créditos disponibles</strong>
+        </div>
+      } @else {
+        <div class="balance-status-row">
+          <span>Créditos:</span>
+          <strong class="balance-val">La persona los reservará al aceptar la oferta.</strong>
+        </div>
+        <div class="tb-form-group">
+          <label class="tb-label" for="teaching-skill">Habilidad que ofrecerás</label>
+          <select id="teaching-skill" class="tb-select" [(ngModel)]="selectedTeachingSkillId" [disabled]="teachingSkills.length === 0">
+            <option value="" disabled>Selecciona una habilidad ofrecida</option>
+            @for (offeredSkill of teachingSkills; track offeredSkill.id) {
+              <option [value]="offeredSkill.id">{{ offeredSkill.title }}</option>
+            }
+          </select>
+          @if (!teachingSkills.length) {
+            <p class="tb-help-text">Primero publica una habilidad ofrecida en esta categoría para que la propuesta sea pertinente.</p>
+          }
+        </div>
+      }
 
       <!-- Proposal Message -->
       <div class="tb-form-group">
@@ -48,11 +66,11 @@
         <select id="exchange-duration" class="tb-select" [(ngModel)]="requestedHours">
           @for (duration of durationOptions; track duration) { <option [ngValue]="duration">{{ duration }} {{ duration === 1 ? 'hora' : 'horas' }}</option> }
         </select>
-        <p class="tb-help-text">La duración debe cubrirse con tu saldo actual. Se permiten bloques de 15 minutos.</p>
+        <p class="tb-help-text">{{ skill.type === 'wanted' ? 'La persona que acepta la oferta debe tener el saldo disponible. Se permiten bloques de 15 minutos.' : 'La duración debe cubrirse con tu saldo actual. Se permiten bloques de 15 minutos.' }}</p>
       </div>
 
       <div class="tb-form-group">
-        <label class="tb-label" for="exchange-msg">Mensaje inicial para {{ skill.authorName }}</label>
+        <label class="tb-label" for="exchange-msg">{{ skill.type === 'wanted' ? 'Mensaje para' : 'Mensaje inicial para' }} {{ skill.authorName }}</label>
         <textarea
           id="exchange-msg"
           class="tb-textarea"
@@ -68,9 +86,9 @@
         <button class="tb-btn tb-btn-outline" (click)="onClose()">
           Cancelar
         </button>
-        <button class="tb-btn tb-btn-accent" (click)="onSendProposal()" [disabled]="isSubmitting || !proposedMessage.trim()">
+        <button class="tb-btn tb-btn-accent" (click)="onSendProposal()" [disabled]="isSubmitting || !proposedMessage.trim() || (skill.type === 'wanted' && !selectedTeachingSkillId)">
           <ion-icon name="checkmark-circle-outline"></ion-icon>
-          {{ isSubmitting ? 'Enviando...' : 'Enviar solicitud' }}
+          {{ isSubmitting ? 'Enviando...' : (skill.type === 'wanted' ? 'Enviar oferta para enseñar' : 'Enviar solicitud') }}
         </button>
       </div>
     </div>

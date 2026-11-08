@@ -19,7 +19,7 @@
         </article>
 
         <article class="dashboard-panel dashboard-requests"><header><div><span class="dashboard-eyebrow">Actividad</span><h2>Solicitudes pendientes</h2></div><a routerLink="/exchanges/requests">Ver solicitudes</a></header>
-          @for (request of pendingRequests.slice(0, 3); track request.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon request-icon"><ion-icon name="mail-outline"></ion-icon></span><div><strong>{{ request.skillTitle }}</strong><small>{{ request.providerId === authService.authUser()?.id ? 'De ' + request.requesterName : 'Para ' + request.providerName }} · {{ request.createdAt | date:'d MMM' }}</small></div><span class="dashboard-state pending">{{ request.status === 'rescheduled' ? 'Horario propuesto' : 'Pendiente' }}</span></div> }
+          @for (request of pendingRequests.slice(0, 3); track request.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon request-icon"><ion-icon name="mail-outline"></ion-icon></span><div><strong>{{ request.skillTitle }}</strong><small>{{ request.initiatorId === authService.authUser()?.id ? 'Para ' : 'De ' }}{{ exchanges.requestCounterpart(request).name }} · {{ request.createdAt | date:'d MMM' }}</small></div><span class="dashboard-state pending">{{ request.status === 'rescheduled' ? 'Horario propuesto' : 'Pendiente' }}</span></div> }
           @empty { <div class="dashboard-empty"><ion-icon name="checkmark-circle-outline"></ion-icon><p>No tienes solicitudes por responder.</p><a routerLink="/explore">Buscar algo para aprender</a></div> }
         </article>
       </section>

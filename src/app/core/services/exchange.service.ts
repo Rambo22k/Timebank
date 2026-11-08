@@ -6,6 +6,7 @@ import { SupabaseService } from './supabase.service';
 
 interface RequestRow {
   id: string;
+  initiator_id: string;
   requester_id: string;
   provider_id: string;
   skill_id: string;
@@ -105,7 +106,20 @@ export class ExchangeService {
 
   get currentUserId(): string { return this.auth.authUser()?.id ?? ''; }
   requestsFor(direction: 'incoming' | 'outgoing'): ExchangeRequest[] {
-    return this.requestsSignal().filter(r => direction === 'incoming' ? r.providerId === this.currentUserId : r.requesterId === this.currentUserId);
+    return this.requestsSignal().filter(r =>
+      (r.requesterId === this.currentUserId || r.providerId === this.currentUserId)
+      && (direction === 'incoming' ? r.initiatorId !== this.currentUserId : r.initiatorId === this.currentUserId)
+    );
+  }
+  requestCounterpart(request: ExchangeRequest): { name: string; avatar: string; summary: string } {
+    const isIncoming = request.initiatorId !== this.currentUserId;
+    const counterpartIsRequester = isIncoming ? request.requesterId === request.initiatorId : request.requesterId !== this.currentUserId;
+    const name = counterpartIsRequester ? request.requesterName : request.providerName;
+    const avatar = counterpartIsRequester ? request.requesterAvatar : request.providerAvatar;
+    const summary = isIncoming
+      ? (request.initiatorId === request.providerId ? 'Te ofrece enseñarte' : 'Quiere aprender contigo')
+      : (request.initiatorId === request.providerId ? 'Le ofreces enseñar' : 'Quieres aprender');
+    return { name, avatar, summary };
   }
   sessionsForCurrentUser(): ExchangeSession[] {
     return this.sessionsSignal().filter(s => s.requesterId === this.currentUserId || s.providerId === this.currentUserId);
@@ -325,7 +339,7 @@ export class ExchangeService {
     this.requestsLoadingSignal.set(true);
     try {
       const { data, error } = await client.from('session_requests')
-        .select('id, requester_id, provider_id, skill_id, message, proposed_start_at, requested_hours, status, created_at')
+        .select('id, initiator_id, requester_id, provider_id, skill_id, message, proposed_start_at, requested_hours, status, created_at')
         .order('created_at', { ascending: false });
       if (error) throw error;
       const rows = (data ?? []) as RequestRow[];
@@ -361,6 +375,7 @@ export class ExchangeService {
       const skills = new Map(skillRows.map(skill => [skill.id, skill.title]));
       this.requestsSignal.set(rows.map(row => ({
         id: row.id,
+        initiatorId: row.initiator_id,
         requesterId: row.requester_id,
         requesterName: profiles.get(row.requester_id)?.display_name ?? 'Miembro de TimeBank',
         requesterAvatar: this.avatarUrl(profiles.get(row.requester_id)?.avatar_path),
@@ -406,7 +421,7 @@ export class ExchangeService {
     }
   }
 
-  async createRequest(data: Omit<ExchangeRequest, 'id' | 'status' | 'createdAt' | 'requesterId' | 'requesterName' | 'requesterAvatar'>): Promise<boolean> {
+  async createRequest(data: Omit<ExchangeRequest, 'id' | 'initiatorId' | 'status' | 'createdAt' | 'requesterId' | 'requesterName' | 'requesterAvatar'>): Promise<boolean> {
     if (!this.auth.authUser()) {
       this.toast.warning('Inicia sesión para enviar una propuesta.');
       return false;
@@ -429,9 +444,40 @@ export class ExchangeService {
     }
   }
 
+  async createTeachingOffer(data: {
+    recipientId: string;
+    wantedSkillId: string;
+    providerSkillId: string;
+    message: string;
+    proposedStartAt: string;
+    requestedHours: number;
+  }): Promise<boolean> {
+    if (!this.auth.authUser()) {
+      this.toast.warning('Inicia sesión para ofrecer una sesión.');
+      return false;
+    }
+    try {
+      const { error } = await this.supabase.requireClient().rpc('create_teaching_offer', {
+        p_recipient_id: data.recipientId,
+        p_wanted_skill_id: data.wantedSkillId,
+        p_provider_skill_id: data.providerSkillId,
+        p_message: data.message,
+        p_proposed_start_at: data.proposedStartAt,
+        p_requested_hours: data.requestedHours
+      });
+      if (error) throw error;
+      await this.loadRequests();
+      this.toast.success('Oferta enviada. La persona puede aceptarla, rechazarla o proponer otro horario.');
+      return true;
+    } catch (error) {
+      this.toast.danger(this.requestErrorMessage(error));
+      return false;
+    }
+  }
+
   async respondToRequest(id: string, action: 'accept' | 'reject'): Promise<void> {
     const request = this.requestsSignal().find(item => item.id === id);
-    if (!request || request.providerId !== this.currentUserId || request.status !== 'pending') return;
+    if (!request || request.initiatorId === this.currentUserId || request.status !== 'pending') return;
     try {
       const { error } = await this.supabase.requireClient().rpc('respond_to_session_request', {
         p_request_id: id,
@@ -463,7 +509,7 @@ export class ExchangeService {
   async rescheduleRequest(id: string, proposedStartAt: string): Promise<void> {
     const request = this.requestsSignal().find(item => item.id === id);
     const startAt = new Date(proposedStartAt);
-    if (!request || request.providerId !== this.currentUserId || request.status !== 'pending' || Number.isNaN(startAt.getTime()) || startAt <= new Date()) {
+    if (!request || request.initiatorId === this.currentUserId || request.status !== 'pending' || Number.isNaN(startAt.getTime()) || startAt <= new Date()) {
       this.toast.warning('Elige una fecha futura para proponer otro horario.');
       return;
     }
@@ -483,7 +529,7 @@ export class ExchangeService {
 
   async acceptRescheduledRequest(id: string): Promise<void> {
     const request = this.requestsSignal().find(item => item.id === id);
-    if (!request || request.requesterId !== this.currentUserId || request.status !== 'rescheduled') return;
+    if (!request || request.initiatorId !== this.currentUserId || request.status !== 'rescheduled') return;
     try {
       const { error } = await this.supabase.requireClient().rpc('accept_rescheduled_request', { p_request_id: id });
       if (error) throw error;
@@ -583,9 +629,13 @@ export class ExchangeService {
 
   private requestErrorMessage(error: unknown): string {
     const message = (error instanceof Error ? error.message : String(error ?? '')).toLowerCase();
-    if (message.includes('insufficient available credits')) return 'No tienes créditos suficientes para esa duración.';
+    if (message.includes('insufficient available credits')) return 'La cuenta de quien aprenderá no tiene créditos suficientes para esa duración.';
     if (message.includes('confirm your email')) return 'Confirma tu correo antes de enviar una solicitud.';
     if (message.includes('complete your age and policy acceptance')) return 'Completa tu fecha de nacimiento y acepta las políticas para continuar.';
+    if (message.includes('learner must confirm their email')) return 'La persona que aprenderá debe confirmar su correo antes de recibir una oferta.';
+    if (message.includes('learner must complete age and policy acceptance')) return 'La persona que aprenderá debe completar sus datos y aceptar las políticas antes de recibir una oferta.';
+    if (message.includes('choose an active offered skill')) return 'Elige una habilidad ofrecida activa de la misma categoría.';
+    if (message.includes('active request already exists')) return 'Ya hay una propuesta activa con esa persona para esta habilidad.';
     if (message.includes('future date') || message.includes('proposed date')) return 'Elige una fecha futura para la sesión.';
     if (message.includes('scheduled session time has not ended')) return 'La sesión aún no ha terminado. Podrás confirmarla al finalizar el horario acordado.';
     if (message.includes('cannot be cancelled after it starts')) return 'La sesión ya comenzó y no se puede cancelar desde la aplicación.';
