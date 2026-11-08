@@ -26,6 +26,22 @@ export class WalletPage {
   get earned() { return this.exchanges.activity().filter(tx => tx.type === 'earned').reduce((sum, tx) => sum + tx.amount, 0); }
   get spent() { return Math.abs(this.exchanges.activity().filter(tx => tx.type === 'spent').reduce((sum, tx) => sum + tx.amount, 0)); }
   get reserved() { return this.exchanges.reservedBalance(); }
+  get timeNetwork() {
+    const requests = new Map(this.exchanges.requests().map(request => [request.id, request]));
+    const edges = new Map<string, { helper: string; learner: string; sessions: number; hours: number }>();
+    for (const session of this.exchanges.sessionsForCurrentUser()) {
+      if (session.status !== 'completed') continue;
+      const request = requests.get(session.requestId);
+      if (!request) continue;
+      const key = `${request.providerId}:${request.requesterId}`;
+      const edge = edges.get(key) ?? { helper: request.providerName, learner: request.requesterName, sessions: 0, hours: 0 };
+      edge.sessions += 1;
+      edge.hours += session.hours;
+      edges.set(key, edge);
+    }
+    return [...edges.values()].sort((a, b) => b.hours - a.hours || b.sessions - a.sessions);
+  }
+  get networkHours() { return this.timeNetwork.reduce((total, edge) => total + edge.hours, 0); }
   get activity() { return [...this.exchanges.activity()].sort((a,b) => b.date.localeCompare(a.date)); }
   get filteredActivity() {
     return this.activity.filter(tx => {

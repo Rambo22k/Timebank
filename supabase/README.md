@@ -38,6 +38,7 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 - La migración `20261108180000_profile_country_languages_and_locales.sql` guarda país, zona horaria, idiomas hablados e idioma preferido de la interfaz. También añade el RPC `public.update_my_profile_settings(...)` para guardar el perfil y reemplaza el alta automática para conservar país y zona horaria del registro. Explorar usa país e idiomas hablados como filtros.
 - La migración `20261108200000_language_preference_rpc.sql` cambia el idioma de la cuenta sin exigir que un perfil antiguo haya completado primero los campos de país y zona horaria.
 - La migración `20261108210000_remove_dark_theme.sql` retira la preferencia de tema y su RPC, y restaura el alta de usuarios sin esa configuración.
+- La migración `20261108220000_direct_solidarity_donations.sql` permite que una persona consienta publicar un resumen breve de su solicitud para recibir donaciones dirigidas. Los motivos privados nunca se exponen; las donaciones siguen entrando al fondo compartido y la asignación depende de la aprobación administrativa. También habilita la vista de la Red de Tiempo desde las sesiones completadas del usuario.
 
 ## Módulos incluidos
 

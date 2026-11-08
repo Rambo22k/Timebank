@@ -25,6 +25,9 @@ export class SolidarityPage {
   donationCategoryId = '';
   requestReason = '';
   requestHours = 1;
+  acceptsDirectDonations = false;
+  publicRequestSummary = '';
+  donationTargetId = '';
   adminNotes: Record<string, string> = {};
 
   constructor() {
@@ -33,13 +36,19 @@ export class SolidarityPage {
 
   async donate(): Promise<void> {
     if (this.donationAmount > this.solidarity.availableBalance()) return;
-    const result = await this.solidarity.donate(this.donationAmount, this.donationCategoryId || null);
-    if (result) { this.donationAmount = 1; this.donationCategoryId = ''; }
+    const target = this.selectedDonationTarget;
+    if (target && this.donationAmount > target.remainingCredits) return;
+    const result = await this.solidarity.donate(this.donationAmount, target ? null : this.donationCategoryId || null, target?.requestId ?? null);
+    if (result) { this.donationAmount = 1; this.donationCategoryId = ''; this.donationTargetId = ''; }
   }
 
   async requestSupport(): Promise<void> {
-    const result = await this.solidarity.createRequest(this.requestReason, this.requestHours);
-    if (result) { this.requestReason = ''; this.requestHours = 1; }
+    const result = await this.solidarity.createRequest(this.requestReason, this.requestHours, this.acceptsDirectDonations, this.publicRequestSummary);
+    if (result) { this.requestReason = ''; this.requestHours = 1; this.acceptsDirectDonations = false; this.publicRequestSummary = ''; }
+  }
+
+  get selectedDonationTarget() {
+    return this.solidarity.donationTargets().find(target => target.requestId === this.donationTargetId) ?? null;
   }
 
   async resolve(requestId: string, approve: boolean): Promise<void> {

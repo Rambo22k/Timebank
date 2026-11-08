@@ -1,5 +1,5 @@
 import { Injectable, effect, signal, inject } from '@angular/core';
-import { SolidarityCategory, SolidarityDonation, SolidarityFundSummary, SolidarityRequest, SolidarityRequestStatus } from '../models/solidarity.model';
+import { SolidarityCategory, SolidarityDonation, SolidarityDonationTarget, SolidarityFundSummary, SolidarityRequest, SolidarityRequestStatus } from '../models/solidarity.model';
 import { AuthService } from './auth.service';
 import { SupabaseService } from './supabase.service';
 import { ToastService } from './toast.service';
@@ -36,6 +36,7 @@ export class SolidarityService {
   private readonly donationsSignal = signal<SolidarityDonation[]>([]);
   private readonly pendingRequestsSignal = signal<SolidarityRequest[]>([]);
   private readonly categoriesSignal = signal<SolidarityCategory[]>([]);
+  private readonly donationTargetsSignal = signal<SolidarityDonationTarget[]>([]);
   private readonly isAdminSignal = signal(false);
   private readonly loadingSignal = signal(false);
   private readonly savingSignal = signal(false);
@@ -48,6 +49,7 @@ export class SolidarityService {
   readonly donations = this.donationsSignal.asReadonly();
   readonly pendingRequests = this.pendingRequestsSignal.asReadonly();
   readonly categories = this.categoriesSignal.asReadonly();
+  readonly donationTargets = this.donationTargetsSignal.asReadonly();
   readonly isAdmin = this.isAdminSignal.asReadonly();
   readonly isLoading = this.loadingSignal.asReadonly();
   readonly isSaving = this.savingSignal.asReadonly();
@@ -75,7 +77,7 @@ export class SolidarityService {
       const isAdmin = roleResult.data?.role === 'admin';
       this.isAdminSignal.set(isAdmin);
 
-      const [summaryResult, balanceResult, requestsResult, donationsResult, categoriesResult, pendingResult] = await Promise.all([
+      const [summaryResult, balanceResult, requestsResult, donationsResult, categoriesResult, pendingResult, targetsResult] = await Promise.all([
         client.from('solidarity_fund_summary').select('available_credits,lifetime_donated_credits,approved_requests,people_helped').maybeSingle(),
         client.from('credit_accounts').select('available_balance').eq('user_id', userId).maybeSingle(),
         client.from('solidarity_requests').select('id,user_id,reason,hours_requested,status,resolution_note,created_at').order('created_at', { ascending: false }),
@@ -83,7 +85,8 @@ export class SolidarityService {
         client.from('categories').select('id,name').eq('is_active', true).order('name'),
         isAdmin
           ? client.from('solidarity_requests').select('id,user_id,reason,hours_requested,status,resolution_note,created_at').eq('status', 'pending').order('created_at')
-          : Promise.resolve({ data: [], error: null })
+          : Promise.resolve({ data: [], error: null }),
+        client.rpc('list_solidarity_donation_targets')
       ]);
       if (summaryResult.error) throw summaryResult.error;
       if (balanceResult.error) throw balanceResult.error;
@@ -91,6 +94,7 @@ export class SolidarityService {
       if (donationsResult.error) throw donationsResult.error;
       if (categoriesResult.error) throw categoriesResult.error;
       if (pendingResult.error) throw pendingResult.error;
+      if (targetsResult.error) throw targetsResult.error;
       if (version !== this.loadVersion || userId !== this.activeUserId) return;
 
       const requests = (requestsResult.data ?? []) as SolidarityRequestRow[];
@@ -124,6 +128,14 @@ export class SolidarityService {
         createdAt: row.created_at
       })));
       this.categoriesSignal.set(categories.map(category => ({ id: category.id, name: category.name })));
+      this.donationTargetsSignal.set((targetsResult.data ?? []).map((row: any) => ({
+        requestId: row.request_id,
+        publicSummary: row.public_summary,
+        requestedCredits: Number(row.requested_credits),
+        receivedCredits: Number(row.received_credits),
+        remainingCredits: Number(row.remaining_credits),
+        createdAt: row.created_at
+      })));
     } catch {
       if (version === this.loadVersion && userId === this.activeUserId) this.toast.danger('No se pudo cargar la información de horas solidarias.');
     } finally {
@@ -131,14 +143,16 @@ export class SolidarityService {
     }
   }
 
-  async donate(amount: number, categoryId: string | null): Promise<boolean> {
+  async donate(amount: number, categoryId: string | null, solidarityRequestId: string | null = null): Promise<boolean> {
     if (!Number.isFinite(amount) || amount <= 0 || Math.round(amount * 100) !== amount * 100 || this.savingSignal()) return false;
     return this.withSaving(async () => {
       const { error } = await this.supabase.requireClient().rpc('donate_credits', {
-        p_amount: amount, p_category_id: categoryId, p_solidarity_request_id: null
+        p_amount: amount, p_category_id: solidarityRequestId ? null : categoryId, p_solidarity_request_id: solidarityRequestId
       });
       if (error) throw error;
-      this.toast.success('Tu donación quedó registrada. Gracias por apoyar a la comunidad.');
+      this.toast.success(solidarityRequestId
+        ? 'Tu donación quedó registrada y se sumó al objetivo de apoyo publicado.'
+        : 'Tu donación quedó registrada. Gracias por apoyar a la comunidad.');
       await this.load();
       try {
         await this.auth.reloadAuthenticatedUser();
@@ -149,13 +163,17 @@ export class SolidarityService {
     }, 'No se pudo registrar la donación. Revisa tu saldo y vuelve a intentarlo.');
   }
 
-  async createRequest(reason: string, hours: number): Promise<boolean> {
+  async createRequest(reason: string, hours: number, acceptsDirectDonations = false, publicSummary = ''): Promise<boolean> {
     const userId = this.auth.authUser()?.id;
     const details = reason.trim();
     if (!userId || details.length < 10 || details.length > 3000 || !Number.isFinite(hours) || hours <= 0 || Math.round(hours * 100) !== hours * 100 || this.savingSignal()) return false;
+    if (acceptsDirectDonations && (publicSummary.trim().length < 12 || publicSummary.trim().length > 280)) return false;
     return this.withSaving(async () => {
-      const { error } = await this.supabase.requireClient().from('solidarity_requests').insert({
-        user_id: userId, reason: details, hours_requested: hours
+      const { error } = await this.supabase.requireClient().rpc('create_solidarity_request', {
+        p_reason: details,
+        p_hours_requested: hours,
+        p_accepts_direct_donations: acceptsDirectDonations,
+        p_public_summary: acceptsDirectDonations ? publicSummary.trim() : null
       });
       if (error) throw error;
       this.toast.success('Tu solicitud de apoyo solidario fue enviada para revisión.');
@@ -198,6 +216,7 @@ export class SolidarityService {
     this.summarySignal.set({ availableCredits: 0, lifetimeDonatedCredits: 0, approvedRequests: 0, peopleHelped: 0 });
     this.balanceSignal.set(0); this.requestsSignal.set([]); this.donationsSignal.set([]);
     this.pendingRequestsSignal.set([]); this.categoriesSignal.set([]); this.isAdminSignal.set(false);
+    this.donationTargetsSignal.set([]);
     this.loadingSignal.set(false); this.savingSignal.set(false);
   }
 }

@@ -29,3 +29,12 @@ export interface SolidarityCategory {
   id: string;
   name: string;
 }
+
+export interface SolidarityDonationTarget {
+  requestId: string;
+  publicSummary: string;
+  requestedCredits: number;
+  receivedCredits: number;
+  remainingCredits: number;
+  createdAt: string;
+}
