@@ -13,6 +13,10 @@ export const authGuard: CanActivateFn = async (_route, state) => {
   if (!auth.isAuthenticated()) {
     return router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
   }
+  if (auth.accountStatus() !== 'active') {
+    return state.url.startsWith('/account-status') ? true : router.createUrlTree(['/account-status']);
+  }
+  if (state.url.startsWith('/account-status')) return router.createUrlTree(['/profile']);
   if (auth.needsProfileCompletion() && !state.url.startsWith('/auth/complete-profile')) {
     return router.createUrlTree(['/auth/complete-profile']);
   }
@@ -28,6 +32,7 @@ export const onboardingGuard: CanActivateFn = async () => {
     return router.createUrlTree(['/auth/login']);
   }
   if (!auth.isAuthenticated()) return router.createUrlTree(['/auth/login']);
+  if (auth.accountStatus() !== 'active') return router.createUrlTree(['/account-status']);
   if (!auth.needsProfileCompletion()) return router.createUrlTree(['/profile']);
   return true;
 };

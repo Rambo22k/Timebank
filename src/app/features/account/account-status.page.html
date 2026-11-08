@@ -1,0 +1,15 @@
+<main class="account-status-page">
+  <section class="account-status-card" role="alert">
+    <div class="account-status-icon"><ion-icon name="alert-circle-outline"></ion-icon></div>
+    <span class="eyebrow">{{ "Estado de la cuenta" | t }}</span>
+    <h1>{{ (auth.accountStatus() === 'suspended' ? 'Cuenta suspendida' : 'Cuenta desactivada') | t }}</h1>
+    @if (auth.accountStatus() === 'suspended' && auth.suspensionReason()) {
+      <p class="account-status-reason"><strong>{{ "Motivo" | t }}:</strong> {{ auth.suspensionReason() }}</p>
+    } @else {
+      <p>{{ "Esta cuenta no puede usar las funciones de TimeBank. Ponte en contacto con un administrador para recibir ayuda." | t }}</p>
+    }
+    <button class="tb-btn tb-btn-outline" type="button" (click)="signOut()">
+      <ion-icon name="log-out-outline"></ion-icon>{{ "Cerrar sesión" | t }}
+    </button>
+  </section>
+</main>

@@ -3,6 +3,18 @@ import { adminGuard, authGuard, onboardingGuard } from './core/guards/auth.guard
 
 export const routes: Routes = [
   {
+    path: 'account-status',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/account/account-status.page').then(m => m.AccountStatusPage),
+    title: 'Estado de la cuenta — TimeBank'
+  },
+  {
+    path: 'profile/change-password',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/auth/change-password.page').then(m => m.ChangePasswordPage),
+    title: 'Cambiar contraseña — TimeBank'
+  },
+  {
     path: '',
     loadComponent: () =>
       import('./features/landing/landing.page').then(m => m.LandingPage),

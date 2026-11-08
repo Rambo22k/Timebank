@@ -23,6 +23,9 @@
                 <button class="tb-btn tb-btn-primary tb-btn-sm" (click)="openNewSkillModal()">
                   <ion-icon name="sparkles-outline"></ion-icon>
                    {{ "Publicar Habilidad" | t }} </button>
+                <a class="tb-btn tb-btn-outline tb-btn-sm" routerLink="/profile/change-password">
+                  {{ "Cambiar contraseña" | t }}
+                </a>
               </div>
               } @else {
                 @if (contacts.activeProfileContact()?.status === 'accepted') {

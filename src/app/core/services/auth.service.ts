@@ -19,6 +19,8 @@ interface PrivateProfile {
   accepted_terms_at: string | null;
   accepted_privacy_at: string | null;
   preferred_language: 'en' | 'es';
+  account_status: 'active' | 'suspended' | 'deactivated';
+  suspension_reason: string | null;
 }
 
 export class TimeBankAuthError extends Error {
@@ -43,6 +45,8 @@ export class AuthService {
   readonly authUser = this.authUserSignal.asReadonly();
   readonly isAdmin = this.isAdminSignal.asReadonly();
   readonly isAuthenticated = computed(() => this.authUserSignal() !== null);
+  readonly accountStatus = computed(() => this.privateProfileSignal()?.account_status ?? 'active');
+  readonly suspensionReason = computed(() => this.privateProfileSignal()?.suspension_reason ?? null);
   readonly isReady = signal(false);
   readonly needsProfileCompletion = computed(() => {
     if (!this.isAuthenticated()) return false;
@@ -151,6 +155,28 @@ export class AuthService {
     this.toastService.success('Tu contraseña se actualizó.');
   }
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const user = this.authUserSignal();
+    if (!user?.email) throw new TimeBankAuthError('No se pudo verificar el correo de esta cuenta.');
+    const client = this.supabase.requireClient();
+    const { data, error: verificationError } = await client.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword
+    });
+    if (verificationError) {
+      if (verificationError.message.toLowerCase().includes('invalid login credentials')) {
+        throw new TimeBankAuthError('La contraseña actual no es correcta.', verificationError);
+      }
+      throw new TimeBankAuthError(this.messageFor(verificationError), verificationError);
+    }
+    if (data.user?.id !== user.id) throw new TimeBankAuthError('No se pudo verificar la cuenta actual.');
+
+    const { error } = await client.auth.updateUser({ password: newPassword });
+    if (error) throw new TimeBankAuthError(this.messageFor(error), error);
+    await this.reloadAuthenticatedUser();
+    this.toastService.success('Tu contraseña se actualizó.');
+  }
+
   async completeOnboarding(birthDate: string): Promise<void> {
     const userId = this.authUserSignal()?.id;
     if (!userId) throw new TimeBankAuthError('Inicia sesión para completar tu perfil.');
@@ -229,7 +255,7 @@ export class AuthService {
     const client = this.supabase.requireClient();
     const [profileResult, privateResult, accountResult, roleResult, languagesResult] = await Promise.all([
       client.from('profiles').select('display_name, headline, location, avatar_path, bio, country_code, timezone, reputation_average, reputation_count, offered_hours, received_hours, completed_sessions, created_at, is_verified').eq('id', authUser.id).maybeSingle(),
-      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at, preferred_language').eq('user_id', authUser.id).maybeSingle(),
+      client.from('profile_private').select('birth_date, accepted_terms_at, accepted_privacy_at, preferred_language, account_status, suspension_reason').eq('user_id', authUser.id).maybeSingle(),
       client.from('credit_accounts').select('available_balance').eq('user_id', authUser.id).maybeSingle(),
       client.from('user_roles').select('role').eq('user_id', authUser.id).eq('role', 'admin').maybeSingle(),
       client.from('profile_languages').select('language_code').eq('user_id', authUser.id)
