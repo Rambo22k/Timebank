@@ -1,6 +1,6 @@
 import { Component, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import {
@@ -16,7 +16,11 @@ import {
   arrowForwardOutline,
   layersOutline,
   personCircleOutline,
-  shareSocialOutline
+  shareSocialOutline,
+  shieldCheckmarkOutline,
+  cloudUploadOutline,
+  peopleOutline,
+  personAddOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -32,6 +36,9 @@ import { SkillsService } from '../../core/services/skills.service';
 import { ToastService } from '../../core/services/toast.service';
 import { UserProfile } from '../../core/models/user.model';
 import { Skill } from '../../core/models/skill.model';
+import { IdentityVerificationService } from '../../core/services/identity-verification.service';
+import { SupabaseService } from '../../core/services/supabase.service';
+import { ContactsService } from '../../core/services/contacts.service';
 
 @Component({
   selector: 'app-profile',
@@ -55,6 +62,10 @@ import { Skill } from '../../core/models/skill.model';
 })
 export class ProfilePage {
   activeTab = signal<'offered' | 'wanted'>('offered');
+  private readonly viewedProfileId = signal<string | null>(null);
+  readonly publicProfile = signal<UserProfile | null>(null);
+  readonly profileLoading = signal(false);
+  readonly profileUnavailable = signal(false);
   isEditProfileModalOpen = false;
   isSavingProfile = false;
 
@@ -75,7 +86,11 @@ export class ProfilePage {
   constructor(
     public authService: AuthService,
     public skillsService: SkillsService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    public verification: IdentityVerificationService,
+    private route: ActivatedRoute,
+    private supabase: SupabaseService,
+    public contacts: ContactsService
   ) {
     addIcons({
       timeOutline,
@@ -90,12 +105,78 @@ export class ProfilePage {
       arrowForwardOutline,
       layersOutline,
       personCircleOutline,
-      shareSocialOutline
+      shareSocialOutline,
+      shieldCheckmarkOutline,
+      cloudUploadOutline,
+      peopleOutline,
+      personAddOutline
+    });
+    this.route.paramMap.subscribe(params => {
+      const profileId = params.get('id');
+      this.viewedProfileId.set(profileId);
+      this.publicProfile.set(null);
+      this.profileUnavailable.set(false);
+      if (!profileId || profileId === this.authService.authUser()?.id) {
+        void Promise.all([
+          this.authService.reloadAuthenticatedUser(),
+          this.verification.load()
+        ]);
+      } else {
+        void this.contacts.loadRelationship(profileId);
+        void this.loadPublicProfile(profileId);
+      }
     });
   }
 
   get user(): UserProfile | null {
-    return this.authService.currentUser();
+    const profileId = this.viewedProfileId();
+    if (!profileId || profileId === this.authService.authUser()?.id) return this.authService.currentUser();
+    return this.publicProfile();
+  }
+
+  get isOwnProfile(): boolean {
+    const profileId = this.viewedProfileId();
+    return !profileId || profileId === this.authService.authUser()?.id;
+  }
+
+  private async loadPublicProfile(profileId: string): Promise<void> {
+    const client = this.supabase.client;
+    if (!client) { this.profileUnavailable.set(true); return; }
+    this.profileLoading.set(true);
+    try {
+      const { data, error } = await client.from('profiles')
+        .select('id,display_name,headline,location,country_code,avatar_path,bio,reputation_average,reputation_count,offered_hours,received_hours,completed_sessions,created_at,is_verified')
+        .eq('id', profileId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) { this.profileUnavailable.set(true); return; }
+      const avatar = data.avatar_path
+        ? (/^https?:\/\//i.test(data.avatar_path) ? data.avatar_path : client.storage.from('profile-avatars').getPublicUrl(data.avatar_path).data.publicUrl)
+        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=400&q=80';
+      this.publicProfile.set({
+        id: data.id,
+        name: data.display_name,
+        email: '',
+        headline: data.headline ?? 'Miembro de la comunidad TimeBank',
+        bio: data.bio ?? '',
+        avatar,
+        location: data.location ?? data.country_code ?? 'En línea',
+        timeCredits: 0,
+        hoursGiven: Number(data.offered_hours ?? 0),
+        hoursReceived: Number(data.received_hours ?? 0),
+        completedExchanges: Number(data.completed_sessions ?? 0),
+        memberSince: new Intl.DateTimeFormat('es-DO', { month: 'long', year: 'numeric' }).format(new Date(data.created_at)),
+        rating: Number(data.reputation_average ?? 0),
+        reviewsCount: Number(data.reputation_count ?? 0),
+        isVerified: data.is_verified,
+        badges: data.is_verified ? ['Miembro verificado'] : []
+      });
+    } catch {
+      this.profileUnavailable.set(true);
+      this.toastService.danger('No se pudo cargar el perfil de este miembro.');
+    } finally {
+      this.profileLoading.set(false);
+    }
   }
 
   get offeredSkills(): Skill[] {
@@ -114,6 +195,24 @@ export class ProfilePage {
 
   openEditProfile(): void {
     this.isEditProfileModalOpen = true;
+  }
+
+  async onVerificationFileSelected(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) await this.verification.submit(file);
+    input.value = '';
+  }
+
+  async connectToProfile(): Promise<void> {
+    const profile = this.user;
+    const relation = this.contacts.activeProfileContact();
+    if (!profile || this.isOwnProfile) return;
+    if (relation?.status === 'pending' && relation.recipient_id === this.authService.authUser()?.id) {
+      await this.contacts.respond(relation.id, true);
+    } else if (!relation || relation.status === 'rejected') {
+      await this.contacts.sendRequest(profile.id);
+    }
   }
 
   closeEditProfile(): void {

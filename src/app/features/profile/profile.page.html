@@ -15,6 +15,7 @@
                 <div class="avatar-online-dot" title="Activo en la red"></div>
               </div>
 
+              @if (isOwnProfile) {
               <div class="hero-actions-group">
                 <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="openEditProfile()">
                   <ion-icon name="create-outline"></ion-icon>
@@ -25,12 +26,29 @@
                   Publicar Habilidad
                 </button>
               </div>
+              } @else {
+                @if (contacts.activeProfileContact()?.status === 'accepted') {
+                  <span class="verified-check contact-state"><ion-icon name="people-outline"></ion-icon>En tus contactos</span>
+                } @else if (contacts.activeProfileContact()?.status === 'pending' && contacts.activeProfileContact()?.recipient_id === authService.authUser()?.id) {
+                  <div class="hero-actions-group"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="connectToProfile()">Aceptar contacto</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="contacts.respond(contacts.activeProfileContact()!.id, false)">Rechazar</button></div>
+                } @else if (contacts.activeProfileContact()?.status === 'pending') {
+                  <span class="relation-state">Solicitud enviada</span>
+                } @else {
+                  <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="connectToProfile()"><ion-icon name="person-add-outline"></ion-icon>Agregar a contactos</button>
+                }
+              }
             </div>
 
             <!-- Identity info -->
             <div class="profile-name-section">
               <div class="name-rating-row">
                 <h1 class="profile-full-name">{{ user.name }}</h1>
+                @if (user.isVerified) {
+                  <span class="verified-check" role="img" aria-label="Identidad verificada" title="Identidad verificada">
+                    <ion-icon name="checkmark-circle-outline"></ion-icon>
+                    <span>Verificado</span>
+                  </span>
+                }
                 @if (user.rating) {
                   <div class="rating-badge" title="Calificación comunitaria">
                     <ion-icon name="star"></ion-icon>
@@ -74,8 +92,9 @@
           </div>
 
           <!-- TIME BANK BALANCE & STATS BANNER -->
-          <div class="timebank-metrics-bar">
+          <div class="timebank-metrics-bar" [class.public-view]="!isOwnProfile">
             <!-- Balance Highlight -->
+            @if (isOwnProfile) {
             <div class="metric-block highlight-credit">
               <div class="metric-top">
                 <ion-icon name="time-outline"></ion-icon>
@@ -87,6 +106,7 @@
               </div>
               <span class="metric-subtext">Equivalente a {{ user.timeCredits }} horas de aprendizaje</span>
             </div>
+            }
 
             <!-- Hours Shared -->
             <div class="metric-block">
@@ -110,6 +130,34 @@
             </div>
           </div>
         </div>
+
+        @if (isOwnProfile) {
+        <section class="verification-card" aria-labelledby="verification-title">
+          <div class="verification-icon"><ion-icon name="shield-checkmark-outline"></ion-icon></div>
+          <div class="verification-copy">
+            <span class="eyebrow">Confianza en la comunidad</span>
+            <h2 id="verification-title">Verificación de identidad</h2>
+            @if (verification.loading()) {
+              <p>Consultando el estado de tu solicitud…</p>
+            } @else if (verification.record()?.status === 'approved') {
+              <p>Tu identidad está verificada. Tu perfil muestra la insignia de confianza.</p>
+            } @else if (verification.record()?.status === 'pending') {
+              <p>Documento recibido el {{ verification.record()?.submitted_at | date:'mediumDate' }}. Está pendiente de revisión por el equipo.</p>
+            } @else if (verification.record()?.status === 'rejected') {
+              <p>La solicitud anterior fue rechazada. {{ verification.record()?.review_note || 'Puedes enviar un documento legible para una nueva revisión.' }}</p>
+            } @else {
+              <p>Envía un documento de identidad para que el equipo pueda revisar tu solicitud. El archivo se guarda de forma privada y solo lo pueden consultar tú y el equipo administrador.</p>
+            }
+          </div>
+          @if (verification.record()?.status !== 'approved' && verification.record()?.status !== 'pending') {
+            <label class="tb-btn tb-btn-outline tb-btn-sm verification-upload" [class.is-disabled]="verification.uploading()">
+              <ion-icon [name]="verification.uploading() ? 'time-outline' : 'cloud-upload-outline'"></ion-icon>
+              {{ verification.uploading() ? 'Enviando…' : 'Seleccionar documento' }}
+              <input type="file" accept="image/jpeg,image/png,image/webp,application/pdf" [disabled]="verification.uploading()" (change)="onVerificationFileSelected($event)" aria-label="Seleccionar documento de identidad">
+            </label>
+          }
+        </section>
+        }
 
         <!-- SKILLS TABS SECTION -->
         <div class="profile-skills-section">
@@ -140,10 +188,10 @@
             </div>
 
             <!-- Add Skill Action -->
-            <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="openNewSkillModal()">
+            @if (isOwnProfile) { <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="openNewSkillModal()">
               <ion-icon name="sparkles-outline"></ion-icon>
               Añadir otra habilidad
-            </button>
+            </button> }
           </div>
 
           <!-- Skills Grid Display -->
@@ -153,10 +201,10 @@
                 @for (skill of offeredSkills; track skill.id) {
                   <app-skill-card
                     [skill]="skill"
-                    [isOwner]="true"
+                    [isOwner]="isOwnProfile"
                     (viewDetail)="onViewSkillDetail($event)"
-                    (edit)="onEditSkill($event)"
-                    (delete)="onConfirmDeleteSkill($event)"
+                    (edit)="isOwnProfile && onEditSkill($event)"
+                    (delete)="isOwnProfile && onConfirmDeleteSkill($event)"
                   ></app-skill-card>
                 }
               </div>
@@ -165,9 +213,9 @@
                 icon="layers-outline"
                 title="Aún no tienes habilidades ofrecidas publicadas"
                 message="Comparte tus conocimientos con la red para empezar a acumular créditos de tiempo."
-                actionText="Publicar primera habilidad"
+                [actionText]="isOwnProfile ? 'Publicar primera habilidad' : ''"
                 actionIcon="sparkles-outline"
-                (action)="openNewSkillModal()"
+                (action)="isOwnProfile && openNewSkillModal()"
               ></app-empty-state>
             }
           } @else {
@@ -176,10 +224,10 @@
                 @for (skill of wantedSkills; track skill.id) {
                   <app-skill-card
                     [skill]="skill"
-                    [isOwner]="true"
+                    [isOwner]="isOwnProfile"
                     (viewDetail)="onViewSkillDetail($event)"
-                    (edit)="onEditSkill($event)"
-                    (delete)="onConfirmDeleteSkill($event)"
+                    (edit)="isOwnProfile && onEditSkill($event)"
+                    (delete)="isOwnProfile && onConfirmDeleteSkill($event)"
                   ></app-skill-card>
                 }
               </div>
@@ -188,14 +236,16 @@
                 icon="swap-horizontal-outline"
                 title="No has solicitado habilidades para aprender"
                 message="Indica qué temas te gustaría dominar para que otros miembros con experiencia te contacten."
-                actionText="Publicar lo que deseo aprender"
+                [actionText]="isOwnProfile ? 'Publicar lo que deseo aprender' : ''"
                 actionIcon="sparkles-outline"
-                (action)="openNewSkillModal()"
+                (action)="isOwnProfile && openNewSkillModal()"
               ></app-empty-state>
             }
           }
         </div>
       }
+      @if (profileLoading()) { <div class="tb-container"><p class="profile-load-state">Cargando perfil…</p></div> }
+      @if (!profileLoading() && profileUnavailable()) { <div class="tb-container"><section class="profile-load-state"><h1>Perfil no disponible</h1><p>Este miembro no existe o su perfil no está disponible.</p><a class="tb-btn tb-btn-primary" routerLink="/explore">Volver a explorar</a></section></div> }
     </div>
   </main>
 
@@ -213,7 +263,7 @@
   <app-skill-detail-modal
     [isOpen]="detailModalOpen"
     [skill]="selectedSkillForDetail"
-    [isOwner]="true"
+    [isOwner]="isOwnProfile"
     (close)="onCloseSkillDetail()"
     (edit)="onEditSkill($event)"
   ></app-skill-detail-modal>

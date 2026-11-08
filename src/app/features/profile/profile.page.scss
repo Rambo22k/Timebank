@@ -10,6 +10,109 @@
   padding: 32px 0 64px;
 }
 
+.verified-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  color: #087b76;
+  background: #e7f5f2;
+  font-size: 0.76rem;
+  font-weight: 750;
+
+  ion-icon { font-size: 1.05rem; }
+}
+.contact-state { white-space: nowrap; }
+.relation-state { color: var(--tb-text-muted); font-size: .82rem; font-weight: 650; }
+
+.profile-load-state {
+  margin: 60px auto;
+  padding: 32px;
+  max-width: 600px;
+  text-align: center;
+  background: var(--tb-white);
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-lg);
+}
+
+.verification-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 26px;
+  margin: -12px 0 32px;
+  border: 1px solid var(--tb-border);
+  border-radius: var(--tb-radius-lg);
+  background: var(--tb-white);
+  box-shadow: 0 4px 18px rgba(20, 41, 39, 0.04);
+
+  .verification-icon {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: var(--tb-teal-dark);
+    background: var(--tb-teal-light);
+    font-size: 1.5rem;
+  }
+
+  .verification-copy {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .eyebrow {
+    color: var(--tb-teal);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 3px 0 5px;
+    color: var(--tb-text-primary);
+    font: 700 1.05rem 'Space Grotesk', sans-serif;
+  }
+
+  p {
+    margin: 0;
+    color: var(--tb-text-secondary);
+    font-size: 0.86rem;
+    line-height: 1.5;
+  }
+
+  .verification-upload {
+    position: relative;
+    flex: 0 0 auto;
+    overflow: hidden;
+
+    input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    &.is-disabled { opacity: 0.65; }
+  }
+
+  @media (max-width: 680px) {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: 18px;
+
+    .verification-icon { flex-basis: 40px; width: 40px; height: 40px; }
+    .verification-copy { flex: 1 1 calc(100% - 58px); }
+    .verification-upload { margin-left: 58px; }
+  }
+}
+
 /* Perspective Switcher Tool Bar */
 .perspective-switch-bar {
   background: var(--tb-white);
@@ -265,6 +368,7 @@
 .timebank-metrics-bar {
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr 1.1fr;
+  &.public-view { grid-template-columns: repeat(3, 1fr); }
   border-top: 1px solid var(--tb-border);
   background: #fafbfa;
 
