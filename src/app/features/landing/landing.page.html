@@ -14,7 +14,7 @@
 
       <section class="dashboard-main-grid">
         <article class="dashboard-panel dashboard-sessions"><header><div><span class="dashboard-eyebrow">{{ "Agenda" | t }}</span><h2>{{ "Próximas sesiones" | t }}</h2></div><a routerLink="/exchanges/sessions">{{ "Ver todas" | t }}</a></header>
-          @for (session of upcomingSessions.slice(0, 3); track session.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon"><ion-icon name="calendar-outline"></ion-icon></span><div><strong>{{ session.skillTitle }}</strong><small>Con {{ session.partnerName }} · {{ session.startAt | date:'EEE d MMM, h:mm a' }}</small></div><span class="dashboard-state">{{ (session.status === 'scheduled' ? 'Agendada' : 'Por confirmar') | t }}</span></div> }
+          @for (session of upcomingSessions.slice(0, 3); track session.id) { <div class="dashboard-list-row"><span class="dashboard-list-icon"><ion-icon name="calendar-outline"></ion-icon></span><div><strong>{{ session.skillTitle }}</strong><small>Con {{ session.partnerName }} · {{ session.startAt | date:'EEE d MMM, h:mm a':exchanges.currentTimezone:exchanges.currentLocale }} ({{ exchanges.currentTimezone }})</small></div><span class="dashboard-state">{{ (session.status === 'scheduled' ? 'Agendada' : 'Por confirmar') | t }}</span></div> }
           @empty { <div class="dashboard-empty"><ion-icon name="calendar-outline"></ion-icon><p>Aún no tienes sesiones próximas.</p><a routerLink="/explore">Explorar habilidades</a></div> }
         </article>
 

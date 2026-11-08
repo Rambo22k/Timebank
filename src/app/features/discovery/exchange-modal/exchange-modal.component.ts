@@ -16,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ExchangeService } from '../../../core/services/exchange.service';
 import { SkillsService } from '../../../core/services/skills.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { zonedDateTimeToIso, tomorrowAtNoonInZone } from '../../../core/utils/zoned-date-time';
 
 @Component({
   selector: 'app-exchange-modal',
@@ -75,9 +76,11 @@ export class ExchangeModalComponent implements OnChanges {
   async onSendProposal(): Promise<void> {
     if (!this.skill || this.isSubmitting) return;
     const currentUser = this.authService.currentUser();
-    const startAt = new Date(this.proposedStartAt);
     if (!currentUser) { this.proposalError = 'Inicia sesión antes de enviar una propuesta.'; return; }
     if (this.skill.userId === currentUser.id) { this.proposalError = 'No puedes proponer un intercambio contigo mismo.'; return; }
+    const startAtIso = zonedDateTimeToIso(this.proposedStartAt, currentUser.timezone);
+    if (!startAtIso) { this.proposalError = 'Ese horario no existe en tu zona horaria. Elige otra hora.'; return; }
+    const startAt = new Date(startAtIso);
     if (Number.isNaN(startAt.getTime()) || startAt <= new Date()) { this.proposalError = 'Elige una fecha futura para la sesión.'; return; }
     if (this.requestedHours <= 0 || this.requestedHours * 4 !== Math.round(this.requestedHours * 4)) { this.proposalError = 'La duración debe usar incrementos de 15 minutos.'; return; }
     if (this.skill.type === 'offered' && currentUser.timeCredits < this.requestedHours) { this.proposalError = 'No tienes créditos suficientes para esta duración.'; return; }
@@ -94,7 +97,7 @@ export class ExchangeModalComponent implements OnChanges {
           skillId: this.skill.id,
           skillTitle: this.skill.title,
           message: this.proposedMessage.trim(),
-          proposedStartAt: startAt.toISOString(),
+          proposedStartAt: startAtIso!,
           requestedHours: this.requestedHours
         });
       } else {
@@ -108,7 +111,7 @@ export class ExchangeModalComponent implements OnChanges {
           wantedSkillId: this.skill.id,
           providerSkillId: offeredSkill.id,
           message: `Oferta para aprender “${this.skill.title}”. Enseñaría “${offeredSkill.title}”.\n\n${this.proposedMessage.trim()}`,
-          proposedStartAt: startAt.toISOString(),
+          proposedStartAt: startAtIso!,
           requestedHours: this.requestedHours
         });
       }
@@ -120,11 +123,7 @@ export class ExchangeModalComponent implements OnChanges {
   }
 
   private defaultStartAt(): string {
-    const start = new Date();
-    start.setDate(start.getDate() + 1);
-    start.setHours(12, 0, 0, 0);
-    const pad = (value: number) => String(value).padStart(2, '0');
-    return `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}T${pad(start.getHours())}:${pad(start.getMinutes())}`;
+    return tomorrowAtNoonInZone(this.authService.currentUser()?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
   }
 
   onClose(): void {

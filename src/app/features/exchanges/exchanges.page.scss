@@ -53,5 +53,10 @@
 .rating-buttons button.selected { color:#e99500; }
 .empty-note { padding:28px; background:#fff; border:1px dashed var(--tb-border-dark); border-radius:14px; color:var(--tb-text-secondary); text-align:center; }
 .reschedule-control { display:grid; gap:7px; width:min(100%,310px); color:var(--tb-text-secondary); font-size:.78rem; }
+.wallet-filters { display:grid; grid-template-columns:minmax(180px,1.5fr) repeat(2,minmax(140px,1fr)) auto; align-items:end; gap:12px; margin:0 0 14px; padding:14px; border:1px solid var(--tb-border); border-radius:12px; background:var(--tb-surface); }
+.wallet-filters label { display:grid; gap:6px; color:var(--tb-text-secondary); font-size:.76rem; font-weight:650; }
+.wallet-filters .tb-select,.wallet-filters .tb-input { min-height:40px; padding:8px 10px; font:inherit; font-size:.85rem; }
+.wallet-filters button { min-height:40px; }
 @media(max-width:850px){.activity-layout{grid-template-columns:1fr}.activity-heading{align-items:flex-start;flex-direction:column}.side-card{order:-1}.wallet-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:580px){.activity-page{padding:32px 0 54px}.activity-card{padding:16px}.stat-grid,.wallet-stats{grid-template-columns:1fr}.balance-panel{padding:20px}.card-top{flex-direction:column}.transaction{grid-template-columns:40px minmax(0,1fr) auto;padding:13px}.activity-heading .tb-btn{width:100%}}
+@media(max-width:700px){.wallet-filters{grid-template-columns:1fr 1fr}.wallet-filters label:first-child{grid-column:1/-1}.wallet-filters button{grid-column:1/-1}}
+@media(max-width:580px){.activity-page{padding:32px 0 54px}.activity-card{padding:16px}.stat-grid,.wallet-stats{grid-template-columns:1fr}.balance-panel{padding:20px}.card-top{flex-direction:column}.transaction{grid-template-columns:40px minmax(0,1fr) auto;padding:13px}.activity-heading .tb-btn{width:100%}.wallet-filters{grid-template-columns:1fr}.wallet-filters label:first-child,.wallet-filters button{grid-column:auto}}

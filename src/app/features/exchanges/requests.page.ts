@@ -10,6 +10,7 @@ import { FooterComponent } from '../../shared/components/footer/footer.component
 import { ExchangeNavComponent } from './exchange-nav.component';
 import { ExchangeService } from '../../core/services/exchange.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { tomorrowAtNoonInZone, zonedDateTimeToIso } from '../../core/utils/zoned-date-time';
 
 @Component({
   selector: 'app-exchange-requests', standalone: true,
@@ -27,10 +28,12 @@ export class ExchangeRequestsPage {
   setDirection(direction: 'incoming' | 'outgoing') { this.direction = direction; }
   dateFor(requestId: string): string {
     if (!this.rescheduleDates[requestId]) {
-      const date = new Date(); date.setDate(date.getDate() + 2); date.setHours(12, 0, 0, 0);
-      const pad = (value: number) => String(value).padStart(2, '0');
-      this.rescheduleDates[requestId] = `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+      this.rescheduleDates[requestId] = tomorrowAtNoonInZone(this.exchanges.currentTimezone, 2);
     }
     return this.rescheduleDates[requestId];
+  }
+  reschedule(requestId: string): void {
+    const iso = zonedDateTimeToIso(this.dateFor(requestId), this.exchanges.currentTimezone);
+    this.exchanges.rescheduleRequest(requestId, iso ?? '');
   }
 }

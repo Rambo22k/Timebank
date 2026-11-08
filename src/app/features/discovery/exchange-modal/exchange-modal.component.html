@@ -59,6 +59,7 @@
       <div class="tb-form-group">
         <label class="tb-label" for="exchange-start">{{ "Fecha y hora propuestas" | t }}</label>
         <input id="exchange-start" class="tb-input" type="datetime-local" [(ngModel)]="proposedStartAt" />
+        <p class="tb-help-text">{{ "La fecha se interpretará en tu zona horaria:" | t }} {{ authService.currentUser()?.timezone }}</p>
       </div>
 
       <div class="tb-form-group">

@@ -89,6 +89,12 @@ export class ExchangeService {
   readonly isLoadingWallet = this.walletLoadingSignal.asReadonly();
   readonly reviews = this.reviewsSignal.asReadonly();
   readonly isLoadingReviews = this.reviewsLoadingSignal.asReadonly();
+  get currentTimezone(): string {
+    return this.auth.currentUser()?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  }
+  get currentLocale(): string {
+    return this.auth.currentUser()?.preferredLanguage === 'en' ? 'en-US' : 'es';
+  }
   readonly balance = computed(() => this.auth.currentUser()?.timeCredits ?? 0);
 
   constructor() {
@@ -509,7 +515,12 @@ export class ExchangeService {
   async rescheduleRequest(id: string, proposedStartAt: string): Promise<void> {
     const request = this.requestsSignal().find(item => item.id === id);
     const startAt = new Date(proposedStartAt);
-    if (!request || request.initiatorId === this.currentUserId || request.status !== 'pending' || Number.isNaN(startAt.getTime()) || startAt <= new Date()) {
+    if (!request || request.initiatorId === this.currentUserId || request.status !== 'pending') return;
+    if (Number.isNaN(startAt.getTime())) {
+      this.toast.warning('Ese horario no es válido en tu zona horaria. Elige otra hora.');
+      return;
+    }
+    if (startAt <= new Date()) {
       this.toast.warning('Elige una fecha futura para proponer otro horario.');
       return;
     }
