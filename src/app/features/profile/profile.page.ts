@@ -190,7 +190,6 @@ export class ProfilePage {
         timezone: data.timezone ?? 'UTC',
         languages: (languageRows ?? []).map(row => row.language_code),
         preferredLanguage: 'es',
-        preferredTheme: 'system',
         timeCredits: 0,
         hoursGiven: Number(data.offered_hours ?? 0),
         hoursReceived: Number(data.received_hours ?? 0),

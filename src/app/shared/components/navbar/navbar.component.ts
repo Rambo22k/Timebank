@@ -19,14 +19,11 @@ import {
   notificationsOutline,
   checkmarkDoneOutline,
   shieldCheckmarkOutline,
-  moonOutline,
-  sunnyOutline
 } from 'ionicons/icons';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { NotificationsService } from '../../../core/services/notifications.service';
 import { AppNotification } from '../../../core/models/notification.model';
-import { ThemeService } from '../../../core/services/theme.service';
 import { LocalizationService, AppLanguage } from '../../../core/services/localization.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -41,7 +38,6 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class NavbarComponent {
   authService = inject(AuthService);
   notifications = inject(NotificationsService);
-  theme = inject(ThemeService);
   localization = inject(LocalizationService);
   private router = inject(Router);
   private toastService = inject(ToastService);
@@ -68,8 +64,6 @@ export class NavbarComponent {
       notificationsOutline,
       checkmarkDoneOutline,
       shieldCheckmarkOutline,
-      moonOutline,
-      sunnyOutline
     });
   }
 
@@ -78,14 +72,6 @@ export class NavbarComponent {
       await this.localization.setLanguage(language);
     } catch {
       this.toastService.warning('El idioma se aplicó en este dispositivo, pero no se pudo guardar en tu cuenta.');
-    }
-  }
-
-  async toggleTheme(): Promise<void> {
-    try {
-      await this.theme.toggle();
-    } catch {
-      this.toastService.warning('El tema quedó aplicado en este dispositivo, pero no se pudo guardar en tu cuenta.');
     }
   }
 

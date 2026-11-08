@@ -112,7 +112,7 @@
   gap: 8px;
 }
 
-.tb-appearance-controls {
+.tb-language-controls {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -144,27 +144,6 @@
     color: var(--tb-teal);
     box-shadow: var(--tb-shadow-sm);
   }
-}
-
-.tb-theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-width: 38px;
-  min-height: 38px;
-  padding: 7px;
-  border: 1px solid var(--tb-border);
-  border-radius: var(--tb-radius-full);
-  background: var(--tb-surface);
-  color: var(--tb-text-primary);
-  font: inherit;
-  font-size: .8rem;
-  cursor: pointer;
-  transition: border-color .18s ease, color .18s ease, background .18s ease;
-
-  ion-icon { font-size: 1.1rem; color: var(--tb-orange); }
-  &:hover, &:focus-visible { border-color: var(--tb-teal); color: var(--tb-teal); }
 }
 
 .tb-credits-pill {
@@ -263,7 +242,7 @@
 .tb-notification-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid var(--tb-border);
@@ -502,18 +481,16 @@
   }
 }
 
-.mobile-appearance-controls {
+.mobile-language-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
   padding: 8px 0 14px;
   border-bottom: 1px solid var(--tb-border);
   color: var(--tb-text-secondary);
   font-size: .75rem;
   font-weight: 650;
-
-  .tb-theme-toggle { min-width: auto; }
 }
 
 .mobile-divider {

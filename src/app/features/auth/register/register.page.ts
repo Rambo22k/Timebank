@@ -22,7 +22,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { countryOptionsFor } from '../../../core/data/localization-options';
 import { LocalizationService } from '../../../core/services/localization.service';
-import { ThemeService } from '../../../core/services/theme.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
@@ -66,7 +65,6 @@ export class RegisterPage {
   private toastService = inject(ToastService);
   private router = inject(Router);
   private localization = inject(LocalizationService);
-  private theme = inject(ThemeService);
 
   form: FormGroup;
   showPassword = false;
@@ -125,7 +123,6 @@ export class RegisterPage {
       const result = await this.authService.register({
         name, email, password, birthDate, countryCode, timezone,
         preferredLanguage: this.localization.language(),
-        preferredTheme: this.theme.preference()
       });
       if (result.emailConfirmationRequired) {
         await this.router.navigate(['/auth/login'], { queryParams: { emailConfirmation: email.trim() } });

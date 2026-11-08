@@ -36,8 +36,8 @@ Esta migración de la base de datos de Supabase constituye la base de datos en i
 - La migración `20261108140000_weekly_availability_workflow.sql` agrega las RPC seguras para registrar y quitar franjas semanales, valida zona horaria e impide solapamientos del mismo día.
 - La migración `20261108160000_teaching_offers_and_request_origins.sql` permite ofrecer una habilidad a una persona que la busca y registra quién inició cada intercambio para que ambas direcciones compartan la misma reserva de créditos y sesiones.
 - La migración `20261108180000_profile_country_languages_and_locales.sql` guarda país, zona horaria, idiomas hablados e idioma preferido de la interfaz. También añade el RPC `public.update_my_profile_settings(...)` para guardar el perfil y reemplaza el alta automática para conservar país y zona horaria del registro. Explorar usa país e idiomas hablados como filtros.
-- La migración `20261108190000_persistent_theme_preference.sql` guarda el tema claro, oscuro o del sistema por cuenta mediante `public.update_my_theme_preference(...)`, conserva la preferencia elegida antes de confirmar el registro y aplica los colores del tema oscuro a la interfaz.
 - La migración `20261108200000_language_preference_rpc.sql` cambia el idioma de la cuenta sin exigir que un perfil antiguo haya completado primero los campos de país y zona horaria.
+- La migración `20261108210000_remove_dark_theme.sql` retira la preferencia de tema y su RPC, y restaura el alta de usuarios sin esa configuración.
 
 ## Módulos incluidos
 

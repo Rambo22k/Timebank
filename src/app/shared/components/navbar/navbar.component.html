@@ -35,16 +35,11 @@
 
     <!-- Desktop User Actions -->
     <div class="tb-nav-actions">
-      <div class="tb-appearance-controls" [attr.aria-label]="isEnglish ? 'Display preferences' : 'Preferencias de pantalla'">
+      <div class="tb-language-controls" [attr.aria-label]="isEnglish ? 'Language preferences' : 'Preferencias de idioma'">
         <div class="tb-language-toggle" role="group" [attr.aria-label]="isEnglish ? 'Application language' : 'Idioma de la aplicación'">
           <button type="button" [class.active]="localization.language() === 'es'" (click)="changeLanguage('es')" [attr.aria-label]="'Español' | t">ES</button>
           <button type="button" [class.active]="localization.language() === 'en'" (click)="changeLanguage('en')" [attr.aria-label]="'English' | t">EN</button>
         </div>
-        <button class="tb-theme-toggle" type="button" (click)="toggleTheme()"
-          [attr.aria-label]="theme.isDark() ? (isEnglish ? 'Switch to light mode' : 'Cambiar a modo claro') : (isEnglish ? 'Switch to dark mode' : 'Cambiar a modo oscuro')"
-          [attr.title]="theme.isDark() ? (isEnglish ? 'Light mode' : 'Modo claro') : (isEnglish ? 'Dark mode' : 'Modo oscuro')">
-          <ion-icon [name]="theme.isDark() ? 'sunny-outline' : 'moon-outline'"></ion-icon>
-        </button>
       </div>
       @if (authService.isAuthenticated()) {
         <!-- Time Credits Live Pill -->
@@ -148,16 +143,11 @@
         }
 
         <nav class="mobile-nav-list">
-          <div class="mobile-appearance-controls">
+          <div class="mobile-language-controls">
             <div class="tb-language-toggle" role="group" [attr.aria-label]="isEnglish ? 'Application language' : 'Idioma de la aplicación'">
               <button type="button" [class.active]="localization.language() === 'es'" (click)="changeLanguage('es')">ES</button>
               <button type="button" [class.active]="localization.language() === 'en'" (click)="changeLanguage('en')">EN</button>
             </div>
-            <button class="tb-theme-toggle" type="button" (click)="toggleTheme()"
-              [attr.aria-label]="theme.isDark() ? (isEnglish ? 'Switch to light mode' : 'Cambiar a modo claro') : (isEnglish ? 'Switch to dark mode' : 'Cambiar a modo oscuro')">
-              <ion-icon [name]="theme.isDark() ? 'sunny-outline' : 'moon-outline'"></ion-icon>
-              {{ (theme.isDark() ? (isEnglish ? 'Light mode' : 'Modo claro') : (isEnglish ? 'Dark mode' : 'Modo oscuro')) | t }}
-            </button>
           </div>
           <a routerLink="/" (click)="closeMobileMenu()" class="mobile-link">
              {{ "Inicio" | t }} </a>
