@@ -1,6 +1,6 @@
 import { Component, signal, computed, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
@@ -14,7 +14,8 @@ import {
   funnelOutline,
   refreshOutline,
   layersOutline,
-  peopleOutline
+  peopleOutline,
+  informationCircleOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -37,6 +38,8 @@ interface MemberSkillMatch {
   learnTitles: string[];
   teachTitles: string[];
   reciprocal: boolean;
+  score: number;
+  peerRating: number;
 }
 
 @Component({
@@ -63,6 +66,8 @@ export class DiscoveryPage implements OnInit {
   authService = inject(AuthService);
   localization = inject(LocalizationService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  readonly guestPreviewLimit = 12;
 
   searchQuery = signal<string>('');
   selectedCategoryId = signal<string>('all');
@@ -91,7 +96,8 @@ export class DiscoveryPage implements OnInit {
       funnelOutline,
       refreshOutline,
       layersOutline,
-      peopleOutline
+      peopleOutline,
+      informationCircleOutline
     });
   }
 
@@ -129,23 +135,30 @@ export class DiscoveryPage implements OnInit {
       members.set(skill.userId, memberSkills);
     }
 
+    const userLanguages = (this.authService.currentUser()?.languages ?? []).map(language => this.normalizeTerm(language));
     return [...members.entries()].flatMap(([peerId, peerSkills]) => {
       const learnTitles = wanted.filter(need => peerSkills.some(skill => skill.type === 'offered' && this.skillsMatch(need, skill))).map(skill => skill.title);
       const teachTitles = offered.filter(skill => peerSkills.some(need => need.type === 'wanted' && this.skillsMatch(skill, need))).map(skill => skill.title);
       if (!learnTitles.length && !teachTitles.length) return [];
       const peer = peerSkills[0];
+      const reciprocal = learnTitles.length > 0 && teachTitles.length > 0;
+      const peerLanguages = (peer.authorLanguages ?? []).map(language => this.normalizeTerm(language));
+      const sharedLanguageCount = peerLanguages.filter(language => userLanguages.includes(language)).length;
       return [{
         userId: peerId,
         name: peer.authorName,
         avatar: peer.authorAvatar,
         learnTitles: [...new Set(learnTitles)].slice(0, 2),
         teachTitles: [...new Set(teachTitles)].slice(0, 2),
-        reciprocal: learnTitles.length > 0 && teachTitles.length > 0
+        reciprocal,
+        peerRating: peer.authorRating ?? 0,
+        score: learnTitles.length * 2 + teachTitles.length * 2 + (reciprocal ? 3 : 0) + Math.min(sharedLanguageCount, 2)
       }];
-    }).sort((a, b) => Number(b.reciprocal) - Number(a.reciprocal)).slice(0, 4);
+    }).sort((a, b) => b.score - a.score || Number(b.reciprocal) - Number(a.reciprocal)
+      || (b.peerRating ?? 0) - (a.peerRating ?? 0) || a.name.localeCompare(b.name)).slice(0, 4);
   });
 
-  get filteredSkills(): Skill[] {
+  get matchingSkills(): Skill[] {
     const currentUserId = this.authService.authUser()?.id;
     return this.skillsService.searchSkills(
       this.searchQuery(),
@@ -156,6 +169,14 @@ export class DiscoveryPage implements OnInit {
     ).filter(skill => skill.userId !== currentUserId
       && (this.selectedCountryCode() === 'all' || skill.authorCountryCode === this.selectedCountryCode())
       && (this.selectedLanguageCode() === 'all' || skill.authorLanguages?.includes(this.selectedLanguageCode())));
+  }
+
+  get filteredSkills(): Skill[] {
+    return this.authService.isAuthenticated() ? this.matchingSkills : this.matchingSkills.slice(0, this.guestPreviewLimit);
+  }
+
+  get guestHasMoreResults(): boolean {
+    return !this.authService.isAuthenticated() && this.matchingSkills.length > this.guestPreviewLimit;
   }
 
   get hasActiveFilters(): boolean {
@@ -215,6 +236,10 @@ export class DiscoveryPage implements OnInit {
   }
 
   onExchange(skill: Skill): void {
+    if (!this.authService.isAuthenticated()) {
+      void this.router.navigate(['/auth/login'], { queryParams: { returnUrl: '/explore' } });
+      return;
+    }
     this.selectedSkillForExchange = skill;
     this.isExchangeModalOpen = true;
   }
@@ -226,7 +251,7 @@ export class DiscoveryPage implements OnInit {
 
   private skillsMatch(first: Skill, second: Skill): boolean {
     if (first.categoryId !== second.categoryId) return false;
-    const normalize = (value: string) => value.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalize = (value: string) => this.normalizeTerm(value);
     const leftTitle = normalize(first.title);
     const rightTitle = normalize(second.title);
     if (leftTitle === rightTitle) return true;
@@ -236,5 +261,9 @@ export class DiscoveryPage implements OnInit {
     const leftTerms = terms(first);
     const rightTerms = terms(second);
     return [...leftTerms].some(term => rightTerms.has(term));
+  }
+
+  private normalizeTerm(value: string): string {
+    return value.toLocaleLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   }
 }

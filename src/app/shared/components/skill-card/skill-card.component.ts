@@ -11,7 +11,8 @@ import {
   arrowForwardOutline,
   swapHorizontalOutline,
   sparklesOutline,
-  checkmarkCircleOutline
+  checkmarkCircleOutline,
+  personCircleOutline
 } from 'ionicons/icons';
 import { Skill } from '../../../core/models/skill.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -28,6 +29,7 @@ export class SkillCardComponent {
   @Input({ required: true }) skill!: Skill;
   @Input() isOwner = false;
   @Input() compact = false;
+  @Input() guestMode = false;
 
   @Output() viewDetail = new EventEmitter<Skill>();
   @Output() exchange = new EventEmitter<Skill>();
@@ -44,7 +46,8 @@ export class SkillCardComponent {
       arrowForwardOutline,
       swapHorizontalOutline,
       sparklesOutline,
-      checkmarkCircleOutline
+      checkmarkCircleOutline,
+      personCircleOutline
     });
   }
 

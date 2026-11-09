@@ -68,8 +68,8 @@
         </button>
       } @else {
         <button class="tb-btn tb-btn-secondary tb-btn-sm" (click)="onExchange($event)">
-          <ion-icon name="swap-horizontal-outline"></ion-icon>
-          {{ (skill.type === 'offered' ? 'Intercambiar' : 'Ofrecer enseñanza') | t }}
+          <ion-icon [name]="guestMode ? 'person-circle-outline' : 'swap-horizontal-outline'"></ion-icon>
+          {{ (guestMode ? 'Inicia sesión para continuar' : skill.type === 'offered' ? 'Intercambiar' : 'Ofrecer enseñanza') | t }}
         </button>
       }
     </div>

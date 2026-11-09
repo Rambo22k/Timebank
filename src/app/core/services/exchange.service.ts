@@ -50,6 +50,14 @@ interface CreditTransactionRow {
   created_at: string;
 }
 
+interface CreditLedgerSnapshotRow {
+  transaction_id: string;
+  available_before: number;
+  available_after: number;
+  reserved_before: number;
+  reserved_after: number;
+}
+
 interface ReviewRow {
   id: string;
   session_id: string;
@@ -191,15 +199,24 @@ export class ExchangeService {
         if (page.length < 500) break;
         if (version !== this.walletLoadVersion || userId !== this.auth.authUser()?.id) return;
       }
-      const adjustmentIds = transactions.filter(row => row.transaction_type === 'admin_adjustment').map(row => row.id);
-      let adjustmentDeltas = new Map<string, number>();
-      if (account?.id && adjustmentIds.length) {
-        for (let offset = 0; offset < adjustmentIds.length; offset += 500) {
-          const ids = adjustmentIds.slice(offset, offset + 500);
+      const ledgerSnapshots = new Map<string, CreditLedgerSnapshotRow>();
+      const transactionIds = transactions.map(row => row.id);
+      if (account?.id && transactionIds.length) {
+        for (let offset = 0; offset < transactionIds.length; offset += 500) {
+          const ids = transactionIds.slice(offset, offset + 500);
           const { data, error } = await client.from('credit_ledger_entries')
-            .select('transaction_id,available_delta').eq('account_id', account.id).in('transaction_id', ids);
+            .select('transaction_id,available_before,available_after,reserved_before,reserved_after,available_delta')
+            .eq('account_id', account.id).in('transaction_id', ids);
           if (error) throw error;
-          for (const row of data ?? []) adjustmentDeltas.set(row.transaction_id as string, Number(row.available_delta));
+          for (const row of data ?? []) {
+            ledgerSnapshots.set(row.transaction_id as string, {
+              transaction_id: row.transaction_id as string,
+              available_before: Number(row.available_before),
+              available_after: Number(row.available_after),
+              reserved_before: Number(row.reserved_before),
+              reserved_after: Number(row.reserved_after)
+            });
+          }
         }
       }
 
@@ -235,13 +252,27 @@ export class ExchangeService {
             title = 'Apoyo solidario recibido'; detail = 'Créditos recibidos del fondo solidario.'; amount = value; type = 'earned'; break;
           case 'admin_adjustment': {
             if (row.provider_id !== userId) return [];
-            const delta = adjustmentDeltas.get(row.id) ?? value;
+            const ledger = ledgerSnapshots.get(row.id);
+            const delta = ledger ? ledger.available_after - ledger.available_before : value;
             title = 'Ajuste de créditos'; detail = row.description || 'Actualización administrativa del saldo.';
             amount = delta; type = delta >= 0 ? 'earned' : 'spent'; break;
           }
           default: return [];
         }
-        return [{ id: row.id, title, detail, date: row.created_at, amount, type }];
+        const ledger = ledgerSnapshots.get(row.id);
+        return [{
+          id: row.id,
+          reference: row.id,
+          title,
+          detail,
+          date: row.created_at,
+          amount,
+          availableBefore: ledger?.available_before ?? null,
+          availableAfter: ledger?.available_after ?? null,
+          reservedBefore: ledger?.reserved_before ?? null,
+          reservedAfter: ledger?.reserved_after ?? null,
+          type
+        }];
       }));
     } catch {
       if (version === this.walletLoadVersion && userId === this.auth.authUser()?.id) {

@@ -39,10 +39,15 @@ export interface ExchangeSession {
 
 export interface CreditActivity {
   id: string;
+  reference: string;
   title: string;
   detail: string;
   date: string;
   amount: number;
+  availableBefore: number | null;
+  availableAfter: number | null;
+  reservedBefore: number | null;
+  reservedAfter: number | null;
   type: 'welcome' | 'earned' | 'spent' | 'reserved' | 'refund';
 }
 

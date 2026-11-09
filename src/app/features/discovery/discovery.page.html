@@ -31,12 +31,13 @@
             <ion-icon name="people-outline"></ion-icon>
              {{ "Buscar miembros y contactos" | t }} </a>
         }
+        @if (!authService.isAuthenticated()) { <aside class="guest-explore-note"><ion-icon name="information-circle-outline"></ion-icon><span>{{ "Estás explorando como visitante: puedes ver hasta 12 publicaciones por búsqueda. Inicia sesión para solicitar intercambios y ver recomendaciones personales." | t }}</span><a routerLink="/auth/register">{{ "Crear cuenta" | t }}</a></aside> }
       </div>
 
       @if (authService.authUser() && recommendedMatches().length) {
         <section class="match-recommendations" aria-labelledby="matches-title">
           <div class="matches-heading">
-            <div><span class="sub-label">{{ "Recomendaciones para ti" | t }}</span><h2 id="matches-title">{{ "Coincidencias de habilidades" | t }}</h2><p>{{ "Personas que ofrecen algo que buscas o buscan algo que tú ofreces." | t }}</p></div>
+            <div><span class="sub-label">{{ "Recomendaciones para ti" | t }}</span><h2 id="matches-title">{{ "Coincidencias de habilidades" | t }}</h2><p>{{ "Personas que ofrecen algo que buscas o buscan algo que tú ofreces." | t }} {{ "Las coincidencias consideran las habilidades que buscas, las que ofreces, idiomas compartidos y reciprocidad." | t }}</p></div>
             <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
           </div>
           <div class="matches-grid">
@@ -181,11 +182,13 @@
           @for (skill of filteredSkills; track skill.id) {
             <app-skill-card
               [skill]="skill"
+              [guestMode]="!authService.isAuthenticated()"
               (viewDetail)="onViewDetail($event)"
               (exchange)="onExchange($event)"
             ></app-skill-card>
           }
         </div>
+        @if (guestHasMoreResults) { <div class="guest-results-limit"><p>{{ "Se muestran las primeras 12 coincidencias. Crea una cuenta para descubrir toda la comunidad." | t }}</p><a class="tb-btn tb-btn-primary" routerLink="/auth/register">{{ "Registrarse gratis" | t }}</a></div> }
       } @else {
         <app-empty-state
           icon="search-outline"
