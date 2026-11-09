@@ -20,6 +20,7 @@ export class ChatService {
   private readonly activeConversationBlockedSignal = signal(false);
   private readonly blockedByCurrentUserSignal = signal(false);
   private readonly blockStatusLoadingSignal = signal(false);
+  private readonly blockedUsersSignal = signal<{ id: string; name: string; avatarPath: string | null }[]>([]);
   private channel: RealtimeChannel | null = null;
   private conversationLoadVersion = 0;
   private messageLoadVersion = 0;
@@ -34,6 +35,7 @@ export class ChatService {
   readonly isActiveConversationBlocked = this.activeConversationBlockedSignal.asReadonly();
   readonly isBlockedByCurrentUser = this.blockedByCurrentUserSignal.asReadonly();
   readonly isCheckingBlockStatus = this.blockStatusLoadingSignal.asReadonly();
+  readonly blockedUsers = this.blockedUsersSignal.asReadonly();
 
   constructor() {
     effect(onCleanup => {
@@ -150,28 +152,54 @@ export class ChatService {
     return this.createReport('user', userId, reason);
   }
 
+  async reportSkill(skillId: string, reason: string): Promise<boolean> {
+    return this.createReport('skill', skillId, reason);
+  }
+
   async reportMessage(messageId: string, reason: string): Promise<boolean> {
     const message = this.messagesSignal().find(item => item.id === messageId);
     if (!message || message.senderId === this.auth.authUser()?.id) return false;
     return this.createReport('message', messageId, reason);
   }
 
-  async blockActivePeer(): Promise<boolean> {
-    const currentUserId = this.auth.authUser()?.id;
-    const conversation = this.activeConversation();
-    if (!currentUserId || !conversation || this.blockedByCurrentUserSignal()) return false;
-    const client = this.supabase.requireClient();
+  async loadBlockedUsers(): Promise<void> {
+    const userId = this.auth.authUser()?.id;
+    if (!userId) { this.blockedUsersSignal.set([]); return; }
     try {
-      const existing = await client.from('user_blocks').select('blocker_id')
-        .eq('blocker_id', currentUserId).eq('blocked_id', conversation.peerId).maybeSingle();
-      if (existing.error) throw existing.error;
-      if (!existing.data) {
-        const { error } = await client.from('user_blocks').insert({ blocker_id: currentUserId, blocked_id: conversation.peerId });
-        if (error) throw error;
+      const client = this.supabase.requireClient();
+      const { data: blocks, error } = await client.from('user_blocks').select('blocked_id').eq('blocker_id', userId).order('created_at', { ascending: false });
+      if (error) throw error;
+      const ids = (blocks ?? []).map(row => row.blocked_id);
+      if (!ids.length) { this.blockedUsersSignal.set([]); return; }
+      const { data: profiles, error: profilesError } = await client.from('profiles').select('id,display_name,avatar_path').in('id', ids);
+      if (profilesError) throw profilesError;
+      const byId = new Map((profiles ?? []).map(profile => [profile.id, profile]));
+      this.blockedUsersSignal.set(ids.map(id => {
+        const profile = byId.get(id);
+        return { id, name: profile?.display_name ?? 'Miembro de TimeBank', avatarPath: profile?.avatar_path ?? null };
+      }));
+    } catch {
+      this.toast.danger('No se pudo cargar la lista de cuentas bloqueadas.');
+    }
+  }
+
+  async blockUser(userId: string): Promise<boolean> {
+    const currentUserId = this.auth.authUser()?.id;
+    if (!currentUserId || !userId || userId === currentUserId) return false;
+    try {
+      const client = this.supabase.requireClient();
+      const { error } = await client.from('user_blocks').upsert(
+        { blocker_id: currentUserId, blocked_id: userId },
+        { onConflict: 'blocker_id,blocked_id', ignoreDuplicates: true }
+      );
+      if (error) throw error;
+      const conversation = this.activeConversation();
+      if (conversation?.peerId === userId) {
+        this.activeConversationBlockedSignal.set(true);
+        this.blockedByCurrentUserSignal.set(true);
       }
-      this.activeConversationBlockedSignal.set(true);
-      this.blockedByCurrentUserSignal.set(true);
       this.toast.success('La cuenta quedó bloqueada. No podrán enviarse mensajes entre ustedes.');
+      await this.loadBlockedUsers();
       return true;
     } catch {
       this.toast.danger('No se pudo bloquear esta cuenta. Inténtalo de nuevo.');
@@ -179,22 +207,38 @@ export class ChatService {
     }
   }
 
-  async unblockActivePeer(): Promise<boolean> {
+  async unblockUser(userId: string): Promise<boolean> {
     const currentUserId = this.auth.authUser()?.id;
-    const conversation = this.activeConversation();
-    if (!currentUserId || !conversation || !this.blockedByCurrentUserSignal()) return false;
+    if (!currentUserId || !userId) return false;
     try {
       const { error } = await this.supabase.requireClient().from('user_blocks').delete()
-        .eq('blocker_id', currentUserId).eq('blocked_id', conversation.peerId);
+        .eq('blocker_id', currentUserId).eq('blocked_id', userId);
       if (error) throw error;
-      this.blockedByCurrentUserSignal.set(false);
-      await this.refreshBlockStatus(conversation.id, conversation.peerId, this.messageLoadVersion);
-      if (!this.activeConversationBlockedSignal()) this.toast.success('La cuenta fue desbloqueada.');
-      return !this.activeConversationBlockedSignal();
+      const conversation = this.activeConversation();
+      if (conversation?.peerId === userId) {
+        await this.refreshBlockStatus(conversation.id, userId, this.messageLoadVersion);
+      }
+      this.toast.success('La cuenta fue desbloqueada.');
+      await this.loadBlockedUsers();
+      return true;
     } catch {
       this.toast.danger('No se pudo desbloquear esta cuenta. Inténtalo de nuevo.');
       return false;
     }
+  }
+
+  async blockActivePeer(): Promise<boolean> {
+    const currentUserId = this.auth.authUser()?.id;
+    const conversation = this.activeConversation();
+    if (!currentUserId || !conversation || this.blockedByCurrentUserSignal()) return false;
+    return this.blockUser(conversation.peerId);
+  }
+
+  async unblockActivePeer(): Promise<boolean> {
+    const currentUserId = this.auth.authUser()?.id;
+    const conversation = this.activeConversation();
+    if (!currentUserId || !conversation || !this.blockedByCurrentUserSignal()) return false;
+    return this.unblockUser(conversation.peerId);
   }
 
   closeConversation(): void {
@@ -225,13 +269,13 @@ export class ChatService {
     this.blockedByCurrentUserSignal.set(data?.blocker_id === currentUserId);
   }
 
-  private async createReport(targetType: 'user' | 'message', targetId: string, reason: string): Promise<boolean> {
+  private async createReport(targetType: 'user' | 'skill' | 'message', targetId: string, reason: string): Promise<boolean> {
     const reporterId = this.auth.authUser()?.id;
     const details = reason.trim();
     if (!reporterId || !targetId || details.length < 5 || details.length > 2000) return false;
     try {
-      const { error } = await this.supabase.requireClient().from('reports').insert({
-        reporter_id: reporterId, target_type: targetType, target_id: targetId, reason: details
+      const { error } = await this.supabase.requireClient().rpc('create_report', {
+        p_target_type: targetType, p_target_id: targetId, p_reason: details
       });
       if (error) throw error;
       this.toast.success('Gracias. El reporte fue enviado al equipo de moderación.');

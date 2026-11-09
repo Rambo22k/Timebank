@@ -254,6 +254,8 @@
   }
 }
 
+.skill-report-area{margin:0 0 20px;padding:14px 16px;border:1px solid var(--tb-border);border-radius:var(--tb-radius-md);background:var(--tb-surface-soft,#f7f9f8)}.skill-report-link{border:0;padding:0;background:transparent;color:var(--tb-text-secondary);font:inherit;font-size:.85rem;text-decoration:underline;cursor:pointer}.skill-report-form{display:grid;gap:8px}.skill-report-form label{font-size:.88rem;font-weight:700;color:var(--tb-text-primary)}.skill-report-form textarea{width:100%;resize:vertical;border:1px solid var(--tb-border);border-radius:var(--tb-radius-sm);padding:10px 12px;font:inherit}.skill-report-actions{display:flex;justify-content:flex-end;gap:8px}.skill-report-actions button:disabled{opacity:.55;cursor:not-allowed}
+
 @keyframes modal-fade {
   from { opacity: 0; }
   to { opacity: 1; }

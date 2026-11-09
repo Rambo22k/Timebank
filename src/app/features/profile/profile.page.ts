@@ -21,7 +21,8 @@ import {
   shieldCheckmarkOutline,
   cloudUploadOutline,
   peopleOutline,
-  personAddOutline
+  personAddOutline,
+  flagOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -44,6 +45,7 @@ import { AvailabilityService } from '../../core/services/availability.service';
 import { COUNTRY_OPTIONS, languageLabel } from '../../core/data/localization-options';
 import { LocalizationService } from '../../core/services/localization.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { ChatService } from '../../core/services/chat.service';
 
 @Component({
   selector: 'app-profile',
@@ -78,6 +80,7 @@ export class ProfilePage {
   private supabase = inject(SupabaseService);
   contacts = inject(ContactsService);
   availability = inject(AvailabilityService);
+  chat = inject(ChatService);
 
   activeTab = signal<'offered' | 'wanted'>('offered');
   private readonly viewedProfileId = signal<string | null>(null);
@@ -88,6 +91,9 @@ export class ProfilePage {
   isSavingProfile = false;
   isDeactivateModalOpen = false;
   isDeactivatingAccount = false;
+  reportReason = '';
+  isReportingProfile = false;
+  isBlockProfileModalOpen = false;
 
   // Skill CRUD modals
   selectedSkillForDetail: Skill | null = null;
@@ -131,13 +137,15 @@ export class ProfilePage {
       shieldCheckmarkOutline,
       cloudUploadOutline,
       peopleOutline,
-      personAddOutline
+      personAddOutline,
+      flagOutline
     });
     this.route.paramMap.subscribe(params => {
       const profileId = params.get('id');
       this.viewedProfileId.set(profileId);
       this.publicProfile.set(null);
       this.profileUnavailable.set(false);
+      void this.chat.loadBlockedUsers();
       if (!profileId || profileId === this.authService.authUser()?.id) {
         const userId = this.authService.authUser()?.id;
         if (userId) void this.availability.load(userId);
@@ -162,6 +170,11 @@ export class ProfilePage {
   get isOwnProfile(): boolean {
     const profileId = this.viewedProfileId();
     return !profileId || profileId === this.authService.authUser()?.id;
+  }
+
+  get isViewedProfileBlocked(): boolean {
+    const profile = this.user;
+    return !!profile && this.chat.blockedUsers().some(item => item.id === profile.id);
   }
 
   private async loadPublicProfile(profileId: string): Promise<void> {
@@ -246,6 +259,25 @@ export class ProfilePage {
       await this.contacts.sendRequest(profile.id);
     }
   }
+
+  async reportViewedProfile(): Promise<void> {
+    const profile = this.user;
+    if (!profile || this.isOwnProfile || this.isReportingProfile) return;
+    this.isReportingProfile = true;
+    try {
+      if (await this.chat.reportUser(profile.id, this.reportReason)) this.reportReason = '';
+    } finally {
+      this.isReportingProfile = false;
+    }
+  }
+
+  async blockViewedProfile(): Promise<void> {
+    const profile = this.user;
+    if (!profile || this.isOwnProfile) return;
+    if (await this.chat.blockUser(profile.id)) this.isBlockProfileModalOpen = false;
+  }
+
+  async unblockProfile(userId: string): Promise<void> { await this.chat.unblockUser(userId); }
 
   async addAvailabilitySlot(): Promise<void> {
     await this.availability.addSlot(

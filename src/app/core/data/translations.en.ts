@@ -577,7 +577,7 @@ export const ENGLISH_TRANSLATIONS: Record<string, string> = {
   "La duración debe cubrirse con tu saldo actual. Se permiten bloques de 15 minutos.": "The duration must be covered by your current balance. 15 minute blocks are allowed.",
   "La persona que acepta la oferta debe tener el saldo disponible. Se permiten bloques de 15 minutos.": "The person accepting the offer must have the balance available. 15 minute blocks are allowed.",
   "Enviar oferta para enseñar": "Send offer to teach",
-  "Desbloquear": "Unlock",
+  "Desbloquear": "Unblock",
   "Este mensaje fue eliminado.": "This message was deleted.",
   "d MMM, h:mm a": "d MMM, h:mm a",
   "Aún no hay mensajes": "There are no messages yet",
@@ -1542,5 +1542,16 @@ export const ENGLISH_TRANSLATIONS: Record<string, string> = {
   "La donación se suma al fondo compartido; la asignación final requiere aprobación administrativa.": "The donation is added to the shared fund; final allocation requires administrator approval.",
   "Tu donación quedó registrada y se sumó al objetivo de apoyo publicado.": "Your donation was recorded and added to the published support goal.",
   "Alguien apoyó tu solicitud solidaria.": "Someone supported your solidarity request",
-  "Un miembro de la comunidad dirigió una donación a tu solicitud.": "A community member directed a donation to your request."
+  "Un miembro de la comunidad dirigió una donación a tu solicitud.": "A community member directed a donation to your request.",
+  "Reportar publicación": "Report listing",
+  "Seguridad y confianza": "Safety and trust",
+  "¿Necesitas ayuda con este perfil?": "Need help with this profile?",
+  "Bloquear miembro": "Block member",
+  "Has bloqueado a esta persona": "You have blocked this member",
+  "Reportar a este miembro": "Report this member",
+  "Miembros bloqueados": "Blocked members",
+  "Las cuentas bloqueadas no pueden iniciar intercambios ni enviarte mensajes.": "Blocked accounts cannot start exchanges or send you messages.",
+  "No tienes miembros bloqueados.": "You have no blocked members.",
+  "¿Bloquear a este miembro?": "Block this member?",
+  "Esta persona no podrá enviarte mensajes ni iniciar nuevos intercambios contigo. Puedes desbloquearla desde tu perfil.": "This member will not be able to message you or start new exchanges with you. You can unblock them from your profile."
 };

@@ -28,7 +28,9 @@
                 </a>
               </div>
               } @else {
-                @if (contacts.activeProfileContact()?.status === 'accepted') {
+                @if (isViewedProfileBlocked) {
+                  <span class="relation-state">{{ "Has bloqueado a esta persona" | t }}</span>
+                } @else if (contacts.activeProfileContact()?.status === 'accepted') {
                   <span class="verified-check contact-state"><ion-icon name="people-outline"></ion-icon>{{ "En tus contactos" | t }}</span>
                 } @else if (contacts.activeProfileContact()?.status === 'pending' && contacts.activeProfileContact()?.recipient_id === authService.authUser()?.id) {
                   <div class="hero-actions-group"><button class="tb-btn tb-btn-primary tb-btn-sm" (click)="connectToProfile()">{{ "Aceptar contacto" | t }}</button><button class="tb-btn tb-btn-outline tb-btn-sm" (click)="contacts.respond(contacts.activeProfileContact()!.id, false)">{{ "Rechazar" | t }}</button></div>
@@ -141,6 +143,25 @@
             </div>
           </div>
         </div>
+
+        @if (!isOwnProfile) {
+          <section class="profile-safety-card" aria-labelledby="profile-safety-title">
+            <div class="profile-safety-heading">
+              <div><span class="eyebrow">{{ "Seguridad y confianza" | t }}</span><h2 id="profile-safety-title">{{ "¿Necesitas ayuda con este perfil?" | t }}</h2></div>
+              @if (!isViewedProfileBlocked) {
+                <button type="button" class="tb-btn tb-btn-outline tb-btn-sm" (click)="isBlockProfileModalOpen = true">{{ "Bloquear miembro" | t }}</button>
+              } @else {
+                <button type="button" class="tb-btn tb-btn-outline tb-btn-sm" (click)="unblockProfile(user.id)">{{ "Desbloquear" | t }}</button>
+              }
+            </div>
+            @if (!isViewedProfileBlocked) {
+              <form class="profile-report-form" (ngSubmit)="reportViewedProfile()">
+                <label for="profile-report-reason">{{ "Reportar a este miembro" | t }}</label>
+                <div class="profile-report-fields"><textarea id="profile-report-reason" name="profileReportReason" [(ngModel)]="reportReason" minlength="5" maxlength="2000" required rows="2" placeholder="{{ 'Describe qué ocurrió. El equipo de TimeBank revisará el reporte de forma privada.' | t }}"></textarea><button type="submit" class="tb-btn tb-btn-outline" [disabled]="reportReason.trim().length < 5 || isReportingProfile">{{ (isReportingProfile ? 'Enviando…' : 'Enviar reporte') | t }}</button></div>
+              </form>
+            }
+          </section>
+        }
 
         @if (isOwnProfile) {
         <section class="verification-card" aria-labelledby="verification-title">
@@ -297,7 +318,19 @@
           }
         </div>
       }
-      @if (isOwnProfile) { <section class="account-management"><div><span class="account-management-label">{{ "Control de cuenta" | t }}</span><h2>{{ "Desactivar mi cuenta" | t }}</h2><p>{{ "Tu perfil dejará de estar disponible y no podrás usar TimeBank. Las sesiones o solicitudes abiertas deben cancelarse o completarse antes." | t }}</p></div><button type="button" class="tb-btn tb-btn-danger tb-btn-sm" (click)="isDeactivateModalOpen = true">{{ "Desactivar cuenta" | t }}</button></section> }
+      @if (isOwnProfile) {
+        <section class="blocked-members-card" aria-labelledby="blocked-members-title">
+          <div><span class="eyebrow">{{ "Seguridad y confianza" | t }}</span><h2 id="blocked-members-title">{{ "Miembros bloqueados" | t }}</h2><p>{{ "Las cuentas bloqueadas no pueden iniciar intercambios ni enviarte mensajes." | t }}</p></div>
+          @if (chat.blockedUsers().length) {
+            <ul class="blocked-members-list">
+              @for (blocked of chat.blockedUsers(); track blocked.id) {
+                <li><span>{{ blocked.name }}</span><button type="button" class="tb-btn tb-btn-outline tb-btn-sm" (click)="unblockProfile(blocked.id)">{{ "Desbloquear" | t }}</button></li>
+              }
+            </ul>
+          } @else { <p class="blocked-empty">{{ "No tienes miembros bloqueados." | t }}</p> }
+        </section>
+        <section class="account-management"><div><span class="account-management-label">{{ "Control de cuenta" | t }}</span><h2>{{ "Desactivar mi cuenta" | t }}</h2><p>{{ "Tu perfil dejará de estar disponible y no podrás usar TimeBank. Las sesiones o solicitudes abiertas deben cancelarse o completarse antes." | t }}</p></div><button type="button" class="tb-btn tb-btn-danger tb-btn-sm" (click)="isDeactivateModalOpen = true">{{ "Desactivar cuenta" | t }}</button></section>
+      }
       @if (profileLoading()) { <div class="tb-container"><p class="profile-load-state">{{ "Cargando perfil…" | t }}</p></div> }
       @if (!profileLoading() && profileUnavailable()) { <div class="tb-container"><section class="profile-load-state"><h1>{{ "Perfil no disponible" | t }}</h1><p>{{ "Este miembro no existe o su perfil no está disponible." | t }}</p><a class="tb-btn tb-btn-primary" routerLink="/explore">{{ "Volver a explorar" | t }}</a></section></div> }
     </div>
@@ -331,6 +364,17 @@
     (closed)="onCloseSkillForm()"
     (save)="onSaveSkill($event)"
   ></app-skill-form-modal>
+
+  <app-confirmation-modal
+    [isOpen]="isBlockProfileModalOpen"
+    [title]="'¿Bloquear a este miembro?' | t"
+    [message]="'Esta persona no podrá enviarte mensajes ni iniciar nuevos intercambios contigo. Puedes desbloquearla desde tu perfil.' | t"
+    [confirmText]="'Bloquear miembro' | t"
+    [cancelText]="'Cancelar' | t"
+    [isDanger]="true"
+    (confirm)="blockViewedProfile()"
+    (cancelled)="isBlockProfileModalOpen = false"
+  ></app-confirmation-modal>
 
   <app-confirmation-modal
     [isOpen]="isDeleteModalOpen"

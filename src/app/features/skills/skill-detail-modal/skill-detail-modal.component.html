@@ -96,6 +96,23 @@
         </div>
       }
 
+      @if (!isOwner && canReportSkill) {
+        <div class="skill-report-area">
+          @if (!reportOpen) {
+            <button type="button" class="skill-report-link" (click)="reportOpen = true">{{ "Reportar publicación" | t }}</button>
+          } @else {
+            <form class="skill-report-form" (ngSubmit)="submitReport()">
+              <label for="skill-report-reason">{{ "Motivo del reporte" | t }}</label>
+              <textarea id="skill-report-reason" name="skillReportReason" [(ngModel)]="reportReason" minlength="5" maxlength="2000" required rows="3" placeholder="{{ 'Describe qué ocurrió. El equipo de TimeBank revisará el reporte de forma privada.' | t }}"></textarea>
+              <div class="skill-report-actions">
+                <button type="button" class="tb-btn tb-btn-outline" (click)="reportOpen = false; reportReason = ''">{{ "Cancelar" | t }}</button>
+                <button type="submit" class="tb-btn tb-btn-outline" [disabled]="reportReason.trim().length < 5 || isSubmittingReport">{{ (isSubmittingReport ? 'Enviando…' : 'Enviar reporte') | t }}</button>
+              </div>
+            </form>
+          }
+        </div>
+      }
+
       <!-- Bottom Action Row -->
       <div class="modal-footer-actions">
         @if (isOwner) {
