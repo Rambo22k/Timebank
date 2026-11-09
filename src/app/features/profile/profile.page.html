@@ -297,6 +297,7 @@
           }
         </div>
       }
+      @if (isOwnProfile) { <section class="account-management"><div><span class="account-management-label">{{ "Control de cuenta" | t }}</span><h2>{{ "Desactivar mi cuenta" | t }}</h2><p>{{ "Tu perfil dejará de estar disponible y no podrás usar TimeBank. Las sesiones o solicitudes abiertas deben cancelarse o completarse antes." | t }}</p></div><button type="button" class="tb-btn tb-btn-danger tb-btn-sm" (click)="isDeactivateModalOpen = true">{{ "Desactivar cuenta" | t }}</button></section> }
       @if (profileLoading()) { <div class="tb-container"><p class="profile-load-state">{{ "Cargando perfil…" | t }}</p></div> }
       @if (!profileLoading() && profileUnavailable()) { <div class="tb-container"><section class="profile-load-state"><h1>{{ "Perfil no disponible" | t }}</h1><p>{{ "Este miembro no existe o su perfil no está disponible." | t }}</p><a class="tb-btn tb-btn-primary" routerLink="/explore">{{ "Volver a explorar" | t }}</a></section></div> }
     </div>
@@ -340,6 +341,17 @@
     [isDanger]="true"
     (confirm)="executeDeleteSkill()"
     (cancelled)="cancelDeleteSkill()"
+  ></app-confirmation-modal>
+
+  <app-confirmation-modal
+    [isOpen]="isDeactivateModalOpen"
+    [title]="'¿Desactivar tu cuenta?' | t"
+    [message]="'Tu sesión se cerrará y tu cuenta dejará de estar disponible. No podrás iniciar intercambios mientras esté desactivada.' | t"
+    [confirmText]="'Sí, desactivar cuenta' | t"
+    [cancelText]="'Conservar cuenta' | t"
+    [isDanger]="true"
+    (confirm)="deactivateOwnAccount()"
+    (cancelled)="isDeactivateModalOpen = false"
   ></app-confirmation-modal>
 
   <app-exchange-modal

@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/ion-icon';
 import { addIcons } from 'ionicons';
 import {
@@ -74,6 +74,7 @@ export class ProfilePage {
   private toastService = inject(ToastService);
   verification = inject(IdentityVerificationService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private supabase = inject(SupabaseService);
   contacts = inject(ContactsService);
   availability = inject(AvailabilityService);
@@ -85,6 +86,8 @@ export class ProfilePage {
   readonly profileUnavailable = signal(false);
   isEditProfileModalOpen = false;
   isSavingProfile = false;
+  isDeactivateModalOpen = false;
+  isDeactivatingAccount = false;
 
   // Skill CRUD modals
   selectedSkillForDetail: Skill | null = null;
@@ -275,6 +278,28 @@ export class ProfilePage {
       this.toastService.danger(error instanceof Error ? error.message : 'No se pudo actualizar el perfil.');
     } finally {
       this.isSavingProfile = false;
+    }
+  }
+
+  async deactivateOwnAccount(): Promise<void> {
+    if (!this.isOwnProfile || this.isDeactivatingAccount) return;
+    this.isDeactivatingAccount = true;
+    try {
+      const { error } = await this.supabase.requireClient().rpc('deactivate_my_account');
+      if (error) throw error;
+      this.isDeactivateModalOpen = false;
+      await this.authService.logout();
+      this.toastService.success('Tu cuenta fue desactivada. Puedes contactar al equipo si deseas reactivarla.');
+      await this.router.navigate(['/']);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      if (message.includes('Finish or cancel your open sessions and requests')) {
+        this.toastService.warning('Antes de desactivar la cuenta, cancela o completa tus solicitudes y sesiones abiertas.');
+      } else {
+        this.toastService.danger('No se pudo desactivar la cuenta. Inténtalo de nuevo.');
+      }
+    } finally {
+      this.isDeactivatingAccount = false;
     }
   }
 
