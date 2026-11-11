@@ -9,15 +9,18 @@ import { NavbarComponent } from '../../shared/components/navbar/navbar.component
 import { FooterComponent } from '../../shared/components/footer/footer.component';
 import { AdminCategoryRow, AdminService, AdminUserRow } from '../../core/services/admin.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin', standalone: true,
   imports: [
-    TranslatePipe,CommonModule, DatePipe, DecimalPipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
+    TranslatePipe,ConfirmationModalComponent,CommonModule, DatePipe, DecimalPipe, FormsModule, RouterModule, IonIcon, NavbarComponent, FooterComponent],
   templateUrl: './admin.page.html', styleUrls: ['./admin.page.scss']
 })
 export class AdminPage {
   admin = inject(AdminService);
+  auth = inject(AuthService);
 
   activeSection = 'overview';
   search = '';
@@ -28,6 +31,8 @@ export class AdminPage {
   editingCategoryId = '';
   notes: Record<string, string> = {};
   settingDrafts: Record<string, number> = {};
+  userDeletionTarget: AdminUserRow | null = null;
+  deletingUserId = '';
 
   constructor() {
     addIcons({ alertCircleOutline, checkmarkCircleOutline, peopleOutline, timeOutline, heartOutline, shieldCheckmarkOutline, refreshOutline, searchOutline, settingsOutline, listOutline, pricetagOutline, walletOutline, eyeOutline, closeCircleOutline });
@@ -37,6 +42,10 @@ export class AdminPage {
   users(): AdminUserRow[] {
     const term = this.search.trim().toLocaleLowerCase();
     return this.admin.users().filter(user => !term || user.display_name.toLocaleLowerCase().includes(term) || user.id.toLowerCase().includes(term));
+  }
+
+  creditUsers(): AdminUserRow[] {
+    return this.users().filter(user => !user.deleted_at);
   }
 
   go(section: string): void { this.activeSection = section; }
@@ -66,6 +75,7 @@ export class AdminPage {
   }
 
   selectUser(userId: string): void {
+    if (this.admin.users().find(user => user.id === userId)?.deleted_at) return;
     this.selectedUserId = userId;
     void this.admin.loadTransactions(userId);
   }
@@ -80,5 +90,16 @@ export class AdminPage {
     const note = this.notes[user.id]?.trim() ?? '';
     if (note.length < 5) return;
     void this.admin.setUserStatus(user, 'suspended', note);
+  }
+
+  async permanentlyDeleteUser(): Promise<void> {
+    const user = this.userDeletionTarget;
+    if (!user || this.deletingUserId) return;
+    this.deletingUserId = user.id;
+    try {
+      if (await this.admin.permanentlyDeleteUser(user)) this.userDeletionTarget = null;
+    } finally {
+      this.deletingUserId = '';
+    }
   }
 }

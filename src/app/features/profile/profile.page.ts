@@ -22,7 +22,8 @@ import {
   cloudUploadOutline,
   peopleOutline,
   personAddOutline,
-  flagOutline
+  flagOutline,
+  videocamOutline
 } from 'ionicons/icons';
 import { NavbarComponent } from '../../shared/components/navbar/navbar.component';
 import { FooterComponent } from '../../shared/components/footer/footer.component';
@@ -46,6 +47,7 @@ import { COUNTRY_OPTIONS, languageLabel } from '../../core/data/localization-opt
 import { LocalizationService } from '../../core/services/localization.service';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ChatService } from '../../core/services/chat.service';
+import { GoogleMeetService } from '../../core/services/google-meet.service';
 
 @Component({
   selector: 'app-profile',
@@ -81,6 +83,7 @@ export class ProfilePage {
   contacts = inject(ContactsService);
   availability = inject(AvailabilityService);
   chat = inject(ChatService);
+  googleMeet = inject(GoogleMeetService);
 
   activeTab = signal<'offered' | 'wanted'>('offered');
   private readonly viewedProfileId = signal<string | null>(null);
@@ -138,7 +141,8 @@ export class ProfilePage {
       cloudUploadOutline,
       peopleOutline,
       personAddOutline,
-      flagOutline
+      flagOutline,
+      videocamOutline
     });
     this.route.paramMap.subscribe(params => {
       const profileId = params.get('id');
@@ -149,6 +153,7 @@ export class ProfilePage {
       if (!profileId || profileId === this.authService.authUser()?.id) {
         const userId = this.authService.authUser()?.id;
         if (userId) void this.availability.load(userId);
+        void this.googleMeet.loadStatus();
         void Promise.all([
           this.authService.reloadAuthenticatedUser(),
           this.verification.load()
@@ -158,6 +163,28 @@ export class ProfilePage {
         void this.contacts.loadRelationship(profileId);
         void this.loadPublicProfile(profileId);
       }
+    });
+    this.route.queryParamMap.subscribe(params => {
+      const result = params.get('googleMeet');
+      if (!result) return;
+      if (result === 'connected') this.toastService.success('Google Meet quedó conectado. Al aceptar sesiones, esta cuenta será anfitriona de la reunión.');
+      else {
+        const reason = params.get('reason');
+        const errorMessages: Record<string, string> = {
+          invalid_state: 'La conexión con Google venció o no es válida. Iníciala otra vez.',
+          expired_state: 'La conexión con Google venció. Iníciala otra vez.',
+          consent_denied: 'No se concedió acceso a Google Meet.',
+          token_exchange_failed: 'Google no pudo completar la autorización. Revisa el cliente OAuth de Google Cloud.',
+          meet_scope_missing: 'No se concedió el permiso requerido para crear reuniones de Google Meet.',
+          google_email_unverified: 'La cuenta Google no devolvió un correo verificado.',
+          refresh_token_missing: 'Google no entregó permiso persistente. Desconecta la cuenta y vuelve a conectarla.',
+          connection_save_failed: 'No se pudo guardar la conexión segura de Google Meet.',
+          callback_failed: 'No se pudo completar la conexión con Google Meet.'
+        };
+        this.toastService.warning(errorMessages[reason ?? ''] ?? 'No se pudo conectar Google Meet. Revisa la configuración OAuth e inténtalo de nuevo.');
+      }
+      void this.googleMeet.loadStatus();
+      void this.router.navigate([], { relativeTo: this.route, queryParams: { googleMeet: null, reason: null }, queryParamsHandling: 'merge', replaceUrl: true });
     });
   }
 
@@ -183,11 +210,11 @@ export class ProfilePage {
     this.profileLoading.set(true);
     try {
       const { data, error } = await client.from('profiles')
-        .select('id,display_name,headline,location,country_code,timezone,avatar_path,bio,reputation_average,reputation_count,offered_hours,received_hours,completed_sessions,created_at,is_verified')
+        .select('id,display_name,headline,location,country_code,timezone,avatar_path,bio,reputation_average,reputation_count,offered_hours,received_hours,completed_sessions,created_at,is_verified,deleted_at')
         .eq('id', profileId)
         .maybeSingle();
       if (error) throw error;
-      if (!data) { this.profileUnavailable.set(true); return; }
+      if (!data || data.deleted_at) { this.profileUnavailable.set(true); return; }
       const { data: languageRows, error: languageError } = await client.from('profile_languages')
         .select('language_code').eq('user_id', profileId);
       if (languageError) throw languageError;

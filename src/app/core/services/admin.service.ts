@@ -4,8 +4,9 @@ import { ToastService } from './toast.service';
 
 export interface AdminUserRow {
   id: string; display_name: string; country_code: string | null; is_verified: boolean; created_at: string;
+  deleted_at: string | null; auth_deleted_at: string | null;
   completed_sessions: number; account_status: 'active' | 'suspended' | 'deactivated'; suspension_reason: string | null;
-  role: 'user' | 'admin'; available_balance: number;
+  role: 'user' | 'admin'; available_balance: number; reserved_balance: number;
 }
 export interface AdminCategoryRow { id: string; name: string; slug: string; description: string | null; icon: string | null; is_active: boolean; sort_order: number; }
 export interface AdminReportRow { id: string; reporter_id: string; reporter_name: string; target_type: string; target_id: string; reason: string; status: string; created_at: string; }
@@ -37,33 +38,42 @@ export class AdminService {
     this.loading.set(true);
     const client = this.supabase.requireClient();
     try {
-      const [stats, profiles, privateProfiles, roles, accounts, categories, reports, verifications, disputes, settings, audit] = await Promise.all([
+      const [stats, profiles, privateProfiles, roles, accounts, categories, reports, verifications, disputes, settings, audit, totalUsers, activeUsers] = await Promise.all([
         client.rpc('get_admin_dashboard_stats'),
-        client.from('profiles').select('id,display_name,country_code,is_verified,created_at,completed_sessions').order('created_at', { ascending: false }).limit(250),
+        client.from('profiles').select('id,display_name,country_code,is_verified,created_at,completed_sessions,deleted_at,auth_deleted_at').order('created_at', { ascending: false }).limit(250),
         client.from('profile_private').select('user_id,account_status,suspension_reason'),
         client.from('user_roles').select('user_id,role'),
-        client.from('credit_accounts').select('user_id,available_balance').eq('account_type', 'user'),
+        client.from('credit_accounts').select('user_id,available_balance,reserved_balance').eq('account_type', 'user'),
         client.from('categories').select('id,name,slug,description,icon,is_active,sort_order').order('sort_order').order('name'),
         client.from('reports').select('id,reporter_id,target_type,target_id,reason,status,created_at').in('status', ['open', 'under_review']).order('created_at', { ascending: false }).limit(100),
         client.from('identity_verifications').select('id,user_id,document_path,status,submitted_at,review_note').eq('status', 'pending').order('submitted_at').limit(100),
         client.from('sessions').select('id,request_id,duration_hours,dispute_reason,dispute_opened_at').eq('status', 'disputed').order('dispute_opened_at', { ascending: false }).limit(100),
         client.from('app_settings').select('key,value,description').order('key'),
-        client.from('admin_audit_log').select('id,actor_id,action,entity_type,entity_id,details,created_at').order('created_at', { ascending: false }).limit(100)
+        client.from('admin_audit_log').select('id,actor_id,action,entity_type,entity_id,details,created_at').order('created_at', { ascending: false }).limit(100),
+        client.from('profiles').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+        client.from('profile_private').select('user_id', { count: 'exact', head: true }).eq('account_status', 'active')
       ]);
-      const results = [stats, profiles, privateProfiles, roles, accounts, categories, reports, verifications, disputes, settings, audit];
+      const results = [stats, profiles, privateProfiles, roles, accounts, categories, reports, verifications, disputes, settings, audit, totalUsers, activeUsers];
       const failed = results.find(result => result.error);
       if (failed?.error) throw failed.error;
 
       const privateById = new Map((privateProfiles.data ?? []).map((row: any) => [row.user_id, row]));
-      const accountById = new Map((accounts.data ?? []).map((row: any) => [row.user_id, row.available_balance]));
+      const accountById = new Map((accounts.data ?? []).map((row: any) => [row.user_id, row]));
       const roleById = new Map<string, 'user' | 'admin'>();
       for (const row of roles.data ?? []) if (row.role === 'admin') roleById.set(row.user_id, 'admin');
-      this.users.set((profiles.data ?? []).map((row: any) => {
+      const userRows = (profiles.data ?? []).map((row: any) => {
         const priv: any = privateById.get(row.id);
         return { ...row, account_status: priv?.account_status ?? 'active', suspension_reason: priv?.suspension_reason ?? null,
-          role: roleById.get(row.id) ?? 'user', available_balance: Number(accountById.get(row.id) ?? 0) };
-      }));
-      this.stats.set((stats.data ?? {}) as Record<string, any>);
+          role: roleById.get(row.id) ?? 'user', available_balance: Number(accountById.get(row.id)?.available_balance ?? 0),
+          reserved_balance: Number(accountById.get(row.id)?.reserved_balance ?? 0) };
+      }) as AdminUserRow[];
+      this.users.set(userRows);
+      const rawStats = (stats.data ?? {}) as Record<string, any>;
+      this.stats.set({
+        ...rawStats,
+        users_total: totalUsers.count ?? rawStats['users_total'] ?? 0,
+        users_active: activeUsers.count ?? rawStats['users_active'] ?? 0
+      });
       this.categories.set((categories.data ?? []) as AdminCategoryRow[]);
 
       const reporterIds = [...new Set((reports.data ?? []).map((row: any) => row.reporter_id))];
@@ -107,6 +117,7 @@ export class AdminService {
   }
 
   async setUserStatus(user: AdminUserRow, status: 'active' | 'suspended' | 'deactivated', reason = ''): Promise<void> {
+    if (user.deleted_at) return;
     const { error } = await this.supabase.requireClient().rpc('set_user_status', { p_user_id: user.id, p_status: status, p_reason: reason || null });
     if (error) { this.toast.danger(error.message); return; }
     this.toast.success(status === 'active' ? 'Cuenta reactivada.' : 'Estado de la cuenta actualizado.');
@@ -114,13 +125,39 @@ export class AdminService {
   }
 
   async setUserRole(user: AdminUserRow, grant: boolean): Promise<void> {
+    if (user.deleted_at) return;
     const { error } = await this.supabase.requireClient().rpc('set_user_role', { p_user_id: user.id, p_role: 'admin', p_grant: grant });
     if (error) { this.toast.danger(error.message); return; }
     this.toast.success(grant ? 'Rol de administrador asignado.' : 'Rol de administrador retirado.');
     await this.load();
   }
 
+  async permanentlyDeleteUser(user: AdminUserRow): Promise<boolean> {
+    if (!user.id || user.role === 'admin') return false;
+    const { data, error } = await this.supabase.requireClient().functions.invoke('admin-delete-user', {
+      body: { userId: user.id }
+    });
+    if (error) {
+      let message = (data as { error?: string } | null)?.error ?? '';
+      if (!message && error.context instanceof Response) {
+        const payload = await error.context.clone().json().catch(() => ({})) as { error?: string };
+        message = payload.error ?? '';
+      }
+      message ||= error.message;
+      this.toast.danger(message || 'No se pudo eliminar la cuenta.');
+      await this.load();
+      return false;
+    }
+    this.toast.success('La cuenta fue eliminada y sus datos personales se anonimizaron.');
+    await this.load();
+    return true;
+  }
+
   async adjustCredits(userId: string, amount: number, reason: string): Promise<void> {
+    if (this.users().some(user => user.id === userId && user.deleted_at)) {
+      this.toast.danger('No se pueden ajustar créditos de una cuenta eliminada.');
+      return;
+    }
     const { error } = await this.supabase.requireClient().rpc('adjust_credits', { p_user_id: userId, p_amount: amount, p_reason: reason.trim() });
     if (error) { this.toast.danger(error.message); return; }
     this.toast.success('Ajuste de créditos registrado en auditoría.');

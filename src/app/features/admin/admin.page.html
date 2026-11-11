@@ -41,12 +41,17 @@
     <section class="admin-panel"><header><div><span class="eyebrow">{{ "Cuentas TimeBank" | t }}</span><h2>{{ "Usuarios" | t }}</h2><p>{{ "Busca por nombre o identificador. Suspende, reactiva o cambia el rol." | t }}</p></div></header>
       <label class="search-box"><ion-icon name="search-outline"></ion-icon><input name="userSearch" [(ngModel)]="search" placeholder="Nombre o UUID del usuario"></label>
       <div class="user-list">@for (user of users(); track user.id) {
-        <article class="user-row"><div class="user-copy"><strong>{{ user.display_name }} @if (user.role === 'admin') { <span class="role-pill">{{ "Admin" | t }}</span> }</strong><small>{{ user.id }} · {{ user.country_code || 'Ubicación no indicada' }} · {{ user.completed_sessions }} sesiones · {{ user.available_balance | number:'1.0-2' }} créditos</small><small>Cuenta {{ user.account_status }} · desde {{ user.created_at | date:'mediumDate' }}</small></div><div class="user-actions">
-          @if (user.account_status === 'active') { <input [name]="'suspension-'+user.id" [(ngModel)]="notes[user.id]" placeholder="Motivo (mín. 5 caracteres)"><button class="danger-link" (click)="suspend(user)">{{ "Suspender" | t }}</button><button class="danger-link" (click)="admin.setUserStatus(user,'deactivated','Desactivada por administración')">{{ "Desactivar" | t }}</button> } @else { <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setUserStatus(user,'active')">{{ "Reactivar" | t }}</button> }
-          <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setUserRole(user,user.role !== 'admin')">{{ (user.role === 'admin' ? 'Quitar admin' : 'Hacer admin') | t }}</button>
+        <article class="user-row"><div class="user-copy"><strong>{{ user.display_name }} @if (user.role === 'admin') { <span class="role-pill">{{ "Admin" | t }}</span> } @if (user.deleted_at) { <span class="role-pill deleted-role">{{ (user.auth_deleted_at ? 'Eliminado' : 'Eliminación pendiente') | t }}</span> }</strong><small>{{ user.id }} · {{ user.country_code || 'Ubicación no indicada' }} · {{ user.completed_sessions }} sesiones · {{ user.available_balance | number:'1.0-2' }} créditos + {{ user.reserved_balance | number:'1.0-2' }} reservados</small><small>Cuenta {{ user.deleted_at ? 'eliminada' : user.account_status }} · desde {{ user.created_at | date:'mediumDate' }}</small></div><div class="user-actions">
+          @if (!user.deleted_at) {
+            @if (user.account_status === 'active') { <input [name]="'suspension-'+user.id" [(ngModel)]="notes[user.id]" placeholder="Motivo (mín. 5 caracteres)"><button class="danger-link" (click)="suspend(user)">{{ "Suspender" | t }}</button><button class="danger-link" (click)="admin.setUserStatus(user,'deactivated','Desactivada por administración')">{{ "Desactivar" | t }}</button> } @else { <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setUserStatus(user,'active')">{{ "Reactivar" | t }}</button> }
+            <button class="tb-btn tb-btn-outline tb-btn-sm" (click)="admin.setUserRole(user,user.role !== 'admin')">{{ (user.role === 'admin' ? 'Quitar admin' : 'Hacer admin') | t }}</button>
+            @if (user.role !== 'admin' && user.id !== auth.authUser()?.id) { <button class="tb-btn tb-btn-danger tb-btn-sm" (click)="userDeletionTarget = user">{{ "Eliminar permanentemente" | t }}</button> }
+          } @else if (!user.auth_deleted_at) {
+            <button class="tb-btn tb-btn-danger tb-btn-sm" [disabled]="deletingUserId === user.id" (click)="userDeletionTarget = user">{{ "Finalizar eliminación" | t }}</button>
+          }
         </div></article>
       } @empty { <p class="empty-state">No se encontraron usuarios.</p> }</div>
-      <p class="admin-hint">{{ "La desactivación conserva el historial y permite reactivar la cuenta. La eliminación permanente de una cuenta de acceso requiere una operación protegida del servidor." | t }}</p>
+      <p class="admin-hint">{{ "La eliminación borra el acceso de Supabase Auth y anonimiza los datos personales. El historial financiero permanece para conservar la auditoría. Primero deben resolverse los intercambios abiertos y dejar el saldo en cero." | t }}</p>
     </section>
   }
 
@@ -78,7 +83,7 @@
   @if (activeSection === 'credits') {
     <section class="admin-panel"><header><div><span class="eyebrow">{{ "Libro mayor" | t }}</span><h2>{{ "Movimientos y ajustes" | t }}</h2><p>{{ "Selecciona un usuario para consultar movimientos o registrar un ajuste justificado." | t }}</p></div></header>
       <label class="search-box"><ion-icon name="search-outline"></ion-icon><input name="creditSearch" [(ngModel)]="search" placeholder="Filtrar usuarios por nombre o UUID"></label>
-      <div class="user-picker">@for (user of users(); track user.id) { <button [class.selected]="selectedUserId === user.id" (click)="selectUser(user.id)">{{ user.display_name }} <small>{{ user.id.slice(0,8) }} · {{ user.available_balance | number:'1.0-2' }} créditos</small></button> }</div>
+      <div class="user-picker">@for (user of creditUsers(); track user.id) { <button [class.selected]="selectedUserId === user.id" (click)="selectUser(user.id)">{{ user.display_name }} <small>{{ user.id.slice(0,8) }} · {{ user.available_balance | number:'1.0-2' }} créditos</small></button> }</div>
       @if (selectedUserId) { <form class="adjust-form" (ngSubmit)="adjustCredits()"><h3>{{ "Ajustar saldo del usuario" | t }}</h3><label>{{ "Cantidad (negativo resta)" | t }}<input name="adjustmentAmount" type="number" step="0.01" [(ngModel)]="adjustmentAmount" required></label><label>{{ "Motivo" | t }}<input name="adjustmentReason" [(ngModel)]="adjustmentReason" minlength="5" required placeholder="Explica el motivo del ajuste"></label><button class="tb-btn tb-btn-primary tb-btn-sm" type="submit" [disabled]="adjustmentReason.trim().length < 5 || adjustmentAmount === 0">{{ "Registrar ajuste" | t }}</button></form>
         <h3>{{ "Movimientos recientes" | t }}</h3><div class="transaction-list">@for (tx of admin.transactions(); track tx.id) { <article><strong>{{ tx.transaction_type }} · {{ tx.amount | number:'1.0-2' }} créditos</strong><small>{{ tx.description }} · {{ tx.created_at | date:'medium' }}</small></article> } @empty { <p class="empty-state">No hay movimientos para este usuario.</p> }</div>
       } @else { <p class="empty-state">{{ "Elige un usuario para ver sus movimientos." | t }}</p> }
@@ -94,3 +99,13 @@
   }
 </div></main>
 <app-footer></app-footer>
+<app-confirmation-modal
+  [isOpen]="!!userDeletionTarget"
+  [title]="'¿Eliminar permanentemente esta cuenta?' | t"
+  [message]="'Se eliminará el acceso de Auth, se borrarán documentos de identidad y foto, se ocultarán habilidades y se anonimizará el historial. No se puede deshacer. Debe tener cero créditos y ningún intercambio abierto.' | t"
+  [confirmText]="(deletingUserId ? 'Eliminando…' : 'Eliminar permanentemente') | t"
+  [cancelText]="'Cancelar' | t"
+  [isDanger]="true"
+  (confirm)="permanentlyDeleteUser()"
+  (cancelled)="userDeletionTarget = null"
+></app-confirmation-modal>

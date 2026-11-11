@@ -31,7 +31,7 @@
           </div>
           <div class="card-actions">
             <a class="tb-btn tb-btn-secondary tb-btn-sm" [href]="session.meetingUrl" target="_blank" rel="noopener noreferrer">
-              <ion-icon name="calendar-outline"></ion-icon>{{ "Entrar a la sesión" | t }} </a>
+              <ion-icon name="videocam-outline"></ion-icon>{{ (session.meetingUrl.startsWith('https://meet.google.com/') ? 'Abrir Google Meet' : 'Abrir enlace de videollamada') | t }} </a>
             @if (exchanges.canConfirmSession(session)) {
               <button class="tb-btn tb-btn-primary tb-btn-sm" [disabled]="exchanges.isSessionActionPending(session.id)" (click)="exchanges.confirmSession(session.id)">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>{{ "Confirmar que se realizó" | t }} </button>

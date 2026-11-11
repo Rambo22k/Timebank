@@ -476,7 +476,7 @@ export class ExchangeService {
       this.toast.success('Solicitud enviada. Puedes seguirla en Solicitudes.');
       return true;
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
       return false;
     }
   }
@@ -507,7 +507,7 @@ export class ExchangeService {
       this.toast.success('Oferta enviada. La persona puede aceptarla, rechazarla o proponer otro horario.');
       return true;
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
       return false;
     }
   }
@@ -516,16 +516,19 @@ export class ExchangeService {
     const request = this.requestsSignal().find(item => item.id === id);
     if (!request || request.initiatorId === this.currentUserId || request.status !== 'pending') return;
     try {
-      const { error } = await this.supabase.requireClient().rpc('respond_to_session_request', {
-        p_request_id: id,
-        p_action: action,
-        p_new_start_at: null
-      });
+      const result = action === 'accept'
+        ? await this.supabase.requireClient().functions.invoke('create-google-meet-session', { body: { requestId: id } })
+        : await this.supabase.requireClient().rpc('respond_to_session_request', {
+            p_request_id: id,
+            p_action: action,
+            p_new_start_at: null
+          });
+      const { error } = result;
       if (error) throw error;
       await Promise.all([this.loadRequests(), ...(action === 'accept' ? [this.auth.reloadAuthenticatedUser()] : [])]);
       this.toast.success(action === 'accept' ? 'Solicitud aceptada y sesión agendada.' : 'Solicitud rechazada.');
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
     }
   }
 
@@ -539,7 +542,7 @@ export class ExchangeService {
       await Promise.all([this.loadRequests(), this.auth.reloadAuthenticatedUser()]);
       this.toast.info('Solicitud cancelada.');
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
     }
   }
 
@@ -565,7 +568,7 @@ export class ExchangeService {
       await this.loadRequests();
       this.toast.success('Nuevo horario propuesto. La otra persona debe confirmarlo.');
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
     }
   }
 
@@ -573,12 +576,12 @@ export class ExchangeService {
     const request = this.requestsSignal().find(item => item.id === id);
     if (!request || request.initiatorId !== this.currentUserId || request.status !== 'rescheduled') return;
     try {
-      const { error } = await this.supabase.requireClient().rpc('accept_rescheduled_request', { p_request_id: id });
+      const { error } = await this.supabase.requireClient().functions.invoke('create-google-meet-session', { body: { requestId: id } });
       if (error) throw error;
       await Promise.all([this.loadRequests(), this.auth.reloadAuthenticatedUser()]);
       this.toast.success('Horario aceptado. La sesión ya está agendada.');
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
     }
   }
 
@@ -631,7 +634,7 @@ export class ExchangeService {
     try {
       await action();
     } catch (error) {
-      this.toast.danger(this.requestErrorMessage(error));
+      this.toast.danger(await this.requestErrorMessage(error));
     } finally {
       this.sessionActionsSignal.update(current => {
         const next = new Set(current);
@@ -669,9 +672,34 @@ export class ExchangeService {
     return this.supabase.client?.storage.from('profile-avatars').getPublicUrl(path).data.publicUrl ?? '';
   }
 
-  private requestErrorMessage(error: unknown): string {
-    const message = (error instanceof Error ? error.message : String(error ?? '')).toLowerCase();
-    if (message.includes('insufficient available credits')) return 'La cuenta de quien aprenderá no tiene créditos suficientes para esa duración.';
+  private async requestErrorMessage(error: unknown): Promise<string> {
+    let rawMessage = error instanceof Error ? error.message : String(error ?? '');
+    let googleDiagnosticMessage: string | null = null;
+    if (error && typeof error === 'object' && 'context' in error) {
+      const context = (error as { context?: unknown }).context;
+      if (context instanceof Response) {
+        const payload = await context.clone().json().catch(() => ({})) as {
+          error?: string;
+          message?: string;
+          code?: string;
+          diagnostic?: { httpStatus?: number; googleStatus?: string | null; googleCode?: number | null; message?: string; reasons?: string[] };
+        };
+        rawMessage = payload.error ?? payload.message ?? rawMessage;
+        if (payload.code === 'google_meet_api_error' && payload.diagnostic) {
+          const diagnostic = payload.diagnostic;
+          const status = diagnostic.googleStatus || `HTTP ${diagnostic.httpStatus ?? 'error'}`;
+          const reasons = diagnostic.reasons?.length ? ` (${diagnostic.reasons.join(', ')})` : '';
+          const detail = diagnostic.message || 'Google no indicó el motivo.';
+          googleDiagnosticMessage = `Google rechazó la creación de la reunión (${status}${reasons}): ${detail}`;
+        }
+      }
+    }
+    const message = rawMessage.toLowerCase();
+    if (googleDiagnosticMessage) return googleDiagnosticMessage;
+    if (message.includes('must connect google meet') || message.includes('provider must connect')) return 'El proveedor debe conectar Google Meet desde su perfil antes de aceptar esta solicitud.';
+    if (message.includes('google meet connection expired')) return 'La conexión de Google Meet del proveedor venció. Debe volver a conectarla desde su perfil.';
+    if (message.includes('google meet could not create')) return 'No se pudo crear la reunión de Google Meet. Revisa que Meet API esté habilitada en Google Cloud.';
+    if (message.includes('balance first') || message.includes('insufficient available credits')) return 'No hay créditos suficientes para reservar esta sesión.';
     if (message.includes('confirm your email')) return 'Confirma tu correo antes de enviar una solicitud.';
     if (message.includes('complete your age and policy acceptance')) return 'Completa tu fecha de nacimiento y acepta las políticas para continuar.';
     if (message.includes('learner must confirm their email')) return 'La persona que aprenderá debe confirmar su correo antes de recibir una oferta.';

@@ -191,6 +191,27 @@
         </section>
         }
 
+        @if (isOwnProfile) {
+          <section class="meet-connection-card profile-safety-card" aria-labelledby="meet-connection-title">
+            <div class="meet-connection-icon"><ion-icon name="videocam-outline"></ion-icon></div>
+            <div class="meet-connection-copy">
+              <span class="eyebrow">{{ "Videollamadas de TimeBank" | t }}</span>
+              <h2 id="meet-connection-title">{{ "Cuenta anfitriona de Google Meet" | t }}</h2>
+              <p>{{ "Conecta tu cuenta de Google para crear las reuniones de las sesiones que provees. Tú serás anfitrión y la otra persona entrará como participante, sin permisos de coanfitrión. El permiso se usa solo para crear reuniones de TimeBank; puedes desconectarlo cuando quieras." | t }}</p>
+              @if (googleMeet.isLoading()) { <small>{{ "Consultando conexión…" | t }}</small> }
+              @else if (googleMeet.status().connected) { <small class="meet-connected">{{ "Conectado como" | t }} {{ googleMeet.status().googleEmail }}</small> }
+              @else { <small>{{ "Debes conectar Google Meet antes de aceptar una sesión como proveedor." | t }}</small> }
+            </div>
+            <div class="meet-connection-actions">
+              @if (googleMeet.status().connected) {
+                <button type="button" class="tb-btn tb-btn-outline tb-btn-sm" [disabled]="googleMeet.isBusy()" (click)="googleMeet.disconnect()">{{ (googleMeet.isBusy() ? 'Desconectando…' : 'Desconectar') | t }}</button>
+              } @else {
+                <button type="button" class="tb-btn tb-btn-primary tb-btn-sm" [disabled]="googleMeet.isBusy() || googleMeet.isLoading()" (click)="googleMeet.connect()">{{ (googleMeet.isBusy() ? 'Conectando…' : 'Conectar Google Meet') | t }}</button>
+              }
+            </div>
+          </section>
+        }
+
         <section class="availability-card" aria-labelledby="availability-title">
           <div class="availability-heading">
             <div class="availability-icon"><ion-icon name="calendar-outline"></ion-icon></div>
